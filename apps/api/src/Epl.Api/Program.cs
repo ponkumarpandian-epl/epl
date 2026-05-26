@@ -152,7 +152,10 @@ app.MapGet("/health", () => Results.Ok(new
 // Built-in identity API: /identity/login, /identity/refresh, /identity/register, etc.
 // NOTE: MapIdentityApi does NOT ship a /logout endpoint. We add one explicitly so
 // SignInManager.SignOutAsync() can issue a cookie-clearing Set-Cookie response.
-app.MapGroup("/identity").MapIdentityApi<AppUser>();
+// ExcludeFromDescription: MapIdentityApi emits endpoints whose request/response
+// types collide in Swashbuckle's schema generator and break /swagger/v1/swagger.json.
+// The endpoints still work at runtime — they just don't appear in the OpenAPI doc.
+app.MapGroup("/identity").MapIdentityApi<AppUser>().ExcludeFromDescription();
 
 app.MapPost("/identity/logout", async (SignInManager<AppUser> signInManager) =>
 {
