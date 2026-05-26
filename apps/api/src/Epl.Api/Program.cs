@@ -11,7 +11,7 @@ using Epl.Infrastructure.Persistence;
 using Epl.Infrastructure.Seed;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
+using Scalar.AspNetCore;
 using Serilog;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 
@@ -90,7 +90,7 @@ builder.Services.AddCors(o => o.AddPolicy("web", p => p
     .AllowAnyMethod()
     .AllowCredentials()));
 
-// ── MVC + Swagger ──────────────────────────────────────────────────────────
+// ── MVC + OpenAPI ──────────────────────────────────────────────────────────
 builder.Services.AddControllers().AddJsonOptions(o =>
 {
     // Controllers have their own JSON config (Minimal API uses ConfigureHttpJsonOptions).
@@ -98,19 +98,17 @@ builder.Services.AddControllers().AddJsonOptions(o =>
     o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     o.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 });
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(o =>
+// .NET 10 built-in OpenAPI (Microsoft.AspNetCore.OpenApi). Swashbuckle 7.x
+// doesn't fully support .NET 10's OpenAPI runtime and throws on doc generation.
+builder.Services.AddOpenApi("v1", o =>
 {
-    o.SwaggerDoc("v1", new OpenApiInfo
+    o.AddDocumentTransformer((doc, _, _) =>
     {
-        Title       = "EPL API",
-        Version     = "v1",
-        Description = "Electronic-City Premier League — auth, team registration, admin.",
+        doc.Info.Title       = "EPL API";
+        doc.Info.Version     = "v1";
+        doc.Info.Description = "Electronic-City Premier League — auth, team registration, admin.";
+        return Task.CompletedTask;
     });
-    // Disambiguate types that share a simple name across namespaces
-    // (e.g. our Epl.Application.Auth.Dtos.RegisterRequest vs
-    //       Microsoft.AspNetCore.Identity.Data.RegisterRequest from MapIdentityApi).
-    o.CustomSchemaIds(type => type.FullName?.Replace("+", ".") ?? type.Name);
 });
 
 var app = builder.Build();
@@ -135,8 +133,11 @@ if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
-app.UseSwagger();
-app.UseSwaggerUI(o => { o.SwaggerEndpoint("v1/swagger.json", "EPL API v1"); o.RoutePrefix = "swagger"; });
+// OpenAPI doc at /openapi/v1.json + Scalar UI at /scalar/v1.
+// Keep /swagger as a redirect for the legacy bookmark.
+app.MapOpenApi();
+app.MapScalarApiReference();
+app.MapGet("/swagger", () => Results.Redirect("/scalar/v1")).ExcludeFromDescription();
 
 app.UseCors("web");
 app.UseAuthentication();
@@ -152,10 +153,7 @@ app.MapGet("/health", () => Results.Ok(new
 // Built-in identity API: /identity/login, /identity/refresh, /identity/register, etc.
 // NOTE: MapIdentityApi does NOT ship a /logout endpoint. We add one explicitly so
 // SignInManager.SignOutAsync() can issue a cookie-clearing Set-Cookie response.
-// ExcludeFromDescription: MapIdentityApi emits endpoints whose request/response
-// types collide in Swashbuckle's schema generator and break /swagger/v1/swagger.json.
-// The endpoints still work at runtime — they just don't appear in the OpenAPI doc.
-app.MapGroup("/identity").MapIdentityApi<AppUser>().ExcludeFromDescription();
+app.MapGroup("/identity").MapIdentityApi<AppUser>();
 
 app.MapPost("/identity/logout", async (SignInManager<AppUser> signInManager) =>
 {
