@@ -1,5 +1,6 @@
 "use client";
 import { useActionState, useState } from "react";
+import Link from "next/link";
 import { createSeasonAction, type NewSeasonState } from "./actions";
 import "./new-season.css";
 
@@ -168,7 +169,7 @@ export function NewSeasonForm() {
           <button type="submit" className="adminBtn adminBtnPrimary">
             Create Season →
           </button>
-          <a href="/admin/seasons" className="adminBtn adminBtnGhost">Cancel</a>
+          <Link href="/admin/seasons" className="adminBtn adminBtnGhost">Cancel</Link>
         </div>
       </div>
 

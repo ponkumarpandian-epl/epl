@@ -1,7 +1,7 @@
 "use client";
 import { useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
-import type { ProfileDto, ProfileSkillDto, SkillLevel } from "@/lib/profile";
+import type { ProfileDto, SkillLevel } from "@/lib/profile";
 import type { SeasonGameDto } from "@/lib/seasons";
 import "./profile.css";
 
