@@ -1,0 +1,188 @@
+.newSeasonGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+/* ── Form column ───────────────────────────────────────────────────────── */
+.formStack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.formGroup label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bone-fade);
+}
+.formInput {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font: 400 16px/1.4 var(--font-sans);
+  transition: border-color var(--fast), box-shadow var(--fast);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.formInput:focus {
+  outline: none;
+  border-color: var(--color-focus-ring);
+  box-shadow: 0 0 0 3px rgba(255, 209, 92, 0.22);
+}
+.formInputError { border-color: rgba(232, 54, 66, 0.7); }
+.fieldErr {
+  color: var(--color-danger);
+  font: 500 12px var(--font-sans);
+}
+.fieldHint {
+  color: var(--bone-fade);
+  font: 400 12px var(--font-sans);
+}
+
+/* ── Preview column ────────────────────────────────────────────────────── */
+.previewSticky {
+  position: sticky;
+  top: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.previewLabel {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.previewLabel::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gold-bright);
+  box-shadow: 0 0 8px rgba(255, 209, 92, 0.7);
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+.previewCard {
+  position: relative;
+  padding: 28px;
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(ellipse 80% 60% at 100% 0%, rgba(232, 181, 61, 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 100% at 0% 100%, rgba(63, 169, 245, 0.12) 0%, transparent 55%),
+    linear-gradient(160deg, var(--ink-3) 0%, var(--ink) 100%);
+  border: 1px solid var(--gold-bright);
+  box-shadow:
+    0 0 0 1px rgba(232, 181, 61, 0.2),
+    0 20px 40px rgba(0, 0, 0, 0.55),
+    0 0 60px rgba(232, 181, 61, 0.12);
+  min-height: 220px;
+  overflow: hidden;
+  isolation: isolate;
+}
+.previewCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(90deg,
+      transparent 0, transparent 6px,
+      rgba(255, 209, 92, 0.025) 6px, rgba(255, 209, 92, 0.025) 7px);
+  pointer-events: none;
+  z-index: 0;
+}
+.previewYear {
+  font-family: var(--font-display);
+  font-size: clamp(60px, 8vw, 100px);
+  line-height: 0.85;
+  letter-spacing: -0.02em;
+  color: var(--gold-bright);
+  margin: 0 0 8px;
+  text-shadow:
+    0 0 30px rgba(232, 181, 61, 0.35),
+    1px 1px 0 rgba(0, 0, 0, 0.75),
+    3px 3px 0 rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 1;
+  transition: color 0.3s var(--ease);
+}
+.previewName {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3vw, 30px);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--bone);
+  margin: 0 0 4px;
+  position: relative;
+  z-index: 1;
+  word-break: break-word;
+}
+.previewTagline {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cyan-bright);
+  margin: 0 0 14px;
+  position: relative;
+  z-index: 1;
+}
+.previewMeta {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.previewMetaRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: var(--bone-dim);
+}
+.previewMetaRow svg { color: var(--gold-bright); flex-shrink: 0; }
+.previewPills {
+  position: relative;
+  z-index: 1;
+  margin-top: 14px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.previewEmpty {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--bone-fade);
+}
+
+@media (max-width: 1080px) {
+  .newSeasonGrid { grid-template-columns: 1fr; }
+  .previewSticky { position: relative; top: 0; }
+}
+@media (max-width: 760px) {
+  .formRow { grid-template-columns: 1fr; }
+}

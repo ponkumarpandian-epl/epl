@@ -1,0 +1,146 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   PRIMARY NAVIGATION — sits between the brand and the user menu in the header
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.primaryNav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+}
+
+.primaryNavLink {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  text-decoration: none;
+  transition: color var(--fast), background var(--fast), border-color var(--fast);
+  white-space: nowrap;
+  min-height: 40px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.primaryNavLink:hover {
+  color: var(--bone);
+  background: rgba(255, 255, 255, 0.04);
+}
+.primaryNavLink.is-active {
+  color: var(--gold-bright);
+  background: linear-gradient(135deg, rgba(232, 181, 61, 0.12), rgba(232, 181, 61, 0.04));
+  border-color: rgba(232, 181, 61, 0.32);
+  box-shadow: 0 0 0 1px rgba(232, 181, 61, 0.10);
+}
+.primaryNavLink.is-admin {
+  color: var(--cyan-bright);
+}
+.primaryNavLink.is-admin.is-active {
+  color: var(--ink);
+  background: linear-gradient(135deg, var(--cyan-bright), var(--cyan));
+  border-color: var(--cyan-bright);
+}
+
+.primaryNavDivider {
+  width: 1px;
+  height: 22px;
+  background: var(--color-border);
+  margin: 0 6px;
+}
+
+/* ── Mobile toggle (hamburger) ──────────────────────────────────────────── */
+.primaryNavToggle {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  padding: 0;
+  width: 44px;
+  height: 44px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: border-color var(--fast), background var(--fast);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.primaryNavToggle:hover { border-color: var(--color-border-strong); background: rgba(255, 255, 255, 0.04); }
+.primaryNavToggle span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--bone);
+  transition: transform var(--mid) var(--ease), opacity var(--fast);
+}
+.primaryNavToggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.primaryNavToggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.primaryNavToggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ── Mobile drawer ──────────────────────────────────────────────────────── */
+.primaryNavDrawer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(3, 8, 26, 0.78);
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--mid) var(--ease), visibility 0s linear var(--mid);
+}
+.primaryNavDrawer.is-open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--mid) var(--ease), visibility 0s linear 0s;
+}
+.primaryNavDrawerInner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100dvh;
+  width: min(320px, 90vw);
+  padding: clamp(28px, 6vw, 40px) clamp(20px, 4vw, 28px);
+  padding-top:    calc(clamp(28px, 6vw, 40px) + env(safe-area-inset-top));
+  padding-bottom: calc(clamp(28px, 6vw, 40px) + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, var(--ink-3), var(--ink));
+  border-left: 1px solid var(--color-border-strong);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transform: translateX(100%);
+  transition: transform var(--mid) var(--ease);
+  overflow-y: auto;
+}
+.primaryNavDrawer.is-open .primaryNavDrawerInner { transform: translateX(0); }
+.primaryNavDrawerEyebrow {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  margin: 18px 0 6px;
+  padding: 0 4px;
+}
+.primaryNavDrawerEyebrow:first-child { margin-top: 0; }
+.primaryNavDrawer .primaryNavLink {
+  font-size: 13px;
+  padding: 14px 16px;
+  min-height: 48px;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 1080px) {
+  .primaryNavDesktop { display: none; }
+  .primaryNavToggle  { display: inline-flex; }
+  .primaryNavDrawer  { display: block; }
+}

@@ -1,0 +1,151 @@
+name: Dev Deploy Backend → epl-sports-api
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/api/**'
+      - '.github/workflows/dev-deploy-backend.yml'
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: epl-sports-api
+  DOTNET_VERSION: '10.0.x'
+  SOLUTION_FILE: 'apps/api/Epl.Api.slnx'
+  WEB_PROJECT:    'apps/api/src/Epl.Api/Epl.Api.csproj'
+  INFRA_PROJECT:  'apps/api/src/Epl.Infrastructure/Epl.Infrastructure.csproj'
+
+jobs:
+  build:
+    name: Build .NET 10 API
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore ${{ env.SOLUTION_FILE }}
+
+      - name: Build (Release)
+        run: dotnet build ${{ env.SOLUTION_FILE }} -c Release --no-restore
+
+      - name: Publish (web project only)
+        run: >
+          dotnet publish ${{ env.WEB_PROJECT }}
+          -c Release
+          --no-build
+          -o ${{ github.workspace }}/publish
+
+      - name: Upload app artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-bundle
+          path: ${{ github.workspace }}/publish
+          retention-days: 3
+
+  # ─── Migrations ───────────────────────────────────────────────────────────
+  # Generates an EF Core "migrations bundle" — a self-contained executable that
+  # applies all pending migrations against a target database. The bundle is
+  # always uploaded as an artifact (for audit + rollback). If the secret
+  # SQL_MIGRATION_CONNECTION_STRING is configured, it is also applied to dev now.
+  #
+  # To enable auto-apply on deploy:
+  #   1. Add a Github Actions repo secret named SQL_MIGRATION_CONNECTION_STRING.
+  #      It must be a SQL Server connection string with a login that has
+  #      db_ddladmin + db_datareader + db_datawriter on epldb.
+  #   2. In Azure Portal → SQL server → Networking → enable
+  #      "Allow Azure services and resources to access this server" (so the
+  #      Github runner's outbound IP isn't blocked). Or use a dedicated runner.
+  migrate:
+    name: Apply EF migrations
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install dotnet-ef
+        run: dotnet tool install --global dotnet-ef --version 10.0.* --prerelease
+
+      - name: Restore (needed for migrations bundle)
+        run: dotnet restore ${{ env.SOLUTION_FILE }}
+
+      - name: Generate migrations bundle (efbundle)
+        run: |
+          dotnet ef migrations bundle \
+            --project ${{ env.INFRA_PROJECT }} \
+            --startup-project ${{ env.WEB_PROJECT }} \
+            --self-contained --target-runtime linux-x64 \
+            --output ${{ github.workspace }}/efbundle \
+            --force
+
+      - name: Upload migrations bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: migrations-bundle
+          path: ${{ github.workspace }}/efbundle
+          retention-days: 14   # longer than the app artifact — useful for rollback
+
+      - name: Show migrations the bundle WILL apply
+        run: |
+          dotnet ef migrations list \
+            --project ${{ env.INFRA_PROJECT }} \
+            --startup-project ${{ env.WEB_PROJECT }} \
+            --no-build
+
+      - name: Check if SQL_MIGRATION_CONNECTION_STRING secret is configured
+        id: secret-check
+        run: |
+          if [ -n "${{ secrets.SQL_MIGRATION_CONNECTION_STRING }}" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::SQL_MIGRATION_CONNECTION_STRING is not set — skipping live apply. The app's startup-time migration will still run, but adding the secret turns this into an explicit CI gate. See workflow comments."
+          fi
+
+      - name: Apply migrations to Azure SQL
+        if: steps.secret-check.outputs.configured == 'true'
+        env:
+          # efbundle reads the connection string from the same key the app uses
+          # (ConnectionStrings__Sql). It overrides any value in appsettings.json.
+          ConnectionStrings__Sql: ${{ secrets.SQL_MIGRATION_CONNECTION_STRING }}
+        run: |
+          chmod +x ${{ github.workspace }}/efbundle
+          ${{ github.workspace }}/efbundle \
+            --connection "$ConnectionStrings__Sql" \
+            --verbose
+
+  deploy:
+    name: Deploy to Azure Web App
+    runs-on: ubuntu-latest
+    needs: [build, migrate]   # do not deploy new code until migrations succeed
+    environment:
+      name: dev
+      url: https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-bundle
+          path: publish
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_BACKEND }}
+          package: publish

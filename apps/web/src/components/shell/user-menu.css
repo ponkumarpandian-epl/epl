@@ -1,0 +1,316 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   USER MENU — avatar pill + dropdown popover
+   Responsive: ≥1080px shows pill + name; <1080px avatar-only;
+   <760px dropdown spans 90vw and right-anchors safely.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.userMenu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* ── Anonymous "Sign in" link ─────────────────────────────────────────────── */
+.userMenuLink {
+  color: var(--color-link);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  transition: color var(--fast), background var(--fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+}
+.userMenuLink:hover { color: var(--color-link-hover); background: rgba(255, 209, 92, 0.08); }
+
+/* ── Trigger button (pill with avatar + name + chevron) ──────────────────── */
+.userBadgeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 14px 4px 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  max-width: 280px;
+  min-height: 48px;
+  transition: background var(--fast), border-color var(--fast), box-shadow var(--fast);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.userBadgeBtn:hover {
+  background: rgba(255, 209, 92, 0.10);
+  border-color: var(--color-border-strong);
+}
+.userBadgeBtn[aria-expanded="true"] {
+  background: rgba(255, 209, 92, 0.14);
+  border-color: var(--color-border-strong);
+  box-shadow: 0 0 0 3px rgba(255, 209, 92, 0.18);
+}
+
+.userAvatarImg {
+  object-fit: cover;
+  background: var(--ink-2);
+}
+.userAvatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-bright) 0%, var(--crimson-hot) 100%);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+  box-shadow:
+    0 0 0 2px var(--ink),
+    0 0 0 3px rgba(255, 209, 92, 0.55),
+    0 4px 14px rgba(232, 54, 66, 0.35);
+}
+
+.userMeta {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1.1;
+  min-width: 0;
+  text-align: left;
+}
+.userEyebrow {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.24em;
+  color: var(--gold-bright);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.userName {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--font-sans);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  max-width: 140px;
+}
+
+.userChevron {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  transition: transform var(--fast) var(--ease), color var(--fast);
+}
+.userBadgeBtn[aria-expanded="true"] .userChevron {
+  transform: rotate(180deg);
+  color: var(--color-link);
+}
+
+/* ── Dropdown popover ────────────────────────────────────────────────────── */
+.userDropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  min-width: 280px;
+  max-width: min(360px, calc(100vw - 24px));
+  padding: 8px;
+  background: linear-gradient(160deg, var(--ink-2) 0%, var(--ink) 100%);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(232, 181, 61, 0.10),
+    0 0 36px rgba(232, 181, 61, 0.08);
+  z-index: 60;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px) scale(0.96);
+  transform-origin: top right;
+  transition:
+    opacity   180ms var(--ease),
+    transform 180ms var(--ease),
+    visibility 0s linear 180ms;
+}
+.userMenu.is-open .userDropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity   220ms var(--ease),
+    transform 220ms var(--ease),
+    visibility 0s linear 0s;
+}
+
+/* small bubble pointer */
+.userDropdown::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  right: 18px;
+  width: 12px;
+  height: 12px;
+  background: var(--ink-2);
+  border-top: 1px solid var(--color-border-strong);
+  border-left: 1px solid var(--color-border-strong);
+  transform: rotate(45deg);
+  border-top-left-radius: 2px;
+}
+
+/* Identity card */
+.userDropdownHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 14px 16px;
+}
+.userAvatarLg {
+  width: 52px;
+  height: 52px;
+  font-size: 18px;
+}
+.userDropdownIdentity {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+.userDropdownName {
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.userDropdownContact {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.userRoleTag {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--color-border);
+}
+.userRoleTag.is-admin {
+  color: var(--color-accent-text);
+  background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+  border-color: var(--gold-bright);
+  box-shadow: 0 2px 8px rgba(232, 181, 61, 0.3);
+}
+
+/* Divider */
+.userDropdownDivider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-border-strong), transparent);
+  margin: 2px 0;
+}
+
+/* Items */
+.userDropdownForm { margin: 0; }
+.userDropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 14px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--fast), background var(--fast), border-color var(--fast), transform var(--fast);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.userDropdownItem:hover,
+.userDropdownItem:focus-visible {
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--color-border);
+}
+.userDropdownItem:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+.userDropdownItemDanger {
+  color: rgba(232, 54, 66, 0.85);
+}
+.userDropdownItemDanger:hover,
+.userDropdownItemDanger:focus-visible {
+  color: var(--crimson-neon);
+  background: rgba(232, 54, 66, 0.10);
+  border-color: rgba(232, 54, 66, 0.45);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 1080px) {
+  .userMeta { display: none; }
+  .userBadgeBtn { padding: 3px 8px 3px 3px; }
+}
+
+@media (max-width: 760px) {
+  .userBadgeBtn { min-height: 44px; }
+  .userAvatar { width: 36px; height: 36px; font-size: 13px; }
+  .userDropdown {
+    right: -8px;
+    min-width: 260px;
+    max-width: calc(100vw - 24px);
+  }
+  .userDropdown::before { right: 26px; }
+  .userDropdownHeader { padding: 12px; gap: 10px; }
+  .userAvatarLg { width: 44px; height: 44px; font-size: 16px; }
+  .userDropdownName { font-size: 16px; }
+}
+
+@media (max-width: 420px) {
+  /* On tiny phones: drawer spans almost the full screen */
+  .userDropdown {
+    right: -12px;
+    min-width: calc(100vw - 28px);
+  }
+  .userDropdown::before { right: 36px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .userDropdown { transition: opacity 0s, visibility 0s, transform 0s; }
+  .userChevron  { transition: none; }
+}

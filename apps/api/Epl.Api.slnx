@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Epl.Api/Epl.Api.csproj" />
+    <Project Path="src/Epl.Application/Epl.Application.csproj" />
+    <Project Path="src/Epl.Domain/Epl.Domain.csproj" />
+    <Project Path="src/Epl.Infrastructure/Epl.Infrastructure.csproj" />
+  </Folder>
+</Solution>

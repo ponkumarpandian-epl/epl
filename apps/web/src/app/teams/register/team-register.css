@@ -1,0 +1,38 @@
+.sportToggle {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.sportPillToggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 18px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  min-height: 44px;
+  transition: color var(--fast), background var(--fast), border-color var(--fast), transform var(--fast);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.sportPillToggle input { position: absolute; opacity: 0; pointer-events: none; }
+.sportPillToggle:hover { color: var(--color-text); }
+.sportPillToggle.is-active {
+  color: var(--ink);
+  background: var(--accent-bright, var(--gold-bright));
+  border-color: var(--accent-bright, var(--gold-bright));
+  box-shadow: 0 4px 14px rgba(255, 209, 92, 0.25);
+}
+.sportPillToggle:focus-within { outline: 2px solid var(--color-focus-ring); outline-offset: 3px; }
+
+.sportPillToggle.sport-cricket    { --accent-bright: var(--sport-cricket-bright); }
+.sportPillToggle.sport-badminton  { --accent-bright: var(--sport-badminton-bright); }
+.sportPillToggle.sport-volleyball { --accent-bright: var(--sport-volleyball-bright); }

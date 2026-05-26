@@ -1,0 +1,52 @@
+node_modules
+.npm
+dist
+coverage
+*.log
+.DS_Store
+
+# Env files — never commit secrets
+.env
+.env.*
+!.env.example
+
+# Next.js
+apps/web/.next
+apps/web/out
+apps/web/node_modules
+apps/web/.env.local
+
+# .NET — multi-project layout
+apps/api/**/bin/
+apps/api/**/obj/
+apps/api/*/bin/
+apps/api/*/obj/
+# Legacy single-project paths
+apps/api/bin
+apps/api/obj
+# EF Core design-time / VS metadata
+*.suo
+*.user
+*.vs/
+apps/api/**/logs/
+**/.vs/
+
+# User-uploaded content (LocalProfileImageStore writes here in dev).
+# Switch to Azure Blob in prod — these never need to be in git.
+apps/api/**/wwwroot/avatars/
+apps/api/**/wwwroot/uploads/
+
+# Safety net — local-only override files for appsettings
+# (User-secrets live outside the repo by design, but if anyone ever drops
+#  a local override file in the project, keep it out of git.)
+apps/api/**/appsettings.Local.json
+apps/api/**/appsettings.*.Local.json
+
+# IDE caches
+.idea/
+.vscode/launch.json
+
+# Python bytecode (from claude skill scripts)
+__pycache__/
+*.pyc
+*.pyo

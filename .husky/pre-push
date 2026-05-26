@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+# Pre-push gate — runs the heavier .NET build, which is too slow for every commit.
+# To bypass:  git push --no-verify
+# (CI is the final word — see .github/workflows/verify.yml)
+
+set -e
+
+echo "── pre-push ──────────────────────────────────────────────────"
+
+# Re-run the fast checks first so you can't push a broken type-check
+# even after committing with --no-verify.
+echo "▶ secret scan"
+npm run -s verify:secrets
+
+echo "▶ web type-check"
+npm run -s verify:web
+
+echo "▶ .NET build (Release)"
+npm run -s verify:api
+
+echo "✓ pre-push checks passed"

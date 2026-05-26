@@ -1,0 +1,10 @@
+.git
+.gitignore
+node_modules
+apps/web/node_modules
+apps/web/.next
+apps/api/bin
+apps/api/obj
+coverage
+*.log
+.DS_Store

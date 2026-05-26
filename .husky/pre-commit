@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+# Pre-commit gate — runs the FAST checks so feedback is immediate.
+# To bypass in an emergency:  git commit --no-verify
+# (CI still enforces every check on push / PR — see .github/workflows/verify.yml)
+
+set -e
+
+echo "── pre-commit ────────────────────────────────────────────────"
+
+# 1) Secret scan (instant — git grep over tracked files)
+echo "▶ secret scan"
+npm run -s verify:secrets
+
+# 2) Web type-check (~5–10s warm, ~30s cold)
+echo "▶ web type-check"
+npm run -s verify:web
+
+echo "✓ pre-commit checks passed"

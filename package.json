@@ -1,0 +1,28 @@
+{
+  "name": "badminton-team-event-app",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "concurrently -n API,WEB -c magenta,cyan \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:web": "node scripts/run-web-dev.mjs",
+    "dev:api": "node scripts/run-api-dev.mjs",
+    "build": "npm run build --workspace @epl/web && npm run build:api",
+    "build:api": "node scripts/build-api.mjs",
+    "lint": "npm run lint --workspace @epl/web",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down --remove-orphans",
+    "verify": "npm run verify:secrets && npm run verify:web && npm run verify:api",
+    "verify:secrets": "node scripts/verify-secrets.mjs",
+    "verify:web": "tsc -p apps/web/tsconfig.json --noEmit",
+    "verify:api": "dotnet build apps/api/Epl.Api.slnx -c Release -nologo --no-incremental",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "husky": "^9.1.7",
+    "typescript": "^5.9.3"
+  }
+}

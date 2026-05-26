@@ -1,0 +1,251 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   FORMS — fields, labels, errors, buttons
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.formShell {
+  min-height: calc(100dvh - 200px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(24px, 6vw, 80px) clamp(16px, 4vw, 48px);
+}
+
+.formPanel {
+  width: 100%;
+  max-width: 480px;
+  padding: clamp(28px, 5vw, 44px);
+  background: linear-gradient(160deg, var(--ink-2), var(--ink));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.formPanelWide {
+  max-width: 760px;
+}
+
+.formEyebrow {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+}
+.formTitle {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 40px);
+  letter-spacing: 0.02em;
+  color: var(--color-text);
+  margin: 0;
+  line-height: 1.05;
+}
+.formLead {
+  color: var(--color-text-muted);
+  margin: -4px 0 4px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.fieldLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+.fieldInputWrap {
+  position: relative;
+  display: flex;
+}
+.fieldInput,
+.fieldTextarea {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font: 400 16px/1.4 var(--font-sans); /* 16px+ avoids iOS Safari zoom-on-focus */
+  transition: border-color var(--fast) var(--ease), box-shadow var(--fast) var(--ease);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.fieldInput:focus,
+.fieldTextarea:focus {
+  outline: none;
+  border-color: var(--color-focus-ring);
+  box-shadow: 0 0 0 3px rgba(255, 209, 92, 0.22);
+}
+.fieldInput::placeholder,
+.fieldTextarea::placeholder {
+  color: var(--color-text-subtle);
+}
+.fieldHasError .fieldInput,
+.fieldHasError .fieldTextarea {
+  border-color: rgba(232, 54, 66, 0.7);
+  box-shadow: 0 0 0 3px rgba(232, 54, 66, 0.15);
+}
+.fieldError {
+  color: var(--color-danger);
+  font: 500 12px var(--font-sans);
+  margin-top: 4px;
+}
+.fieldHint {
+  color: var(--color-text-subtle);
+  font: 400 12px var(--font-sans);
+}
+
+.pwToggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color var(--fast), background var(--fast);
+}
+.pwToggle:hover { color: var(--color-text); background: rgba(255,255,255,0.06); }
+.pwToggle:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; }
+
+.formActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-top: 4px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 14px 22px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform var(--mid) var(--ease), box-shadow var(--mid) var(--ease), background var(--mid) var(--ease), border-color var(--mid);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.btn:disabled,
+.btn[aria-busy="true"] {
+  opacity: 0.7;
+  cursor: progress;
+}
+.btnPrimary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  color: var(--color-primary-text);
+  box-shadow: 0 4px 16px rgba(200, 32, 47, 0.4);
+}
+.btnPrimary:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(232, 54, 66, 0.6);
+}
+.btnGhost {
+  background: transparent;
+  border-color: var(--color-border-strong);
+  color: var(--color-link);
+}
+.btnGhost:not(:disabled):hover {
+  background: rgba(255, 209, 92, 0.08);
+  color: var(--color-link-hover);
+}
+
+.formFooter {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+.formFooter a {
+  color: var(--color-link);
+  font-weight: 600;
+}
+.formFooter a:hover { color: var(--color-link-hover); }
+
+.formBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  line-height: 1.5;
+  animation: bannerSlideIn 280ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.formBannerError {
+  background: linear-gradient(180deg, rgba(232, 54, 66, 0.18), rgba(232, 54, 66, 0.08));
+  border: 1px solid rgba(232, 54, 66, 0.55);
+  border-left: 4px solid var(--crimson-hot);
+  color: #ffe1e1;
+  box-shadow:
+    0 8px 24px rgba(232, 54, 66, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+.formBannerIcon {
+  flex-shrink: 0;
+  color: var(--crimson-neon);
+  margin-top: 1px;
+  filter: drop-shadow(0 0 6px rgba(255, 95, 77, 0.45));
+}
+.formBannerBody {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.formBannerTitle {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #ffd5d5;
+}
+.formBannerText {
+  font-size: 14px;
+  color: #ffe1e1;
+}
+
+@keyframes bannerSlideIn {
+  0%   { opacity: 0; transform: translateY(-6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .formBanner { animation: none; }
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; }
+}

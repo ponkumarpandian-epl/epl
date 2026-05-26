@@ -1,0 +1,346 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   CONTACT PAGE — premium dark, gradient cards, sport-tinted contacts
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.contactShell {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: clamp(40px, 6vw, 80px) clamp(16px, 4vw, 32px) 96px;
+}
+
+/* ── Hero ────────────────────────────────────────────────────────────────── */
+.contactHero {
+  position: relative;
+  max-width: 760px;
+  margin: 0 auto 56px;
+  text-align: center;
+  padding: clamp(28px, 4vw, 48px) 16px 0;
+}
+.contactHeroEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: rgba(232, 181, 61, 0.08);
+  border: 1px solid rgba(232, 181, 61, 0.32);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  margin-bottom: 24px;
+}
+.contactHeroEyebrow::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gold-bright);
+  box-shadow: 0 0 8px rgba(255, 209, 92, 0.7);
+}
+.contactHeroTitle {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 7vw, 88px);
+  letter-spacing: 0.025em;
+  line-height: 0.95;
+  color: var(--bone);
+  text-transform: uppercase;
+  margin: 0 0 18px;
+  text-shadow:
+    1px 1px 0 rgba(0, 0, 0, 0.85),
+    3px 3px 0 rgba(0, 0, 0, 0.65),
+    0 8px 24px rgba(0, 0, 0, 0.55);
+}
+.contactHeroTitle .accentGold  { color: var(--gold-bright); }
+.contactHeroTitle .accentCyan  { color: var(--cyan-bright); }
+.contactHeroLead {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--bone-dim);
+  max-width: 560px;
+  margin: 0 auto;
+}
+.contactHeroLead strong { color: var(--bone); font-weight: 600; }
+
+/* ── Primary CTA cards (Email / Sponsorship / WhatsApp) ─────────────────── */
+.contactQuickGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 56px;
+}
+.contactQuickCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  background: linear-gradient(160deg, var(--ink-3) 0%, var(--ink) 100%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.4s var(--ease), border-color 0.4s, box-shadow 0.4s;
+  min-height: 152px;
+  overflow: hidden;
+  isolation: isolate;
+}
+.contactQuickCard::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 100% 0%, rgba(var(--qaccent, 255, 209, 92), 0.16) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.7;
+  transition: opacity 0.4s;
+}
+.contactQuickCard:hover {
+  transform: translateY(-4px);
+  border-color: rgba(var(--qaccent, 255, 209, 92), 0.6);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(var(--qaccent, 255, 209, 92), 0.18);
+}
+.contactQuickCard:hover::after { opacity: 1; }
+.contactQuickCard.gold      { --qaccent: 255, 209, 92; }
+.contactQuickCard.crimson   { --qaccent: 232, 54, 66; }
+.contactQuickCard.cyan      { --qaccent: 63, 169, 245; }
+
+.contactQuickIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(var(--qaccent, 255, 209, 92), 0.16);
+  border: 1px solid rgba(var(--qaccent, 255, 209, 92), 0.42);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(var(--qaccent, 255, 209, 92));
+  z-index: 1;
+}
+.contactQuickLabel {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bone-fade);
+  z-index: 1;
+}
+.contactQuickTitle {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1.1;
+  color: var(--bone);
+  margin: 0;
+  z-index: 1;
+}
+.contactQuickValue {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--bone-dim);
+  letter-spacing: 0.02em;
+  word-break: break-all;
+  margin-top: auto;
+  z-index: 1;
+}
+.contactQuickArrow {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  color: var(--bone-fade);
+  transition: color 0.3s, transform 0.3s;
+  z-index: 1;
+}
+.contactQuickCard:hover .contactQuickArrow {
+  color: rgb(var(--qaccent, 255, 209, 92));
+  transform: translate(3px, -3px);
+}
+
+/* ── Sport coordinators ─────────────────────────────────────────────────── */
+.contactSection {
+  margin-bottom: 64px;
+}
+.contactSectionHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--color-border);
+}
+.contactSectionEyebrow {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  margin-bottom: 6px;
+}
+.contactSectionTitle {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 40px);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bone);
+  margin: 0;
+  line-height: 0.95;
+}
+
+.contactSportGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.contactSportCard {
+  --accent: var(--gold);
+  --accent-bright: var(--gold-bright);
+  --accent-rgb: 255, 209, 92;
+  position: relative;
+  padding: 24px;
+  background: linear-gradient(165deg, var(--ink-3) 0%, var(--ink) 100%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  transition: border-color 0.4s, transform 0.4s, box-shadow 0.4s;
+  overflow: hidden;
+}
+.contactSportCard.cricket    { --accent: var(--sport-cricket);    --accent-bright: var(--sport-cricket-bright);    --accent-rgb: var(--sport-cricket-rgb); }
+.contactSportCard.badminton  { --accent: var(--sport-badminton);  --accent-bright: var(--sport-badminton-bright);  --accent-rgb: var(--sport-badminton-rgb); }
+.contactSportCard.volleyball { --accent: var(--sport-volleyball); --accent-bright: var(--sport-volleyball-bright); --accent-rgb: var(--sport-volleyball-rgb); }
+.contactSportCard:hover {
+  border-color: rgba(var(--accent-rgb), 0.5);
+  transform: translateY(-3px);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(var(--accent-rgb), 0.15);
+}
+.contactSportName {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-bright);
+  margin: 0 0 16px;
+  text-shadow: 0 0 20px rgba(var(--accent-rgb), 0.3);
+}
+.contactSportContacts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.contactPerson {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.3s, border-color 0.3s, transform 0.3s;
+}
+.contactPerson:hover {
+  background: rgba(var(--accent-rgb), 0.06);
+  border-color: rgba(var(--accent-rgb), 0.3);
+  transform: translateX(2px);
+}
+.contactPersonAvatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.75), rgba(var(--accent-rgb), 0.30));
+  color: var(--bone);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 14px;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(var(--accent-rgb), 0.45);
+}
+.contactPersonText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.contactPersonName {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--bone);
+  letter-spacing: 0.01em;
+}
+.contactPersonPhone {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--bone-dim);
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+.contactPersonPhone:hover { color: var(--accent-bright); }
+
+/* ── Venue & timings strip ──────────────────────────────────────────────── */
+.contactInfo {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+.contactInfoCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 24px;
+  background: linear-gradient(160deg, rgba(14, 47, 102, 0.18), rgba(3, 8, 26, 0.6));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+.contactInfoIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(232, 181, 61, 0.10);
+  border: 1px solid rgba(232, 181, 61, 0.36);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-bright);
+  flex-shrink: 0;
+}
+.contactInfoBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.contactInfoLabel {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bone-fade);
+}
+.contactInfoValue {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--bone);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 1080px) {
+  .contactQuickGrid  { grid-template-columns: repeat(2, 1fr); }
+  .contactQuickGrid > :last-child { grid-column: 1 / -1; }
+  .contactSportGrid  { grid-template-columns: repeat(2, 1fr); }
+  .contactSportGrid > :last-child { grid-column: 1 / -1; }
+}
+@media (max-width: 760px) {
+  .contactQuickGrid,
+  .contactSportGrid,
+  .contactInfo { grid-template-columns: 1fr; }
+  .contactQuickGrid > :last-child,
+  .contactSportGrid > :last-child { grid-column: auto; }
+  .contactSectionHeader { flex-direction: column; align-items: flex-start; }
+}

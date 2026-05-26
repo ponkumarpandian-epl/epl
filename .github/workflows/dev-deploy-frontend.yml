@@ -1,0 +1,104 @@
+name: Dev Deploy Frontend → epl-sports-ui
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/web/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/dev-deploy-frontend.yml'
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: epl-sports-ui
+  NODE_VERSION: '24'
+
+jobs:
+  build:
+    name: Build Next.js (standalone)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build --workspace @epl/web
+
+      # Next.js in an npm workspaces monorepo nests the app under the project's
+      # path inside standalone/ (standalone/apps/web/server.js). We flatten
+      # this so server.js lands at the deployment root and the startup command
+      # "node server.js" works without any Azure Portal configuration.
+      - name: Assemble & flatten standalone bundle
+        run: |
+          set -e
+          STANDALONE="apps/web/.next/standalone"
+          DEPLOY="$GITHUB_WORKSPACE/deploy"
+
+          echo "-- standalone root structure --"
+          find "$STANDALONE" -maxdepth 3 -not -path "*/node_modules/*" | sort
+
+          mkdir -p "$DEPLOY"
+
+          # Flatten: copy app contents (server.js, .next/, package.json) to root
+          cp -r "$STANDALONE/apps/web/." "$DEPLOY/"
+
+          # Copy shared node_modules from the monorepo root level of standalone
+          cp -r "$STANDALONE/node_modules" "$DEPLOY/"
+
+          # Add static assets and public/ (excluded from standalone by design)
+          mkdir -p "$DEPLOY/.next"
+          cp -r apps/web/.next/static  "$DEPLOY/.next/static"
+          cp -r apps/web/public        "$DEPLOY/public"
+
+          echo "-- final deploy bundle --"
+          ls -la "$DEPLOY"
+
+      - name: Zip bundle
+        run: |
+          cd $GITHUB_WORKSPACE/deploy
+          zip -r $GITHUB_WORKSPACE/frontend.zip .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-bundle
+          path: frontend.zip
+          retention-days: 3
+
+  deploy:
+    name: Deploy to Azure Web App
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: dev
+      url: https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-bundle
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_FRONTEND }}
+          package: frontend.zip
+          # startup-command is not supported with publish-profile auth.
+          # Bundle is flattened so server.js is at wwwroot root.
+          # Set startup command once in Azure Portal → Configuration → General settings:
+          #   node server.js

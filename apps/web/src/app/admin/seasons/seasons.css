@@ -1,0 +1,204 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ADMIN SEASONS — bento grid · animated hero card · stat counters
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.seasonGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+.seasonCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: inherit;
+  background: linear-gradient(165deg, var(--ink-3) 0%, var(--ink) 100%);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.4s var(--ease), border-color 0.4s, box-shadow 0.4s;
+  animation: cardSlideIn 380ms var(--ease) both;
+}
+.seasonCard:nth-child(2) { animation-delay: 60ms; }
+.seasonCard:nth-child(3) { animation-delay: 120ms; }
+.seasonCard:nth-child(4) { animation-delay: 180ms; }
+.seasonCard:nth-child(5) { animation-delay: 240ms; }
+@keyframes cardSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.seasonCard:hover {
+  transform: translateY(-4px);
+  border-color: rgba(232, 181, 61, 0.5);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(232, 181, 61, 0.16);
+}
+
+/* Active season — full-row "hero" card */
+.seasonCard.is-active {
+  grid-column: 1 / -1;
+  background:
+    radial-gradient(ellipse 50% 100% at 100% 0%, rgba(232, 181, 61, 0.25) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 90% at 0% 100%, rgba(63, 169, 245, 0.16) 0%, transparent 55%),
+    linear-gradient(135deg, var(--ink-3) 0%, var(--ink) 100%);
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 0 1px var(--gold-bright), 0 18px 36px rgba(232, 181, 61, 0.22);
+}
+.seasonCard.is-active::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(90deg,
+      transparent 0, transparent 6px,
+      rgba(255, 209, 92, 0.02) 6px, rgba(255, 209, 92, 0.02) 7px);
+  pointer-events: none;
+  z-index: 0;
+}
+.seasonCard.is-active .seasonCardInner {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+.seasonCard:not(.is-active) .seasonCardInner {
+  display: contents;
+}
+
+/* Big year typography (hero card only) */
+.seasonYearMonster {
+  font-family: var(--font-display);
+  font-size: clamp(90px, 12vw, 180px);
+  line-height: 0.85;
+  letter-spacing: -0.02em;
+  color: var(--gold-bright);
+  margin: 0;
+  text-shadow:
+    0 0 30px rgba(232, 181, 61, 0.35),
+    1px 1px 0 rgba(0, 0, 0, 0.75),
+    3px 3px 0 rgba(0, 0, 0, 0.5);
+  position: relative;
+  display: inline-block;
+}
+.seasonYearMonster::after {
+  content: "";
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  bottom: -8px;
+  height: 4px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, transparent, var(--gold-bright) 30%, var(--gold-bright) 70%, transparent);
+  box-shadow: 0 0 16px rgba(255, 209, 92, 0.6);
+}
+
+.seasonName {
+  font-family: var(--font-display);
+  font-size: 26px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bone);
+  margin: 0;
+  line-height: 1.05;
+}
+.seasonCard.is-active .seasonName {
+  font-size: clamp(28px, 3vw, 36px);
+}
+.seasonTagline {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cyan-bright);
+  margin: 0;
+}
+.seasonDates {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--bone-dim);
+  letter-spacing: 0.04em;
+}
+
+.seasonHeaderRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+.seasonPills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Stats strip — number counters */
+.seasonStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+  position: relative;
+  z-index: 1;
+}
+.seasonStat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.seasonStatValue {
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1;
+  color: var(--bone);
+}
+.seasonStatLabel {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bone-fade);
+}
+
+.seasonActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+/* Empty state */
+.emptySeasons {
+  padding: 64px 24px;
+  text-align: center;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+}
+.emptySeasons h3 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  color: var(--bone);
+  margin: 0 0 8px;
+}
+.emptySeasons p { color: var(--bone-dim); margin: 0 0 18px; }
+
+@media (max-width: 1080px) {
+  .seasonGrid { grid-template-columns: repeat(2, 1fr); }
+  .seasonCard.is-active .seasonCardInner { grid-template-columns: 1fr; gap: 16px; }
+  .seasonYearMonster { font-size: clamp(70px, 18vw, 130px); }
+}
+@media (max-width: 760px) {
+  .seasonGrid { grid-template-columns: 1fr; }
+  .seasonStats { grid-template-columns: 1fr 1fr; }
+  .seasonStat:nth-child(3) { grid-column: 1 / -1; }
+}
