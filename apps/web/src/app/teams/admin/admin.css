@@ -85,6 +85,10 @@
   border-color: var(--color-focus-ring);
   box-shadow: 0 0 0 3px rgba(255, 209, 92, 0.22);
 }
+.filterSelect option {
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text);
+}
 .filterRight {
   display: inline-flex;
   gap: 8px;
