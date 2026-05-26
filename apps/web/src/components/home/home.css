@@ -993,6 +993,7 @@
     padding: 8px 14px;
     border-radius: 12px;
     gap: 6px;
+    top: 14px;
   }
   .topbarLeft { flex-wrap: wrap; white-space: normal; }
   .topbarRight {
@@ -1002,13 +1003,15 @@
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     margin-top: 2px;
   }
+  /* Topbar wraps to two rows on small screens — clear it from the hero title. */
+  .heroContent { padding-top: 84px; }
 }
 
 @media (max-width: 420px) {
   .topbar { font-size: 8px; letter-spacing: 0.08em; }
   .topbar .sep { display: none; }
   .hero { aspect-ratio: 16 / 9; max-height: 280px; }
-  .heroContent { padding: 30px 16px 44px; }
+  .heroContent { padding: 76px 16px 36px; }
   .heroTitle { font-size: clamp(26px, 11vw, 42px); }
   .sportName { font-size: 38px; }
   .sportFee .amount { font-size: 28px; }
