@@ -63,16 +63,16 @@ export default function ContactPage() {
 
       {/* ── Primary CTA quick cards ── */}
       <section className="contactQuickGrid" aria-label="Quick contact options">
-        <a className="contactQuickCard gold" href="mailto:infor.ecitypremierleague@gmail.com?subject=EPL%20Inquiry">
+        <a className="contactQuickCard gold" href="mailto:info.ecitypremierleague@gmail.com?subject=EPL%20Inquiry">
           <div className="contactQuickIcon"><MailIcon /></div>
           <span className="contactQuickLabel">General · Email</span>
           <h3 className="contactQuickTitle">Drop us a note</h3>
-          <span className="contactQuickValue">infor.ecitypremierleague@gmail.com</span>
+          <span className="contactQuickValue">info.ecitypremierleague@gmail.com</span>
           <span className="contactQuickArrow"><ArrowIcon /></span>
         </a>
 
         <a className="contactQuickCard cyan"
-           href={`mailto:infor.ecitypremierleague@gmail.com?subject=${encodeURIComponent("Become a Sponsor — EPL Season 2 (2026)")}`}>
+           href={`mailto:info.ecitypremierleague@gmail.com?subject=${encodeURIComponent("Become a Sponsor — EPL Season 2 (2026)")}`}>
           <div className="contactQuickIcon"><HandshakeIcon /></div>
           <span className="contactQuickLabel">Partnerships · Sponsor</span>
           <h3 className="contactQuickTitle">Become a sponsor</h3>
@@ -80,21 +80,20 @@ export default function ContactPage() {
           <span className="contactQuickArrow"><ArrowIcon /></span>
         </a>
 
-        <a className="contactQuickCard crimson" href="tel:+919591337122">
+        <article className="contactQuickCard crimson">
           <div className="contactQuickIcon"><PhoneIcon /></div>
-          <span className="contactQuickLabel">Coordinator · Call / WhatsApp</span>
-          <h3 className="contactQuickTitle">Ponkumar</h3>
-          <span className="contactQuickValue">+91 95913 37122</span>
-          <span className="contactQuickArrow"><ArrowIcon /></span>
-        </a>
-
-        <a className="contactQuickCard crimson" href="tel:+919686800057">
-          <div className="contactQuickIcon"><PhoneIcon /></div>
-          <span className="contactQuickLabel">Coordinator · Call / WhatsApp</span>
-          <h3 className="contactQuickTitle">Deepak</h3>
-          <span className="contactQuickValue">+91 96868 00057</span>
-          <span className="contactQuickArrow"><ArrowIcon /></span>
-        </a>
+          <span className="contactQuickLabel">Coordinators · Call / WhatsApp</span>
+          <div className="contactQuickPeople">
+            <a href="tel:+919591337122" className="contactQuickPerson">
+              <span className="contactQuickPersonName">Ponkumar</span>
+              <span className="contactQuickPersonPhone">+91 95913 37122</span>
+            </a>
+            <a href="tel:+919686800057" className="contactQuickPerson">
+              <span className="contactQuickPersonName">Deepak</span>
+              <span className="contactQuickPersonPhone">+91 96868 00057</span>
+            </a>
+          </div>
+        </article>
       </section>
 
       {/* ── Sport coordinators ── */}
