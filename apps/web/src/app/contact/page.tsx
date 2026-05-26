@@ -66,7 +66,12 @@ export default function ContactPage() {
 
       {/* ── Primary CTA quick cards ── */}
       <section className="contactQuickGrid" aria-label="Quick contact options">
-        <a className="contactQuickCard gold" href="mailto:info.ecitypremierleague@gmail.com?subject=EPL%20Inquiry">
+        <a
+          className="contactQuickCard gold"
+          href="mailto:info.ecitypremierleague@gmail.com?subject=EPL%20Inquiry"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <div className="contactQuickIcon"><MailIcon /></div>
           <span className="contactQuickLabel">General · Email</span>
           <h3 className="contactQuickTitle">Drop us a note</h3>
@@ -74,8 +79,12 @@ export default function ContactPage() {
           <span className="contactQuickArrow"><ArrowIcon /></span>
         </a>
 
-        <a className="contactQuickCard cyan"
-           href={`mailto:info.ecitypremierleague@gmail.com?subject=${encodeURIComponent("Become a Sponsor — EPL Season 2 (2026)")}`}>
+        <a
+          className="contactQuickCard cyan"
+          href={`mailto:info.ecitypremierleague@gmail.com?subject=${encodeURIComponent("Become a Sponsor — EPL Season 2 (2026)")}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <div className="contactQuickIcon"><HandshakeIcon /></div>
           <span className="contactQuickLabel">Partnerships · Sponsor</span>
           <h3 className="contactQuickTitle">Become a sponsor</h3>

@@ -11,6 +11,8 @@ export function SponsorsCta() {
         </div>
         <a
           href={`mailto:info.ecitypremierleague@gmail.com?subject=${subject}`}
+          target="_blank"
+          rel="noopener noreferrer"
           className="becomeSponsor"
           role="button"
         >
