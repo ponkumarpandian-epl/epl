@@ -160,7 +160,7 @@
   transform: translate(3px, -3px);
 }
 
-/* Two-coordinator variant: name + phone rows inside a single QuickCard. */
+/* Two-coordinator variant: name + phone + Call/WA action buttons per row. */
 .contactQuickPeople {
   display: flex;
   flex-direction: column;
@@ -170,22 +170,22 @@
 }
 .contactQuickPerson {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 10px 14px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  text-decoration: none;
   color: inherit;
-  min-height: 44px;
-  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  min-height: 48px;
 }
-.contactQuickPerson:hover {
-  background: rgba(var(--qaccent, 255, 209, 92), 0.12);
-  border-color: rgba(var(--qaccent, 255, 209, 92), 0.42);
-  transform: translateX(2px);
+.contactQuickPersonText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
 }
 .contactQuickPersonName {
   font-family: var(--font-display);
@@ -197,6 +197,44 @@
   font-size: 12px;
   color: var(--bone-dim);
   letter-spacing: 0.02em;
+}
+
+/* Call / WhatsApp icon buttons (shared by quick-card & sport-coordinator rows) */
+.contactActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.contactIconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--bone-dim);
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
+  touch-action: manipulation;
+}
+.contactIconBtn:hover {
+  transform: translateY(-1px);
+}
+.contactIconBtn--call:hover {
+  background: rgba(var(--qaccent, var(--accent-rgb, 255, 209, 92)), 0.18);
+  border-color: rgba(var(--qaccent, var(--accent-rgb, 255, 209, 92)), 0.55);
+  color: var(--bone);
+}
+.contactIconBtn--wa {
+  color: #25d366;
+}
+.contactIconBtn--wa:hover {
+  background: rgba(37, 211, 102, 0.18);
+  border-color: rgba(37, 211, 102, 0.55);
+  color: #4ee586;
 }
 
 /* ── Sport coordinators ─────────────────────────────────────────────────── */
@@ -304,6 +342,7 @@
   flex-direction: column;
   gap: 2px;
   min-width: 0;
+  flex: 1;
 }
 .contactPersonName {
   font-family: var(--font-sans);

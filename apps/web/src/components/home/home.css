@@ -641,16 +641,52 @@
   letter-spacing: 0.05em;
   flex-shrink: 0;
 }
-.contactText { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.contactText { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; flex: 1; }
 .contactName  { font-size: 13px; font-weight: 600; color: var(--bone); }
 .contactPhone {
   font-family: var(--font-mono);
   font-size: 12px;
   color: var(--bone-dim);
   letter-spacing: 0.02em;
-  transition: color 0.25s;
 }
-.contactPhone:hover { color: var(--accent-bright); }
+
+/* Call / WhatsApp icon buttons (used by sport cards and contact page) */
+.contactActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.contactIconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--bone-dim);
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
+  touch-action: manipulation;
+}
+.contactIconBtn:hover {
+  transform: translateY(-1px);
+}
+.contactIconBtn--call:hover {
+  background: rgba(var(--accent-rgb), 0.18);
+  border-color: rgba(var(--accent-rgb), 0.55);
+  color: var(--bone);
+}
+.contactIconBtn--wa {
+  color: #25d366;
+}
+.contactIconBtn--wa:hover {
+  background: rgba(37, 211, 102, 0.18);
+  border-color: rgba(37, 211, 102, 0.55);
+  color: #4ee586;
+}
 
 .registerBtn {
   margin-top: 8px;
