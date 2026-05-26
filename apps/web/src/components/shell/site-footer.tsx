@@ -1,4 +1,3 @@
-import Link from "next/link";
 import "../home/home.css";
 
 export function SiteFooter() {
@@ -10,10 +9,6 @@ export function SiteFooter() {
           <a href="https://www.e-citypremierleague.in" target="_blank" rel="noopener noreferrer">
             www.e-citypremierleague.in
           </a>
-        </div>
-        <div className="footerContacts">
-          <Link href="/#gallery">Gallery</Link>
-          <Link href="/contact">Contact</Link>
         </div>
       </div>
     </footer>

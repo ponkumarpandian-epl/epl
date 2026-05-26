@@ -10,7 +10,7 @@ export function SponsorsCta() {
           <h3 className="sponsorsCtaTitle">Want to support EPL?</h3>
         </div>
         <a
-          href={`mailto:ponkumarpandian@gmail.com?subject=${subject}`}
+          href={`mailto:infor.ecitypremierleague@gmail.com?subject=${subject}`}
           className="becomeSponsor"
           role="button"
         >
