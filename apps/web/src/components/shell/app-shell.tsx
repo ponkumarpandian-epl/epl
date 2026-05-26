@@ -1,5 +1,6 @@
 import { SiteHeader } from "./site-header";
 import { SiteFooter } from "./site-footer";
+import { CommunityFab } from "./community-fab";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -9,6 +10,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       <SiteFooter />
+      <CommunityFab />
     </div>
   );
 }

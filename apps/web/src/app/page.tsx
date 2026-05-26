@@ -23,7 +23,6 @@ function toCardProps(sg: SeasonGameDto): SportCardProps {
       phoneE164:    c.phoneE164,
     })),
     seasonGameId:     sg.id,
-    whatsAppGroupUrl: sg.whatsAppGroupUrl,
     registrationOpen: sg.registrationOpen,
   };
 }
