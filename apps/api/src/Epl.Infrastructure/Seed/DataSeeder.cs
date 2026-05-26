@@ -28,7 +28,7 @@ public static class DataSeeder
                 Slug             = "cricket",
                 Kind             = Sport.Cricket,
                 Description      = "Inter-apartment cricket - leather-ball, 6 overs a side.",
-                WhatsAppGroupUrl = "https://chat.whatsapp.com/epl-cricket-community",
+                WhatsAppGroupUrl = "https://tinyurl.com/EPLCricketwhatsapp",
             };
             db.Games.Add(cricket);
             log.LogInformation("Seeded Game: Cricket");
@@ -43,7 +43,7 @@ public static class DataSeeder
                 Slug             = "badminton",
                 Kind             = Sport.Badminton,
                 Description      = "Men's & Women's doubles, BWF-style match format.",
-                WhatsAppGroupUrl = "https://chat.whatsapp.com/epl-badminton-community",
+                WhatsAppGroupUrl = "https://tinyurl.com/EPLBadmintonwhatsapp",
             };
             db.Games.Add(badminton);
             log.LogInformation("Seeded Game: Badminton");
@@ -58,7 +58,7 @@ public static class DataSeeder
                 Slug             = "volleyball",
                 Kind             = Sport.Volleyball,
                 Description      = "Men's volleyball, best-of-three rally-point sets.",
-                WhatsAppGroupUrl = "https://chat.whatsapp.com/epl-volleyball-community",
+                WhatsAppGroupUrl = "https://tinyurl.com/EPLVolleyballwhatsapp",
             };
             db.Games.Add(volleyball);
             log.LogInformation("Seeded Game: Volleyball");
@@ -95,7 +95,7 @@ public static class DataSeeder
             categories: "Men's",
             entryFee: 6500,
             cardImageUrl: "/card-cricket.jpg",
-            whatsAppOverride: "https://chat.whatsapp.com/epl-s2-cricket",
+            whatsAppOverride: "https://tinyurl.com/EPLCricketwhatsapp",
             contacts: new()
             {
                 new() { Name = "Christo",  PhoneDisplay = "97902 42834", PhoneE164 = "+919790242834" },
@@ -111,7 +111,7 @@ public static class DataSeeder
             categories: "Men's & Women's Doubles",
             entryFee: 6000,
             cardImageUrl: "/card-badminton.jpg",
-            whatsAppOverride: "https://chat.whatsapp.com/epl-s2-badminton",
+            whatsAppOverride: "https://tinyurl.com/EPLBadmintonwhatsapp",
             contacts: new()
             {
                 new() { Name = "Deepak J", PhoneDisplay = "96868 00057", PhoneE164 = "+919686800057" },
@@ -126,7 +126,7 @@ public static class DataSeeder
             categories: "Men's",
             entryFee: 3000,
             cardImageUrl: "/card-volleyball.jpg",
-            whatsAppOverride: "https://chat.whatsapp.com/epl-s2-volleyball",
+            whatsAppOverride: "https://tinyurl.com/EPLVolleyballwhatsapp",
             contacts: new()
             {
                 new() { Name = "Abdul",   PhoneDisplay = "94481 80435", PhoneE164 = "+919448180435" },
