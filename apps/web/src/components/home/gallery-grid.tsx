@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import type { GalleryImageDto } from "./gallery-section";
 import "./gallery.css";
 
@@ -65,14 +66,20 @@ export function GalleryGrid({ items }: { items: GalleryImageDto[] }) {
         ))}
       </ul>
 
-      {open && active && (
+      {/* Portal to body so the lightbox escapes any parent stacking context
+          (.gallery sits at z-index 2, .sponsors at z-index 2 later in DOM
+          order — without the portal, the sponsors strip paints on top of
+          the lightbox). Opening only happens via a click handler, so the
+          portal never runs server-side. */}
+      {open && active && createPortal(
         <Lightbox
           item={active}
           onClose={close}
           onPrev={prev}
           onNext={next}
           position={`${index! + 1} / ${items.length}`}
-        />
+        />,
+        document.body,
       )}
     </>
   );
