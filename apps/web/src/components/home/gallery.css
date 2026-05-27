@@ -323,7 +323,22 @@
 
 @media (max-width: 760px) {
   .lightboxClose { width: 40px; height: 40px; font-size: 24px; }
-  .lightboxNav   { width: 44px; height: 44px; font-size: 28px; }
+  /* Move prev/next out from behind the (full-width) image to a centred pair
+     at the bottom of the modal — easy thumb-reach, no image overlap. */
+  .lightboxNav {
+    width: 48px;
+    height: 48px;
+    font-size: 30px;
+    top: auto;
+    bottom: max(env(safe-area-inset-bottom), 16px);
+    transform: none;
+  }
+  .lightboxNav:hover,
+  .lightboxNav:focus-visible { transform: scale(1.06); }
+  .lightboxNavPrev { left: calc(50% - 64px); right: auto; }
+  .lightboxNavNext { left: calc(50% + 16px); right: auto; }
+  /* Reserve room under the figure so the nav buttons don't cover the caption */
+  .lightboxFigure { max-height: calc(100dvh - 140px); padding-bottom: 64px; }
   .lightboxCaption { flex-direction: column; align-items: flex-start; gap: 8px; }
   .lightboxAlt { font-size: 13px; }
 }
