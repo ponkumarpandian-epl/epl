@@ -57,10 +57,31 @@ Run from the repo root.
 | Just web lint | `npm run lint --workspace @epl/web` |
 | Just API build | `dotnet build apps/api/Epl.Api.slnx -c Release -nologo` |
 | Production build (web + api) | `npm run build` |
+| Local AI code review (Claude Code) | `npm run review` |
 
 `npm run verify` runs three checks: a secret scan, web type-check, and API release build. It mirrors the `.github/workflows/verify.yml` CI workflow — if local verify passes, CI passes.
 
 **No automated tests yet.** When you add a critical-path feature, surface that to the user rather than silently shipping it untested.
+
+### Local code review
+
+A Claude-Code-driven review runs locally against pending changes:
+
+```
+npm run review                       # review uncommitted + staged + ahead-of-main
+npm run review -- "auth flow"        # narrow with a hint
+```
+
+One-time setup:
+
+```
+npm install -g @anthropic-ai/claude-code   # install CLI (https://github.com/anthropics/claude-code)
+claude login                                # auth (or export ANTHROPIC_API_KEY)
+```
+
+The script in [scripts/claude-review.mjs](scripts/claude-review.mjs) invokes the **code-reviewer subagent** at [.claude/agents/code-reviewer.md](.claude/agents/code-reviewer.md), which reports findings in the project's standard severity rubric (🔴 must / 🟡 should / 🔵 nit). Fixes are not applied automatically — delegate to the **fix-findings** agent or address them by hand.
+
+Run this before opening a PR. It complements (not replaces) `npm run verify`.
 
 ---
 
