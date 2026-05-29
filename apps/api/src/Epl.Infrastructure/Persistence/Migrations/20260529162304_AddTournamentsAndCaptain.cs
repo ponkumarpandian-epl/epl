@@ -147,8 +147,7 @@ namespace Epl.Infrastructure.Persistence.Migrations
                 table: "Teams",
                 column: "CaptainUserId",
                 principalTable: "AspNetUsers",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.SetNull);
+                principalColumn: "Id");
 
             // ── Captain backfill (plan 10 §2.3) ────────────────────────────────
             // Match each Team.CaptainMobile (E.164) to AspNetUsers.PhoneNumber and:

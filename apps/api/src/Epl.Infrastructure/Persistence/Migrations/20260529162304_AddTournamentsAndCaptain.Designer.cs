@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Epl.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260529151201_AddTournamentsAndCaptain")]
+    [Migration("20260529162304_AddTournamentsAndCaptain")]
     partial class AddTournamentsAndCaptain
     {
         /// <inheritdoc />
@@ -719,7 +719,7 @@ namespace Epl.Infrastructure.Persistence.Migrations
                     b.HasOne("Epl.Domain.Entities.AppUser", "Captain")
                         .WithMany()
                         .HasForeignKey("CaptainUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Epl.Domain.Entities.AppUser", "CreatedBy")
                         .WithMany("CaptainedTeams")

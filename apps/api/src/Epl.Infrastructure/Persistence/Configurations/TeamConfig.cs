@@ -29,11 +29,17 @@ public class TeamConfig : IEntityTypeConfiguration<Team>
         // Captain — real FK to AppUser. Nullable while the backfill from
         // CaptainMobile → AppUser.PhoneNumber runs, and for legacy rows where
         // the registrant hasn't signed up yet.
+        //
+        // ON DELETE NO ACTION (not SetNull) because Teams already has
+        // CreatedByUserId → AspNetUsers ON DELETE SET NULL — two SetNull paths
+        // from the same parent table trip SQL Server's "multiple cascade paths"
+        // check. A user delete is rare + admin-handled (transfer captaincy
+        // first), so blocking the cascade is the right default.
         b.HasOne(t => t.Captain)
          .WithMany()
          .HasForeignKey(t => t.CaptainUserId)
          .IsRequired(false)
-         .OnDelete(DeleteBehavior.SetNull);
+         .OnDelete(DeleteBehavior.NoAction);
 
         b.HasIndex(t => t.CaptainUserId);
 
