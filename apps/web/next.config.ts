@@ -23,9 +23,11 @@ const nextConfig: NextConfig = {
       { source: "/api/gallery",        destination: `${API_INTERNAL_URL}/api/gallery` },
       { source: "/api/seasons/:path*", destination: `${API_INTERNAL_URL}/api/seasons/:path*` },
       { source: "/api/seasons",        destination: `${API_INTERNAL_URL}/api/seasons` },
-      { source: "/api/profile/:path*", destination: `${API_INTERNAL_URL}/api/profile/:path*` },
-      { source: "/api/profile",        destination: `${API_INTERNAL_URL}/api/profile` },
-      { source: "/identity/:path*",    destination: `${API_INTERNAL_URL}/identity/:path*` },
+      { source: "/api/profile/:path*",     destination: `${API_INTERNAL_URL}/api/profile/:path*` },
+      { source: "/api/profile",            destination: `${API_INTERNAL_URL}/api/profile` },
+      { source: "/api/tournaments/:path*", destination: `${API_INTERNAL_URL}/api/tournaments/:path*` },
+      { source: "/api/tournaments",        destination: `${API_INTERNAL_URL}/api/tournaments` },
+      { source: "/identity/:path*",        destination: `${API_INTERNAL_URL}/identity/:path*` },
     ];
   },
 };

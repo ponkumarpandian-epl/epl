@@ -7,16 +7,18 @@ import "./primary-nav.css";
 interface Item { href: string; label: string; admin?: boolean }
 
 const PUBLIC: Item[] = [
-  { href: "/",        label: "Home" },
-  { href: "/#sports", label: "Sports" },
-  { href: "/#gallery", label: "Gallery" },
-  { href: "/rules",   label: "Rules" },
-  { href: "/contact", label: "Contact" },
+  { href: "/",             label: "Home" },
+  { href: "/#sports",      label: "Sports" },
+  { href: "/tournaments",  label: "Tournaments" },
+  { href: "/#gallery",     label: "Gallery" },
+  { href: "/rules",        label: "Rules" },
+  { href: "/contact",      label: "Contact" },
 ];
 
 const ADMIN: Item[] = [
-  { href: "/admin/seasons", label: "Seasons",            admin: true },
-  { href: "/teams/admin",   label: "Team Registrations", admin: true },
+  { href: "/admin/seasons",     label: "Seasons",            admin: true },
+  { href: "/admin/tournaments", label: "Tournaments",        admin: true },
+  { href: "/teams/admin",       label: "Team Registrations", admin: true },
 ];
 
 export function PrimaryNav({ isAdmin }: { isAdmin: boolean }) {
