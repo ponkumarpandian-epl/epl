@@ -13,6 +13,19 @@ export async function toggleRegistrationAction(seasonId: string, open: boolean):
   return { ok: true };
 }
 
+export async function toggleGameRegistrationAction(
+  seasonId: string,
+  seasonGameId: string,
+  open: boolean,
+): Promise<ActionResult> {
+  const res = await api.post(`/api/seasons/${seasonId}/games/${seasonGameId}/registration`, { open });
+  if (!res.ok) return { ok: false, message: res.message };
+  revalidatePath("/", "layout");
+  revalidatePath(`/admin/seasons/${seasonId}`);
+  revalidatePath("/admin/seasons");
+  return { ok: true };
+}
+
 export async function activateSeasonAction(seasonId: string): Promise<ActionResult> {
   const res = await api.post(`/api/seasons/${seasonId}/activate`, {});
   if (!res.ok) return { ok: false, message: res.message };
