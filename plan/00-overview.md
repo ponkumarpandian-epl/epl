@@ -36,6 +36,9 @@
 | [05-iterations.md](./05-iterations.md) | Iteration-by-iteration delivery plan with acceptance criteria for each chunk |
 | [06-cleanup.md](./06-cleanup.md) | Exact archive-then-remove procedure (files move to an external backup folder, not deleted) |
 | [07-gallery-azure.md](./07-gallery-azure.md) | Feature plan — host gallery images on Azure Blob Storage (`gallery.e-citypremierleague.in`, container per season, auto-discovery, no hardcoded URLs) |
+| [08-general-tournaments.md](./08-general-tournaments.md) | Feature plan — stand-alone badminton tournaments (Singles / MD / WD / XD) outside the EPL season, with a reusable Bracket subsystem shared between tournaments and future season fixtures. Mockup: [08-general-tournaments-mockup.html](./08-general-tournaments-mockup.html) |
+| [09-database-diagram.html](./09-database-diagram.html) | Visual ER diagram (existing EPL tables + new Tournament & Bracket tables + new TeamMember/Captain FK) — open in a browser. Pure HTML/SVG diagram + collapsible table cross-reference cards below. |
+| [10-team-captain-roster.md](./10-team-captain-roster.md) | Feature plan — first-class Captain role per EPL Season team. Captains build the roster via player search; players must be registered users; a `TeamMember` table replaces the free-text CaptainName/Mobile pair. Authorization policy: `TeamCaptainOrAdmin`. Cross-cuts EPL today and any future team-based tournament. |
 
 ---
 

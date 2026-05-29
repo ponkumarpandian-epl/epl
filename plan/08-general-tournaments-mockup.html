@@ -1,0 +1,817 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EPL — General Tournaments · UI mockup</title>
+<style>
+  /* Replicating the project's design tokens so the mockup matches the live site. */
+  :root {
+    --ink:        #03081A;
+    --ink-2:      #060F26;
+    --ink-3:      #0B1834;
+    --bone:       #EAEAF0;
+    --bone-dim:   #B6B9C7;
+    --bone-fade:  #7A7E92;
+    --gold:       #B68C2A;
+    --gold-bright:#E8B53D;
+    --crimson:    #C82F3C;
+    --cyan-bright:#3FA9F5;
+    --green:      #25D366;
+    --color-border: rgba(255,255,255,0.08);
+    --radius-sm:  8px;
+    --radius-md:  12px;
+    --radius-lg:  20px;
+    --radius-pill:999px;
+    --shadow-md:  0 10px 30px rgba(0,0,0,0.45);
+    --font-display: 'Anton', system-ui, sans-serif;
+    --font-sans:    system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --font-mono:    ui-monospace, 'JetBrains Mono', Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--ink); color: var(--bone); margin: 0; font-family: var(--font-sans); }
+  a { color: var(--gold-bright); }
+
+  /* Page shell */
+  .page { max-width: 1280px; margin: 0 auto; padding: 32px 24px 96px; }
+  .nav  { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; padding-bottom: 16px;
+          border-bottom: 1px solid var(--color-border); }
+  .nav a {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+    padding: 8px 14px; border-radius: var(--radius-pill); border: 1px solid var(--color-border);
+    text-decoration: none; color: var(--bone-dim);
+  }
+  .nav a:hover { color: var(--gold-bright); border-color: rgba(232,181,61,0.4); }
+  .sectionHeader {
+    margin: 48px 0 24px; padding-bottom: 12px; border-bottom: 1px solid var(--color-border);
+    display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+  }
+  .sectionEyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.3em;
+                    color: var(--gold-bright); text-transform: uppercase; }
+  .sectionTitle  { font-family: var(--font-display); font-size: clamp(28px,4vw,44px);
+                   letter-spacing: 0.04em; text-transform: uppercase; margin: 4px 0 0; }
+  .sectionLead   { color: var(--bone-dim); font-size: 14px; max-width: 580px; }
+
+  /* Reusable bits */
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
+    border-radius: var(--radius-pill); font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--color-border); color: var(--bone-dim);
+  }
+  .chip.gold    { color: var(--gold-bright);  border-color: rgba(232,181,61,0.45); background: rgba(232,181,61,0.08); }
+  .chip.crimson { color: #FF8C95;             border-color: rgba(200,47,60,0.55);  background: rgba(200,47,60,0.10); }
+  .chip.cyan    { color: var(--cyan-bright);  border-color: rgba(63,169,245,0.45); background: rgba(63,169,245,0.08); }
+  .chip.green   { color: #4ee586;             border-color: rgba(37,211,102,0.45); background: rgba(37,211,102,0.10); }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px;
+    border-radius: var(--radius-pill); border: 1px solid rgba(232,181,61,0.45);
+    background: transparent; color: var(--gold-bright); text-decoration: none;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    font-weight: 700; cursor: pointer; min-height: 44px;
+  }
+  .btn:hover { background: var(--gold-bright); color: var(--ink); }
+  .btn.primary { background: var(--gold-bright); color: var(--ink); }
+  .btn.primary:hover { background: var(--gold); border-color: var(--gold); }
+  .btn.ghost { color: var(--bone-dim); border-color: var(--color-border); }
+  .btn.ghost:hover { color: var(--bone); border-color: rgba(255,255,255,0.25); background: transparent; }
+
+  /* §D — Tournaments hub list */
+  .hubFilters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+  .hubFilters .chip { cursor: pointer; }
+  .hubFilters .chip.active { color: var(--ink); background: var(--gold-bright); border-color: var(--gold-bright); }
+  .hubGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 980px) { .hubGrid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .hubGrid { grid-template-columns: 1fr; } }
+  .tournCard {
+    position: relative;
+    background: linear-gradient(160deg, var(--ink-3) 0%, var(--ink) 100%);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden; display: flex; flex-direction: column;
+    transition: transform .25s, border-color .25s, box-shadow .25s;
+  }
+  .tournCard:hover { transform: translateY(-3px); border-color: rgba(232,181,61,0.3);
+                     box-shadow: 0 16px 32px rgba(0,0,0,0.5); }
+  .tournBanner {
+    aspect-ratio: 16/9;
+    background: linear-gradient(135deg, rgba(200,47,60,0.35), rgba(11,24,52,0.95)),
+                radial-gradient(circle at 70% 30%, rgba(232,181,61,0.4), transparent 60%);
+    position: relative;
+  }
+  .tournBanner::after {
+    content: 'BADMINTON'; position: absolute; top: 12px; left: 12px;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.3em; color: var(--bone);
+    padding: 4px 10px; border-radius: var(--radius-pill); background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .tournBody { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .tournName { font-family: var(--font-display); font-size: 22px; letter-spacing: 0.03em;
+               text-transform: uppercase; margin: 0; line-height: 1.05; }
+  .tournMeta { font-family: var(--font-mono); font-size: 11px; color: var(--bone-fade);
+               letter-spacing: 0.08em; }
+  .tournCats { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .tournCount { font-family: var(--font-mono); font-size: 11px; color: var(--bone-dim);
+                letter-spacing: 0.08em; }
+  .tournCta { margin-top: auto; }
+
+  /* §E — Tournament detail */
+  .detailHeader {
+    border-radius: var(--radius-lg); padding: 36px 32px; margin-bottom: 24px;
+    background: linear-gradient(110deg, var(--ink-3) 0%, var(--ink-2) 60%, var(--ink) 100%);
+    border: 1px solid var(--color-border);
+    display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;
+  }
+  .detailHeader h1 { font-family: var(--font-display); font-size: clamp(32px,4vw,52px);
+                     margin: 6px 0 4px; letter-spacing: 0.03em; text-transform: uppercase;
+                     line-height: 1; }
+  .detailEyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.3em;
+                    color: var(--gold-bright); text-transform: uppercase; }
+  .detailMeta { font-family: var(--font-mono); font-size: 12px; color: var(--bone-dim);
+                letter-spacing: 0.1em; display: flex; gap: 18px; flex-wrap: wrap; margin-top: 14px; }
+  .detailCountdown {
+    margin-left: auto; padding: 14px 18px; border-radius: var(--radius-md);
+    background: rgba(200,47,60,0.12); border: 1px solid rgba(200,47,60,0.4);
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: #FF8C95;
+  }
+  .detailCountdown b { display: block; font-family: var(--font-display); font-size: 26px;
+                       letter-spacing: 0.04em; color: #FFD0D4; margin-top: 4px; }
+
+  /* Category tabs */
+  .tabs { display: inline-flex; padding: 4px; border-radius: var(--radius-pill);
+          background: rgba(255,255,255,0.04); border: 1px solid var(--color-border);
+          gap: 4px; margin-bottom: 24px; flex-wrap: wrap; }
+  .tabs button {
+    border: 0; background: transparent; color: var(--bone-dim);
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.2em;
+    text-transform: uppercase; padding: 10px 16px; border-radius: var(--radius-pill);
+    cursor: pointer; min-height: 40px;
+  }
+  .tabs button.active { background: var(--gold-bright); color: var(--ink); font-weight: 700; }
+  .tabs button:not(.active):hover { color: var(--bone); }
+
+  .categoryPanel { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+  @media (max-width: 880px) { .categoryPanel { grid-template-columns: 1fr; } }
+  .panelCard {
+    background: linear-gradient(160deg, var(--ink-3), var(--ink));
+    border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+    padding: 20px 22px;
+  }
+  .panelCard h3 { font-family: var(--font-display); font-size: 22px; letter-spacing: 0.04em;
+                  text-transform: uppercase; margin: 0 0 14px; }
+  .progressLabel { display: flex; justify-content: space-between; font-family: var(--font-mono);
+                   font-size: 11px; color: var(--bone-dim); letter-spacing: 0.08em; }
+  .progress { width: 100%; height: 8px; background: rgba(255,255,255,0.06);
+              border-radius: 999px; overflow: hidden; margin: 8px 0 16px; }
+  .progress > div { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-bright)); }
+
+  .entryList { display: flex; flex-direction: column; gap: 8px; }
+  .entryRow {
+    display: grid; grid-template-columns: 24px 1fr auto; align-items: center; gap: 12px;
+    padding: 10px 14px; border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.04);
+  }
+  .entrySeed { font-family: var(--font-mono); font-size: 11px; color: var(--bone-fade); }
+  .entryName { font-size: 14px; font-weight: 600; color: var(--bone); }
+  .entryStatus { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em;
+                 text-transform: uppercase; color: var(--bone-dim); }
+
+  /* §F — Bracket (single elimination) */
+  .bracketWrap { overflow-x: auto; padding: 16px 0; }
+  .bracket { display: flex; gap: 36px; min-width: max-content; }
+  .roundCol { display: flex; flex-direction: column; gap: 28px; justify-content: space-around;
+              min-width: 220px; }
+  .roundLabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.3em;
+                color: var(--gold-bright); text-transform: uppercase; margin-bottom: 4px; }
+  .matchCard {
+    background: var(--ink-2); border: 1px solid var(--color-border);
+    border-radius: var(--radius-md); padding: 10px 12px; min-width: 220px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .matchCard.complete { border-color: rgba(232,181,61,0.35); }
+  .matchPart {
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    font-size: 13px; padding: 4px 0;
+  }
+  .matchPart.winner { color: var(--gold-bright); font-weight: 700; }
+  .matchPart.loser  { color: var(--bone-fade); }
+  .matchPart .seed { font-family: var(--font-mono); font-size: 10px; color: var(--bone-fade);
+                     margin-right: 8px; }
+  .matchPart .score { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em;
+                      color: var(--bone-dim); }
+  .matchMeta { font-family: var(--font-mono); font-size: 10px; color: var(--bone-fade);
+                letter-spacing: 0.1em; padding-top: 4px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+  /* §A — Admin tournaments list */
+  .adminCard {
+    background: linear-gradient(160deg, var(--ink-3), var(--ink));
+    border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+    padding: 18px 20px; display: grid; grid-template-columns: 80px 1fr auto;
+    gap: 18px; align-items: center; margin-bottom: 12px;
+  }
+  .adminCard .thumb { aspect-ratio: 1; background:
+      linear-gradient(135deg, rgba(200,47,60,0.35), rgba(11,24,52,0.95));
+      border-radius: var(--radius-md); border: 1px solid var(--color-border); }
+  .adminCard .body h4 { margin: 0 0 4px; font-family: var(--font-display);
+                        letter-spacing: 0.04em; text-transform: uppercase; font-size: 18px; }
+  .adminCard .meta { font-family: var(--font-mono); font-size: 10.5px;
+                      color: var(--bone-fade); letter-spacing: 0.1em; }
+  .adminCard .actions { display: flex; gap: 8px; }
+
+  /* §B — Admin builder form */
+  .formGroup { display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: center;
+               padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+  .formGroup label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.16em;
+                      color: var(--bone-dim); text-transform: uppercase; }
+  .formGroup input, .formGroup textarea, .formGroup select {
+    width: 100%; padding: 10px 12px; background: rgba(255,255,255,0.04);
+    border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+    color: var(--bone); font-family: var(--font-sans); font-size: 14px;
+  }
+  .formGroup input:focus, .formGroup textarea:focus, .formGroup select:focus {
+    outline: 2px solid rgba(232,181,61,0.4); outline-offset: 1px;
+  }
+  .categoryRow {
+    display: grid; grid-template-columns: 1fr 100px 100px 100px auto auto;
+    gap: 10px; padding: 10px; background: rgba(255,255,255,0.03);
+    border: 1px solid var(--color-border); border-radius: var(--radius-md); align-items: center;
+    margin-bottom: 8px;
+  }
+  .categoryRow .pillToggle { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em;
+                              text-transform: uppercase; padding: 6px 12px;
+                              border-radius: var(--radius-pill); background: rgba(37,211,102,0.18);
+                              color: #4ee586; border: 1px solid rgba(37,211,102,0.45); cursor: pointer; }
+
+  /* §C — Bracket builder admin */
+  .builderToolbar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 14px 18px; margin-bottom: 16px;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+  .builderToolbar .spacer { flex: 1; }
+
+  .note {
+    margin-top: 8px; padding: 10px 14px; border-radius: var(--radius-sm);
+    background: rgba(63,169,245,0.08); border: 1px solid rgba(63,169,245,0.3);
+    font-family: var(--font-mono); font-size: 11.5px; color: var(--cyan-bright);
+    letter-spacing: 0.06em;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="nav">
+    <a href="#hub">D · Hub</a>
+    <a href="#detail">E · Detail</a>
+    <a href="#bracket">F · Bracket</a>
+    <a href="#register">G · Register</a>
+    <a href="#adminList">A · Admin list</a>
+    <a href="#adminCreate">B · Admin create</a>
+    <a href="#adminBuilder">C · Bracket builder</a>
+  </div>
+
+  <p style="font-family:var(--font-mono);font-size:11.5px;color:var(--bone-fade);letter-spacing:0.08em;">
+    Mockup for <a href="./08-general-tournaments.md">plan/08-general-tournaments.md</a>. All chrome and tokens
+    mirror the live EPL theme — no new visual language is introduced. Static markup only, not interactive.
+  </p>
+
+  <!-- §D — Tournaments hub -->
+  <section id="hub">
+    <div class="sectionHeader">
+      <div>
+        <div class="sectionEyebrow">§D — Public hub</div>
+        <h2 class="sectionTitle">/tournaments</h2>
+      </div>
+      <p class="sectionLead">Status-filtered grid of standalone badminton tournaments. Each card's CTA changes by state — Open → "Register" (gold), Completed → "Results".</p>
+    </div>
+
+    <div class="hubFilters">
+      <span class="chip active">All</span>
+      <span class="chip">Upcoming</span>
+      <span class="chip">Open · 2</span>
+      <span class="chip">In progress · 1</span>
+      <span class="chip">Completed</span>
+    </div>
+
+    <div class="hubGrid">
+      <article class="tournCard">
+        <div class="tournBanner"></div>
+        <div class="tournBody">
+          <h3 class="tournName">Smashify Open · March</h3>
+          <div class="tournMeta">14 – 16 MAR 2026 · SMASHIFY ACADEMY, EC</div>
+          <div class="tournCats">
+            <span class="chip">Singles</span>
+            <span class="chip">Men's Doubles</span>
+            <span class="chip">Mixed</span>
+          </div>
+          <div class="tournCount">28 entries · ₹400 / entry</div>
+          <div class="tournCta">
+            <a class="btn primary" href="#detail">Register →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tournCard">
+        <div class="tournBanner"></div>
+        <div class="tournBody">
+          <h3 class="tournName">Friday Night Doubles</h3>
+          <div class="tournMeta">28 FEB 2026 · COURT 5, EC</div>
+          <div class="tournCats">
+            <span class="chip">Men's Doubles</span>
+            <span class="chip">Women's Doubles</span>
+          </div>
+          <div class="tournCount">12 entries · FREE</div>
+          <div class="tournCta">
+            <a class="btn primary" href="#detail">Register →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tournCard">
+        <div class="tournBanner"></div>
+        <div class="tournBody">
+          <h3 class="tournName">EC Singles Showdown</h3>
+          <div class="tournMeta">8 – 9 FEB 2026 · JMR INDOOR · LIVE NOW</div>
+          <div class="tournCats">
+            <span class="chip">Singles</span>
+          </div>
+          <div class="tournCount">16 entries · DRAW PUBLISHED</div>
+          <div class="tournCta">
+            <a class="btn" href="#bracket">Live draws →</a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- §E — Tournament detail -->
+  <section id="detail">
+    <div class="sectionHeader">
+      <div>
+        <div class="sectionEyebrow">§E — Public detail</div>
+        <h2 class="sectionTitle">/tournaments/smashify-open-mar-2026</h2>
+      </div>
+      <p class="sectionLead">Banner + sticky countdown + category tabs. URL deep-links into a category. Right column has the Register CTA and live entry counters.</p>
+    </div>
+
+    <header class="detailHeader">
+      <div style="flex: 1; min-width: 260px;">
+        <div class="detailEyebrow">Badminton · Open Bracket</div>
+        <h1>Smashify Open · March</h1>
+        <div class="detailMeta">
+          <span>📅 14 – 16 MAR 2026</span>
+          <span>📍 SMASHIFY ACADEMY, EC PHASE 1</span>
+          <span>₹ 400 / ENTRY</span>
+        </div>
+      </div>
+      <div class="detailCountdown">
+        Registration closes in
+        <b>03d · 14h · 22m</b>
+      </div>
+    </header>
+
+    <div class="tabs">
+      <button>Singles · 8/16</button>
+      <button class="active">Men's Doubles · 12/16</button>
+      <button>Women's Doubles · 4/8</button>
+      <button>Mixed Doubles · 6/12</button>
+    </div>
+
+    <div class="categoryPanel">
+      <div class="panelCard">
+        <h3>Men's Doubles · entries</h3>
+        <div class="progressLabel"><span>12 of 16 spots filled</span><span>4 left</span></div>
+        <div class="progress"><div style="width: 75%"></div></div>
+        <div class="entryList">
+          <div class="entryRow">
+            <span class="entrySeed">1</span>
+            <span class="entryName">Anand &amp; Pradeep</span>
+            <span class="entryStatus chip gold">Seeded</span>
+          </div>
+          <div class="entryRow">
+            <span class="entrySeed">2</span>
+            <span class="entryName">Vinay &amp; Karthik</span>
+            <span class="entryStatus chip gold">Seeded</span>
+          </div>
+          <div class="entryRow">
+            <span class="entrySeed">3</span>
+            <span class="entryName">Ramesh &amp; Sathish</span>
+            <span class="entryStatus chip gold">Seeded</span>
+          </div>
+          <div class="entryRow">
+            <span class="entrySeed">—</span>
+            <span class="entryName">Deepak &amp; Roopesh</span>
+            <span class="entryStatus chip">Confirmed</span>
+          </div>
+          <div class="entryRow">
+            <span class="entrySeed">—</span>
+            <span class="entryName">Christo &amp; Nagaraj</span>
+            <span class="entryStatus chip">Confirmed</span>
+          </div>
+          <div class="entryRow" style="opacity:0.7;">
+            <span class="entrySeed">—</span>
+            <span class="entryName">+ 7 more entries</span>
+            <span class="entryStatus chip">Show all</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panelCard" style="position: sticky; top: 20px; align-self: start;">
+        <h3>Join this category</h3>
+        <p style="font-size:13.5px; color:var(--bone-dim); line-height:1.55;">
+          Pair up with your partner and register before <b style="color:var(--bone)">11 Mar 2026</b>.
+          Entry fee ₹ 400 — pay at the venue.
+        </p>
+        <a class="btn primary" href="#register" style="width:100%; justify-content:center;">Register team →</a>
+        <div style="height: 12px;"></div>
+        <a class="btn ghost" href="#" style="width:100%; justify-content:center;">Join WhatsApp group</a>
+        <div class="note">Draw will be published 24 hours after registration closes.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- §F — Bracket -->
+  <section id="bracket">
+    <div class="sectionHeader">
+      <div>
+        <div class="sectionEyebrow">§F — Public bracket</div>
+        <h2 class="sectionTitle">Single elimination · 8 entries</h2>
+      </div>
+      <p class="sectionLead">Desktop: left-to-right tree. Each match shows seed + score per game. Mobile (not shown): stacked rounds with swipe pagination.</p>
+    </div>
+
+    <div class="bracketWrap">
+      <div class="bracket">
+        <div class="roundCol">
+          <div class="roundLabel">Quarter-finals</div>
+          <div class="matchCard complete">
+            <div class="matchPart winner"><span><span class="seed">[1]</span>Anand / Pradeep</span><span class="score">21 · 21</span></div>
+            <div class="matchPart loser"><span><span class="seed">[8]</span>Krishna / Manoj</span><span class="score">12 · 14</span></div>
+            <div class="matchMeta">Court 1 · 14 Mar · 09:00</div>
+          </div>
+          <div class="matchCard complete">
+            <div class="matchPart loser"><span><span class="seed">[5]</span>Deepak / Roopesh</span><span class="score">19 · 18</span></div>
+            <div class="matchPart winner"><span><span class="seed">[4]</span>Christo / Nagaraj</span><span class="score">21 · 21</span></div>
+            <div class="matchMeta">Court 2 · 14 Mar · 09:00</div>
+          </div>
+          <div class="matchCard">
+            <div class="matchPart"><span><span class="seed">[3]</span>Ramesh / Sathish</span><span class="score">—</span></div>
+            <div class="matchPart"><span><span class="seed">[6]</span>Abdul / Roop</span><span class="score">—</span></div>
+            <div class="matchMeta">Court 1 · 14 Mar · 10:30</div>
+          </div>
+          <div class="matchCard">
+            <div class="matchPart"><span><span class="seed">[7]</span>Vasanth / Pawan</span><span class="score">—</span></div>
+            <div class="matchPart"><span><span class="seed">[2]</span>Vinay / Karthik</span><span class="score">—</span></div>
+            <div class="matchMeta">Court 2 · 14 Mar · 10:30</div>
+          </div>
+        </div>
+
+        <div class="roundCol">
+          <div class="roundLabel">Semi-finals</div>
+          <div class="matchCard">
+            <div class="matchPart"><span><span class="seed">[1]</span>Anand / Pradeep</span><span class="score">—</span></div>
+            <div class="matchPart"><span><span class="seed">[4]</span>Christo / Nagaraj</span><span class="score">—</span></div>
+            <div class="matchMeta">Court 1 · 15 Mar · 09:00</div>
+          </div>
+          <div class="matchCard">
+            <div class="matchPart"><span class="seed">[winner of M3]</span><span class="score">—</span></div>
+            <div class="matchPart"><span class="seed">[winner of M4]</span><span class="score">—</span></div>
+            <div class="matchMeta">Court 1 · 15 Mar · 11:00</div>
+          </div>
+        </div>
+
+        <div class="roundCol">
+          <div class="roundLabel">Final</div>
+          <div class="matchCard">
+            <div class="matchPart"><span class="seed">[winner SF-1]</span><span class="score">—</span></div>
+            <div class="matchPart"><span class="seed">[winner SF-2]</span><span class="score">—</span></div>
+            <div class="matchMeta">Court 1 · 16 Mar · 18:00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p style="font-family:var(--font-mono);font-size:11px;color:var(--bone-fade);letter-spacing:0.08em;margin-top:14px;">
+      Round Robin & Group→Knockout layouts not shown here — see plan §5 D & §F.
+    </p>
+  </section>
+
+  <!-- §G — Register drawer / page -->
+  <section id="register">
+    <div class="sectionHeader">
+      <div>
+        <div class="sectionEyebrow">§G — Registration form</div>
+        <h2 class="sectionTitle">Register team · Men's Doubles</h2>
+      </div>
+      <p class="sectionLead">Drawer (desktop) / full page (mobile). Slot 1 prefilled from logged-in user; slot 2 free fields. Partner mobile is validated for uniqueness within the category.</p>
+    </div>
+
+    <div class="panelCard" style="max-width: 560px;">
+      <div class="formGroup">
+        <label>Your name</label>
+        <input value="Pon Kumar" />
+      </div>
+      <div class="formGroup">
+        <label>Your mobile</label>
+        <input value="+91 95913 37122" />
+      </div>
+      <div class="formGroup">
+        <label>Partner name</label>
+        <input placeholder="Deepak J" />
+      </div>
+      <div class="formGroup">
+        <label>Partner mobile</label>
+        <input placeholder="+91 96868 00057" />
+      </div>
+      <div class="formGroup">
+        <label>Team label (optional)</label>
+        <input placeholder="Smashers" />
+      </div>
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <a class="btn primary" href="#">Submit registration →</a>
+        <a class="btn ghost" href="#">Cancel</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- §A — Admin: tournaments list -->
+  <section id="adminList">
+    <div class="sectionHeader">
+      <div>
+        <div class="sectionEyebrow">§A — Admin</div>
+        <h2 class="sectionTitle">/admin/tournaments</h2>
+      </div>
+      <p class="sectionLead">Compact list: thumb + name + dates + status chips + actions. Drafts (unpublished) appear with a muted chip and live above published ones.</p>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center;">
+      <span class="chip active" style="cursor:default; background:var(--gold-bright); color:var(--ink); border-color:var(--gold-bright);">All · 5</span>
+      <span class="chip">Drafts · 1</span>
+      <span class="chip">Open · 2</span>
+      <span class="chip">In progress · 1</span>
+      <span class="chip">Completed · 1</span>
+      <div style="flex:1"></div>
+      <a class="btn primary" href="#adminCreate">+ Create tournament</a>
+    </div>
+
+    <div class="adminCard">
+      <div class="thumb"></div>
+      <div class="body">
+        <h4>Smashify Open · March</h4>
+        <div class="meta">14 – 16 MAR 2026 · 3 CATEGORIES · 28 / 52 ENTRIES</div>
+      </div>
+      <div class="actions">
+        <span class="chip green">Open</span>
+        <a class="btn ghost" href="#adminCreate">Edit</a>
+        <a class="btn" href="#adminBuilder">Manage</a>
+      </div>
+    </div>
+
+    <div class="adminCard">
+      <div class="thumb" style="background: linear-gradient(135deg, rgba(63,169,245,0.35), rgba(11,24,52,0.95));"></div>
+      <div class="body">
+        <h4>Friday Night Doubles</h4>
+        <div class="meta">28 FEB 2026 · 2 CATEGORIES · 12 / 24 ENTRIES</div>
+      </div>
+      <div class="actions">
+        <span class="chip green">Open</span>
+        <a class="btn ghost" href="#">Edit</a>
+        <a class="btn" href="#">Manage</a>
+      </div>
+    </div>
+
+    <div class="adminCard">
+      <div class="thumb" style="background: linear-gradient(135deg, rgba(232,181,61,0.35), rgba(11,24,52,0.95));"></div>
+      <div class="body">
+        <h4>EC Singles Showdown</h4>
+        <div class="meta">8 – 9 FEB 2026 · 1 CATEGORY · 16 ENTRIES · DRAW LIVE</div>
+      </div>
+      <div class="actions">
+        <span class="chip cyan">In progress</span>
+        <a class="btn ghost" href="#">Edit</a>
+        <a class="btn" href="#">Manage</a>
+      </div>
+    </div>
+
+    <div class="adminCard">
+      <div class="thumb" style="background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(11,24,52,0.95));"></div>
+      <div class="body">
+        <h4>Summer Slam · May (draft)</h4>
+        <div class="meta">— DATES NOT SET — 2 CATEGORIES PROPOSED · 0 ENTRIES</div>
+      </div>
+      <div class="actions">
+        <span class="chip">Draft</span>
+        <a class="btn ghost" href="#">Edit</a>
+        <a class="btn ghost" href="#">Delete</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- §B — Admin: create / edit -->
+  <section id="adminCreate">
+    <div class="sectionHeader">
+      <div>
+        <div class="sectionEyebrow">§B — Admin</div>
+        <h2 class="sectionTitle">/admin/tournaments/new</h2>
+      </div>
+      <p class="sectionLead">Single page, collapsible sections. Categories are an inline editable list — admin adds Singles / Men's Doubles / Women's Doubles / Mixed Doubles with their own caps and fees.</p>
+    </div>
+
+    <div class="panelCard">
+      <h3>Basics</h3>
+      <div class="formGroup">
+        <label>Name</label>
+        <input placeholder="Smashify Open · March 2026" />
+      </div>
+      <div class="formGroup">
+        <label>Slug</label>
+        <input value="smashify-open-mar-2026" />
+      </div>
+      <div class="formGroup">
+        <label>Description</label>
+        <textarea rows="3" placeholder="Open badminton tournament hosted at Smashify Academy. Cash prizes for top 3 in each category."></textarea>
+      </div>
+      <div class="formGroup">
+        <label>Banner image URL</label>
+        <input placeholder="https://steplmediacontent.blob.core.windows.net/tournaments/..." />
+      </div>
+    </div>
+
+    <div style="height:20px"></div>
+
+    <div class="panelCard">
+      <h3>When &amp; where</h3>
+      <div class="formGroup"><label>Starts on</label><input type="date" value="2026-03-14" /></div>
+      <div class="formGroup"><label>Ends on</label><input type="date" value="2026-03-16" /></div>
+      <div class="formGroup"><label>Registration deadline</label><input type="datetime-local" value="2026-03-11T20:00" /></div>
+      <div class="formGroup"><label>Venue</label><input value="Smashify Academy, EC Phase 1" /></div>
+    </div>
+
+    <div style="height:20px"></div>
+
+    <div class="panelCard">
+      <h3>Categories</h3>
+
+      <div class="categoryRow">
+        <input value="Men's Doubles" />
+        <input value="2" placeholder="Players" />
+        <input value="8" placeholder="Min" />
+        <input value="16" placeholder="Max" />
+        <span class="pillToggle">Open</span>
+        <a href="#" style="color:var(--bone-fade);">✕</a>
+      </div>
+
+      <div class="categoryRow">
+        <input value="Women's Doubles" />
+        <input value="2" placeholder="Players" />
+        <input value="4" placeholder="Min" />
+        <input value="8" placeholder="Max" />
+        <span class="pillToggle">Open</span>
+        <a href="#" style="color:var(--bone-fade);">✕</a>
+      </div>
+
+      <div class="categoryRow">
+        <input value="Mixed Doubles" />
+        <input value="2" placeholder="Players" />
+        <input value="6" placeholder="Min" />
+        <input value="12" placeholder="Max" />
+        <span class="pillToggle">Open</span>
+        <a href="#" style="color:var(--bone-fade);">✕</a>
+      </div>
+
+      <div class="categoryRow">
+        <input value="Singles" />
+        <input value="1" placeholder="Players" />
+        <input value="8" placeholder="Min" />
+        <input value="16" placeholder="Max" />
+        <span class="pillToggle">Open</span>
+        <a href="#" style="color:var(--bone-fade);">✕</a>
+      </div>
+
+      <a class="btn ghost" href="#" style="margin-top:8px;">+ Add category</a>
+    </div>
+
+    <div style="height:20px"></div>
+
+    <div class="panelCard">
+      <h3>Status &amp; toggles</h3>
+      <div class="formGroup">
+        <label>Registration open</label>
+        <span class="pillToggle">Open · click to close</span>
+      </div>
+      <div class="formGroup">
+        <label>Publish</label>
+        <span class="chip">Draft (not visible to public)</span>
+      </div>
+      <div style="display:flex; gap:10px; margin-top: 16px; padding-top:16px;">
+        <a class="btn primary" href="#">Save changes</a>
+        <a class="btn" href="#">Save &amp; publish</a>
+        <a class="btn ghost" href="#">Cancel</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- §C — Admin: bracket builder -->
+  <section id="adminBuilder">
+    <div class="sectionHeader">
+      <div>
+        <div class="sectionEyebrow">§C — Admin</div>
+        <h2 class="sectionTitle">/admin/tournaments/[id]/men-doubles · Bracket builder</h2>
+      </div>
+      <p class="sectionLead">Wraps the same bracket renderer the public uses, with seed editing + per-match result entry on top. Format selector locks once any match has a score.</p>
+    </div>
+
+    <div class="builderToolbar">
+      <span class="chip gold">Single elimination</span>
+      <span class="chip">12 entries</span>
+      <span class="chip">4 BYE slots</span>
+      <a class="btn ghost" href="#">Auto-seed (by seed)</a>
+      <a class="btn ghost" href="#">Shuffle unseeded</a>
+      <div class="spacer"></div>
+      <span class="chip">Draft</span>
+      <a class="btn primary" href="#">Publish bracket</a>
+    </div>
+
+    <div class="note">
+      Format is locked once any match has a recorded score. Clear results first to switch format.
+    </div>
+
+    <div style="height:16px"></div>
+
+    <div class="bracketWrap">
+      <div class="bracket">
+        <div class="roundCol">
+          <div class="roundLabel">Round of 16</div>
+          <div class="matchCard" style="border-style:dashed;">
+            <div class="matchPart"><span><span class="seed">[1]</span>Anand / Pradeep</span><span class="score">⋮</span></div>
+            <div class="matchPart"><span class="seed">BYE</span><span class="score"></span></div>
+            <div class="matchMeta">+ Set court / time</div>
+          </div>
+          <div class="matchCard" style="border-style:dashed;">
+            <div class="matchPart"><span><span class="seed">[9]</span>Krishna / Manoj</span><span class="score">⋮</span></div>
+            <div class="matchPart"><span><span class="seed">[8]</span>Pavan / Suresh</span><span class="score">⋮</span></div>
+            <div class="matchMeta">+ Set court / time</div>
+          </div>
+          <div class="matchCard" style="border-style:dashed;">
+            <div class="matchPart"><span><span class="seed">[4]</span>Christo / Nagaraj</span><span class="score">⋮</span></div>
+            <div class="matchPart"><span class="seed">BYE</span><span class="score"></span></div>
+            <div class="matchMeta">+ Set court / time</div>
+          </div>
+          <div class="matchCard" style="border-style:dashed;">
+            <div class="matchPart"><span><span class="seed">[5]</span>Deepak / Roopesh</span><span class="score">⋮</span></div>
+            <div class="matchPart"><span><span class="seed">[12]</span>Late entry · seed?</span><span class="score">⋮</span></div>
+            <div class="matchMeta">+ Set court / time</div>
+          </div>
+        </div>
+
+        <div class="roundCol">
+          <div class="roundLabel">Quarter-final</div>
+          <div class="matchCard">
+            <div class="matchPart"><span class="seed">[winner R16-1]</span><span class="score">⋮</span></div>
+            <div class="matchPart"><span class="seed">[winner R16-2]</span><span class="score">⋮</span></div>
+            <div class="matchMeta">+ Set court / time</div>
+          </div>
+          <div class="matchCard">
+            <div class="matchPart"><span class="seed">[winner R16-3]</span><span class="score">⋮</span></div>
+            <div class="matchPart"><span class="seed">[winner R16-4]</span><span class="score">⋮</span></div>
+            <div class="matchMeta">+ Set court / time</div>
+          </div>
+        </div>
+
+        <div class="roundCol">
+          <div class="roundLabel">Semi-final</div>
+          <div class="matchCard">
+            <div class="matchPart"><span class="seed">[winner QF-1]</span><span class="score">⋮</span></div>
+            <div class="matchPart"><span class="seed">[winner QF-2]</span><span class="score">⋮</span></div>
+            <div class="matchMeta">+ Set court / time</div>
+          </div>
+        </div>
+
+        <div class="roundCol">
+          <div class="roundLabel">Final</div>
+          <div class="matchCard">
+            <div class="matchPart"><span class="seed">[winner SF-1]</span><span class="score">⋮</span></div>
+            <div class="matchPart"><span class="seed">[winner SF-2]</span><span class="score">⋮</span></div>
+            <div class="matchMeta">+ Set court / time</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p style="font-family:var(--font-mono);font-size:11px;color:var(--bone-fade);letter-spacing:0.08em;margin-top:14px;">
+      Per-match ⋮ menu: Record result · Set court &amp; time · Mark walkover · Reseed.
+      Recording a result advances the winner into the linked next-round slot automatically.
+    </p>
+  </section>
+
+  <p style="margin-top:64px; padding-top:24px; border-top:1px solid var(--color-border); font-family:var(--font-mono); font-size:11px; color:var(--bone-fade); letter-spacing:0.08em;">
+    End of mockup · 7 surfaces · see plan/08-general-tournaments.md for the implementation roadmap.
+  </p>
+
+</div>
+</body>
+</html>

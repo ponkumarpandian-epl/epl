@@ -1,0 +1,1102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EPL — Database diagram (existing + new tournament tables)</title>
+<style>
+  :root {
+    --ink:        #03081A;
+    --ink-2:      #060F26;
+    --ink-3:      #0B1834;
+    --bone:       #EAEAF0;
+    --bone-dim:   #B6B9C7;
+    --bone-fade:  #7A7E92;
+    --gold:       #B68C2A;
+    --gold-bright:#E8B53D;
+    --crimson:    #C82F3C;
+    --cyan-bright:#3FA9F5;
+    --green:      #25D366;
+    --color-border: rgba(255,255,255,0.08);
+    --radius-md:  12px;
+    --radius-lg:  20px;
+    --radius-pill:999px;
+    --font-display: 'Anton', system-ui, sans-serif;
+    --font-sans:    system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --font-mono:    ui-monospace, 'JetBrains Mono', Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--ink); color: var(--bone); margin: 0; font-family: var(--font-sans); }
+  a { color: var(--gold-bright); }
+
+  .page { max-width: 1480px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  header.intro {
+    border-radius: var(--radius-lg);
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    background: linear-gradient(110deg, var(--ink-3) 0%, var(--ink-2) 60%, var(--ink) 100%);
+    border: 1px solid var(--color-border);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.3em;
+    color: var(--gold-bright);
+    text-transform: uppercase;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(34px, 4.5vw, 54px);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    line-height: 1;
+    margin: 6px 0 12px;
+  }
+  .lead {
+    font-size: 14.5px;
+    color: var(--bone-dim);
+    max-width: 820px;
+    line-height: 1.55;
+    margin: 0 0 12px;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 24px;
+    margin-top: 14px;
+    align-items: center;
+  }
+  .legendDot {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--bone-dim);
+    text-transform: uppercase;
+  }
+  .legendDot::before {
+    content: "";
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+  }
+  .legendDot.existing::before { background: rgba(63,169,245,0.30);  border: 1px solid rgba(63,169,245,0.7); }
+  .legendDot.new::before      { background: rgba(232,181,61,0.30);  border: 1px solid rgba(232,181,61,0.85); }
+  .legendDot.shared::before   { background: rgba(37,211,102,0.25);  border: 1px solid rgba(37,211,102,0.65); }
+  .legendDot.identity::before { background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.30); }
+
+  /* Diagram wrapper */
+  .diagramWrap {
+    background: linear-gradient(160deg, var(--ink-2), var(--ink));
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    overflow: auto;
+    margin-bottom: 32px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  }
+  .mermaid {
+    min-width: 1100px;
+    font-family: var(--font-sans) !important;
+  }
+  /* Mermaid override — keep our dark theme visible */
+  .mermaid svg { background: transparent !important; }
+
+  /* Table cards (cross-reference panel) */
+  .sectionHeader {
+    margin: 40px 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .sectionTitle {
+    font-family: var(--font-display);
+    font-size: clamp(22px, 3vw, 30px);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+  .sectionLead {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--bone-fade);
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  /* Toolbar for expand/collapse all */
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+  .toolbar .label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: var(--bone-fade);
+    text-transform: uppercase;
+    margin-right: auto;
+  }
+  .toolbarBtn {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 7px 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--color-border);
+    color: var(--bone-dim);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .toolbarBtn:hover { color: var(--gold-bright); border-color: rgba(232,181,61,0.45); }
+  .toolbarBtn.filterBtn[data-active="true"] {
+    background: rgba(232,181,61,0.16);
+    color: var(--gold-bright);
+    border-color: rgba(232,181,61,0.6);
+  }
+
+  .tablesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 14px;
+  }
+
+  /* Collapsible card built from <details> */
+  details.tableCard {
+    background: linear-gradient(165deg, var(--ink-3), var(--ink));
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  details.tableCard.new       { border-color: rgba(232,181,61,0.45); }
+  details.tableCard.new[open] { box-shadow: 0 0 0 1px rgba(232,181,61,0.18), 0 10px 22px rgba(0,0,0,0.35); }
+  details.tableCard.shared       { border-color: rgba(37,211,102,0.45); }
+  details.tableCard.shared[open] { box-shadow: 0 0 0 1px rgba(37,211,102,0.18), 0 10px 22px rgba(0,0,0,0.35); }
+  details.tableCard.existing       { border-color: rgba(63,169,245,0.35); }
+  details.tableCard.existing[open] { box-shadow: 0 0 0 1px rgba(63,169,245,0.18), 0 10px 22px rgba(0,0,0,0.30); }
+
+  details.tableCard summary {
+    list-style: none;       /* hide native marker */
+    cursor: pointer;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    user-select: none;
+  }
+  details.tableCard summary::-webkit-details-marker { display: none; }
+  details.tableCard summary h3 {
+    font-family: var(--font-display);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    font-size: 17px;
+    margin: 0;
+    color: var(--bone);
+  }
+  details.tableCard summary .badge {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: var(--radius-pill);
+  }
+  details.tableCard.new      summary .badge { background: rgba(232,181,61,0.16); color: var(--gold-bright); border: 1px solid rgba(232,181,61,0.45); }
+  details.tableCard.existing summary .badge { background: rgba(63,169,245,0.12); color: var(--cyan-bright); border: 1px solid rgba(63,169,245,0.4); }
+  details.tableCard.shared   summary .badge { background: rgba(37,211,102,0.15); color: #4ee586;             border: 1px solid rgba(37,211,102,0.45); }
+  details.tableCard summary .chev {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--bone-fade);
+    transition: transform 0.2s;
+    width: 16px;
+    text-align: center;
+  }
+  details.tableCard[open] summary .chev { transform: rotate(90deg); color: var(--gold-bright); }
+  details.tableCard summary:hover { background: rgba(255,255,255,0.025); }
+
+  .cardBody {
+    padding: 4px 16px 16px;
+    border-top: 1px solid var(--color-border);
+  }
+  .cardBody .desc {
+    font-size: 12.5px;
+    color: var(--bone-dim);
+    margin: 12px 0 14px;
+    line-height: 1.5;
+  }
+  .subhead {
+    margin: 14px 0 6px;
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.24em;
+    color: var(--gold-bright);
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .cardBody ul {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--bone);
+    line-height: 1.7;
+  }
+  .cardBody li.pk { color: var(--gold-bright); }
+  .cardBody li.fk { color: var(--cyan-bright); }
+  .cardBody li.idx { color: var(--bone-fade); }
+
+  /* Relations list */
+  .relList li {
+    display: grid;
+    grid-template-columns: 22px 1fr auto;
+    gap: 8px;
+    align-items: baseline;
+    padding: 3px 0;
+  }
+  .relList .arrow      { color: var(--gold-bright); font-weight: 700; }
+  .relList .arrow.in   { color: var(--cyan-bright); }
+  .relList .target     { color: var(--bone); }
+  .relList .via {
+    color: var(--bone-fade);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+  }
+  .relList .target:hover { color: var(--gold-bright); cursor: pointer; }
+  .relList .target {
+    text-decoration: none;
+    color: var(--bone);
+    border-bottom: 1px dashed transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .relList .target:hover { border-bottom-color: rgba(232,181,61,0.6); }
+
+  .notes {
+    margin: 24px 0;
+    padding: 18px 20px;
+    background: rgba(63,169,245,0.06);
+    border: 1px solid rgba(63,169,245,0.3);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--bone-dim);
+  }
+  .notes b { color: var(--bone); }
+  .notes code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.06);
+    color: var(--bone);
+  }
+
+  .footer-meta {
+    margin-top: 56px;
+    padding-top: 18px;
+    border-top: 1px solid var(--color-border);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--bone-fade);
+    letter-spacing: 0.1em;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="intro">
+    <div class="eyebrow">Plan · 09 · Database</div>
+    <h1>EPL Schema — existing + tournament additions</h1>
+    <p class="lead">
+      Visual overview of the full domain schema after the work in
+      <a href="./08-general-tournaments.md">08-general-tournaments.md</a> and
+      <a href="./10-team-captain-roster.md">10-team-captain-roster.md</a> lands. The new tournament + bracket
+      subsystem is purely additive; the captain/roster plan adds <b>TeamMember</b> plus a
+      <code>Team.CaptainUserId</code> FK. The <b>Bracket</b> entity is <i>polymorphic</i> — it can
+      attach to either a <code>TournamentCategory</code> (now) or a <code>SeasonGame</code> (future,
+      no schema change needed).
+    </p>
+
+    <div class="legend">
+      <span class="legendDot existing">Existing (EPL Season)</span>
+      <span class="legendDot new">New (Tournament + Bracket)</span>
+      <span class="legendDot shared">Shared / polymorphic</span>
+      <span class="legendDot identity">Identity (ASP.NET) — referenced only</span>
+    </div>
+  </header>
+
+  <!-- ───── Diagram ───── -->
+  <details open id="diagramDetails">
+    <summary style="cursor:pointer; display:flex; align-items:baseline; justify-content:space-between; gap:16px; padding-bottom:10px; border-bottom:1px solid var(--color-border); margin:40px 0 16px; list-style:none;">
+      <div>
+        <h2 class="sectionTitle">Entity-relationship diagram</h2>
+        <div class="sectionLead">Pure HTML/SVG · cyan = EPL existing · gold = Tournament new · green = Bracket subsystem</div>
+      </div>
+      <span class="chev" style="font-family:var(--font-mono); color:var(--gold-bright); font-size:14px;">▼</span>
+    </summary>
+
+  <div class="diagramWrap" style="overflow:auto;">
+    <svg viewBox="0 0 1380 1470" preserveAspectRatio="xMidYMin meet"
+         style="min-width:1200px; width:100%; height:auto; display:block; font-family:system-ui,sans-serif;">
+
+      <!-- Arrow markers -->
+      <defs>
+        <marker id="arrowCyan"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#3FA9F5"/>
+        </marker>
+        <marker id="arrowGold"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#E8B53D"/>
+        </marker>
+        <marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#4ee586"/>
+        </marker>
+      </defs>
+
+      <!-- ──────── Relationship lines (under boxes) ──────── -->
+
+      <!-- EPL existing (cyan) -->
+      <g stroke="#3FA9F5" stroke-width="1.6" fill="none" opacity="0.85">
+        <path d="M 810 150 V 220"                                 marker-end="url(#arrowCyan)"/>
+        <path d="M 1190 150 V 185 H 810 V 220"                    marker-end="url(#arrowCyan)"/>
+        <path d="M 810 330 V 365 H 430 V 400"                     marker-end="url(#arrowCyan)"/>
+        <path d="M 430 150 V 400"                                 marker-end="url(#arrowCyan)"/>
+        <path d="M 150 150 V 220"                                 marker-end="url(#arrowCyan)"/>
+        <path d="M 700 95 H 285 V 275 H 260"                      marker-end="url(#arrowCyan)"/>
+      </g>
+
+      <!-- Tournament new (gold) -->
+      <g stroke="#E8B53D" stroke-width="1.6" fill="none" opacity="0.85">
+        <path d="M 920 95 H 1080"                                 marker-end="url(#arrowGold)"/>
+        <path d="M 1190 330 V 400"                                marker-end="url(#arrowGold)"/>
+        <path d="M 1190 510 V 580"                                marker-end="url(#arrowGold)"/>
+        <!-- Team → TeamMember (new) -->
+        <path d="M 320 455 H 260"                                 marker-end="url(#arrowGold)"/>
+        <!-- AppUser → TeamMember (new, the player & addedBy) -->
+        <path d="M 150 330 V 400"                                 marker-end="url(#arrowGold)"/>
+        <!-- AppUser → Team CaptainUserId (new, dashed faint to keep diagram readable) -->
+        <path d="M 200 150 V 365 H 380 V 400"                     marker-end="url(#arrowGold)" stroke-dasharray="6,4" opacity="0.65"/>
+      </g>
+
+      <!-- Bracket subsystem (green) -->
+      <g stroke="#4ee586" stroke-width="1.6" fill="none" opacity="0.85">
+        <path d="M 1080 455 H 1020 V 720 H 920"                   marker-end="url(#arrowGreen)"/>
+        <path d="M 1080 635 H 580 V 905 H 260 V 940"              marker-end="url(#arrowGreen)"/>
+        <path d="M 700 815 H 600 V 925 H 150 V 940"               marker-end="url(#arrowGreen)"/>
+        <path d="M 920 815 H 1020 V 925 H 1190 V 940"             marker-end="url(#arrowGreen)"/>
+        <path d="M 810 870 V 1120"                                marker-end="url(#arrowGreen)"/>
+        <path d="M 1190 1050 V 1085 H 920 V 1120"                 marker-end="url(#arrowGreen)"/>
+        <path d="M 150 1050 V 1085 H 700 V 1120"                  marker-end="url(#arrowGreen)"/>
+        <path d="M 810 1230 V 1300"                               marker-end="url(#arrowGreen)"/>
+        <path d="M 920 1150 C 1000 1150 1000 1210 920 1210"       stroke-dasharray="3,3" marker-end="url(#arrowGreen)"/>
+      </g>
+
+      <!-- Future polymorphic (dashed green) -->
+      <g stroke="#4ee586" stroke-width="1.4" fill="none" opacity="0.55" stroke-dasharray="6,4">
+        <path d="M 760 330 V 545 H 720 V 760"                     marker-end="url(#arrowGreen)"/>
+      </g>
+
+      <!-- Nullable / future faint refs -->
+      <g stroke="#7A7E92" stroke-width="1.2" fill="none" opacity="0.5" stroke-dasharray="4,4">
+        <!-- AppUser → Team (CreatedBy, nullable cyan-ish but use faint) -->
+        <path d="M 260 130 H 285 V 200 H 360 V 400"               marker-end="url(#arrowCyan)"/>
+        <!-- AppUser → TournamentEntry (Player1/2, nullable) -->
+        <path d="M 260 110 H 1340 V 630 H 1300"                   marker-end="url(#arrowGold)"/>
+        <!-- Team → BracketParticipant (SourceTeamId, future) -->
+        <path d="M 320 460 H 290 V 935 H 230 V 940"               marker-end="url(#arrowGreen)"/>
+      </g>
+
+      <!-- Line labels -->
+      <g font-family="ui-monospace, monospace" font-size="10" fill="#7A7E92">
+        <text x="815" y="195">GameId</text>
+        <text x="900" y="178">SeasonId</text>
+        <text x="585" y="360">SeasonGameId</text>
+        <text x="438" y="270">ApartmentId</text>
+        <text x="158" y="195">UserId</text>
+        <text x="380" y="265">GameId</text>
+        <text x="970" y="88">GameId</text>
+        <text x="1195" y="395">TournamentId</text>
+        <text x="1195" y="575">TournamentCategoryId</text>
+        <text x="955" y="710" fill="#4ee586">ParentId · TournamentCategory</text>
+        <text x="615" y="900" fill="#4ee586">SourceEntryId</text>
+        <text x="478" y="918" fill="#4ee586">BracketId</text>
+        <text x="1028" y="918" fill="#4ee586">BracketId</text>
+        <text x="816" y="1115" fill="#4ee586">BracketId</text>
+        <text x="925" y="1108" fill="#4ee586">RoundId</text>
+        <text x="320" y="1108" fill="#4ee586">ParticipantA / B / Winner</text>
+        <text x="816" y="1285" fill="#4ee586">MatchId</text>
+        <text x="1005" y="1185" fill="#4ee586">NextMatchId</text>
+        <text x="615" y="540" fill="#4ee586" opacity="0.65">ParentId · SeasonGame (future)</text>
+        <text x="295" y="200" fill="#7A7E92" opacity="0.65">CreatedByUserId</text>
+        <text x="1145" y="105" fill="#7A7E92" opacity="0.65">PlayerXUserId · nullable</text>
+        <text x="120" y="940" fill="#7A7E92" opacity="0.65">SourceTeamId · future</text>
+        <text x="265" y="450" fill="#E8B53D">TeamId · roster</text>
+        <text x="48"  y="370" fill="#E8B53D">UserId · player</text>
+        <text x="210" y="380" fill="#E8B53D" opacity="0.8">CaptainUserId</text>
+      </g>
+
+      <!-- ──────── Entity boxes (over lines) ──────── -->
+
+      <!-- Row 1: Identity + masters (existing - cyan) -->
+      <g>
+        <rect x="40"   y="40"  width="220" height="110" rx="10" fill="#0B1834" stroke="#3FA9F5" stroke-opacity="0.55" stroke-width="1.5"/>
+        <text x="56"   y="68"  font-size="16" font-weight="700" fill="#EAEAF0">AppUser</text>
+        <text x="56"   y="86"  font-size="10" font-family="ui-monospace,monospace" fill="#7A7E92" letter-spacing="0.12em">EXISTING · IDENTITY</text>
+        <line x1="40" y1="98" x2="260" y2="98" stroke="#FFFFFF" stroke-opacity="0.06"/>
+        <text x="56"   y="116" font-size="11" font-family="ui-monospace,monospace" fill="#E8B53D">PK · Id</text>
+        <text x="56"   y="132" font-size="11" font-family="ui-monospace,monospace" fill="#B6B9C7">FullName · Email · Avatar</text>
+      </g>
+
+      <g>
+        <rect x="320" y="40" width="220" height="110" rx="10" fill="#0B1834" stroke="#3FA9F5" stroke-opacity="0.55" stroke-width="1.5"/>
+        <text x="336" y="68" font-size="16" font-weight="700" fill="#EAEAF0">Apartment</text>
+        <text x="336" y="86" font-size="10" font-family="ui-monospace,monospace" fill="#7A7E92" letter-spacing="0.12em">EXISTING</text>
+        <line x1="320" y1="98" x2="540" y2="98" stroke="#FFFFFF" stroke-opacity="0.06"/>
+        <text x="336" y="116" font-size="11" font-family="ui-monospace,monospace" fill="#E8B53D">PK · Id</text>
+        <text x="336" y="132" font-size="11" font-family="ui-monospace,monospace" fill="#B6B9C7">Name · Lat · Lng · Address</text>
+      </g>
+
+      <g>
+        <rect x="700" y="40" width="220" height="110" rx="10" fill="#0B1834" stroke="#3FA9F5" stroke-opacity="0.55" stroke-width="1.5"/>
+        <text x="716" y="68" font-size="16" font-weight="700" fill="#EAEAF0">Game</text>
+        <text x="716" y="86" font-size="10" font-family="ui-monospace,monospace" fill="#7A7E92" letter-spacing="0.12em">EXISTING · MASTER SPORT</text>
+        <line x1="700" y1="98" x2="920" y2="98" stroke="#FFFFFF" stroke-opacity="0.06"/>
+        <text x="716" y="116" font-size="11" font-family="ui-monospace,monospace" fill="#E8B53D">PK · Id</text>
+        <text x="716" y="132" font-size="11" font-family="ui-monospace,monospace" fill="#B6B9C7">Name · Slug · Kind</text>
+      </g>
+
+      <g>
+        <rect x="1080" y="40" width="220" height="110" rx="10" fill="#0B1834" stroke="#3FA9F5" stroke-opacity="0.55" stroke-width="1.5"/>
+        <text x="1096" y="68" font-size="16" font-weight="700" fill="#EAEAF0">Season</text>
+        <text x="1096" y="86" font-size="10" font-family="ui-monospace,monospace" fill="#7A7E92" letter-spacing="0.12em">EXISTING · EPL ANNUAL</text>
+        <line x1="1080" y1="98" x2="1300" y2="98" stroke="#FFFFFF" stroke-opacity="0.06"/>
+        <text x="1096" y="116" font-size="11" font-family="ui-monospace,monospace" fill="#E8B53D">PK · Id</text>
+        <text x="1096" y="132" font-size="11" font-family="ui-monospace,monospace" fill="#B6B9C7">Name · Year · IsActive</text>
+      </g>
+
+      <!-- Row 2 -->
+      <g>
+        <rect x="40"   y="220" width="220" height="110" rx="10" fill="#0B1834" stroke="#3FA9F5" stroke-opacity="0.55" stroke-width="1.5"/>
+        <text x="56"   y="248" font-size="16" font-weight="700" fill="#EAEAF0">UserGameSkill</text>
+        <text x="56"   y="266" font-size="10" font-family="ui-monospace,monospace" fill="#7A7E92" letter-spacing="0.12em">EXISTING</text>
+        <line x1="40" y1="278" x2="260" y2="278" stroke="#FFFFFF" stroke-opacity="0.06"/>
+        <text x="56"   y="296" font-size="11" font-family="ui-monospace,monospace" fill="#E8B53D">PK · (UserId, GameId)</text>
+        <text x="56"   y="312" font-size="11" font-family="ui-monospace,monospace" fill="#3FA9F5">FK · UserId · GameId</text>
+      </g>
+
+      <g>
+        <rect x="700" y="220" width="220" height="110" rx="10" fill="#0B1834" stroke="#3FA9F5" stroke-opacity="0.55" stroke-width="1.5"/>
+        <text x="716" y="248" font-size="16" font-weight="700" fill="#EAEAF0">SeasonGame</text>
+        <text x="716" y="266" font-size="10" font-family="ui-monospace,monospace" fill="#7A7E92" letter-spacing="0.12em">EXISTING · SEASON × GAME</text>
+        <line x1="700" y1="278" x2="920" y2="278" stroke="#FFFFFF" stroke-opacity="0.06"/>
+        <text x="716" y="296" font-size="11" font-family="ui-monospace,monospace" fill="#E8B53D">PK · Id</text>
+        <text x="716" y="312" font-size="11" font-family="ui-monospace,monospace" fill="#3FA9F5">FK · SeasonId · GameId</text>
+      </g>
+
+      <g>
+        <rect x="1080" y="220" width="220" height="110" rx="10" fill="#0B1834" stroke="#E8B53D" stroke-opacity="0.7" stroke-width="1.5"/>
+        <text x="1096" y="248" font-size="16" font-weight="700" fill="#EAEAF0">Tournament</text>
+        <text x="1096" y="266" font-size="10" font-family="ui-monospace,monospace" fill="#E8B53D" letter-spacing="0.12em">NEW · STAND-ALONE EVENT</text>
+        <line x1="1080" y1="278" x2="1300" y2="278" stroke="#FFFFFF" stroke-opacity="0.06"/>
+        <text x="1096" y="296" font-size="11" font-family="ui-monospace,monospace" fill="#E8B53D">PK · Id</text>
+        <text x="1096" y="312" font-size="11" font-family="ui-monospace,monospace" fill="#3FA9F5">FK · GameId</text>
+      </g>
+
+      <!-- Row 3 -->
+      <g>
+        <rect x="320" y="400" width="220" height="110" rx="10" fill="#0B1834" stroke="#3FA9F5" stroke-opacity="0.55" stroke-width="1.5"/>
+        <text x="336" y="428" font-size="16" font-weight="700" fill="#EAEAF0">Team</text>
+        <text x="336" y="446" font-size="10" font-family="ui-monospace,monospace" fill="#7A7E92" letter-spacing="0.12em">EXISTING · EPL REGISTRATION</text>
+        <line x1="320" y1="458" x2="540" y2="458" stroke="#FFFFFF" stroke-opacity="0.06"/>
+        <text x="336" y="476" font-size="11" font-family="ui-monospace,monospace" fill="#E8B53D">PK · Id</text>
+        <text x="336" y="492" font-size="11" font-family="ui-monospace,monospace" fill="#3FA9F5">FK · SeasonGame · Apartment · Captain</text>
+      </g>
+
+      <!-- Row 3b: TeamMember (new, beside Team) -->
+      <g>
+        <rect x="40" y="400" width="220" height="110" rx="10" fill="#0B1834" stroke="#E8B53D" stroke-opacity="0.7" stroke-width="1.5"/>
+        <text x="56" y="428" font-size="16" font-weight="700" fill="#EAEAF0">TeamMember</text>
+        <text x="56" y="446" font-size="10" font-family="ui-monospace,monospace" fill="#E8B53D" letter-spacing="0.12em">NEW · ROSTER · CAPTAIN GATE</text>
+        <line x1="40" y1="458" x2="260" y2="458" stroke="#FFFFFF" stroke-opacity="0.06"/>
+        <text x="56" y="476" font-size="11" font-family="ui-monospace,monospace" fill="#E8B53D">PK · Id</text>
+        <text x="56" y="492" font-size="11" font-family="ui-monospace,monospace" fill="#3FA9F5">FK · TeamId · UserId · AddedBy</text>
+      </g>
+
+      <g>
+        <rect x="1080" y="400" width="220" height="110" rx="10" fill="#0B1834" stroke="#E8B53D" stroke-opacity="0.7" stroke-width="1.5"/>
+        <text x="1096" y="428" font-size="16" font-weight="700" fill="#EAEAF0">TournamentCategory</text>
+        <text x="1096" y="446" font-size="10" font-family="ui-monospace,monospace" fill="#E8B53D" letter-spacing="0.12em">NEW · SINGLES / MD / WD / XD</text>
+        <line x1="1080" y1="458" x2="1300" y2="458" stroke="#FFFFFF" stroke-opacity="0.06"/>
+        <text x="1096" y="476" font-size="11" font-family="ui-monospace,monospace" fill="#E8B53D">PK · Id</text>
+        <text x="1096" y="492" font-size="11" font-family="ui-monospace,monospace" fill="#3FA9F5">FK · TournamentId</text>
+      </g>
+
+      <!-- Row 4 -->
+      <g>
+        <rect x="1080" y="580" width="220" height="110" rx="10" fill="#0B1834" stroke="#E8B53D" stroke-opacity="0.7" stroke-width="1.5"/>
+        <text x="1096" y="608" font-size="16" font-weight="700" fill="#EAEAF0">TournamentEntry</text>
+        <text x="1096" y="626" font-size="10" font-family="ui-monospace,monospace" fill="#E8B53D" letter-spacing="0.12em">NEW · SOLO OR PAIR</text>
+        <line x1="1080" y1="638" x2="1300" y2="638" stroke="#FFFFFF" stroke-opacity="0.06"/>
+        <text x="1096" y="656" font-size="11" font-family="ui-monospace,monospace" fill="#E8B53D">PK · Id</text>
+        <text x="1096" y="672" font-size="11" font-family="ui-monospace,monospace" fill="#3FA9F5">FK · TournamentCategoryId · User×2</text>
+      </g>
+
+      <!-- Row 5: Bracket -->
+      <g>
+        <rect x="700" y="760" width="220" height="110" rx="10" fill="#0B1834" stroke="#4ee586" stroke-opacity="0.7" stroke-width="1.5"/>
+        <text x="716" y="788" font-size="16" font-weight="700" fill="#EAEAF0">Bracket</text>
+        <text x="716" y="806" font-size="10" font-family="ui-monospace,monospace" fill="#4ee586" letter-spacing="0.12em">SHARED · POLYMORPHIC</text>
+        <line x1="700" y1="818" x2="920" y2="818" stroke="#FFFFFF" stroke-opacity="0.06"/>
+        <text x="716" y="836" font-size="11" font-family="ui-monospace,monospace" fill="#E8B53D">PK · Id</text>
+        <text x="716" y="852" font-size="11" font-family="ui-monospace,monospace" fill="#3FA9F5">ParentType · ParentId · Format</text>
+      </g>
+
+      <!-- Row 6: Bracket participants + rounds -->
+      <g>
+        <rect x="40" y="940" width="220" height="110" rx="10" fill="#0B1834" stroke="#4ee586" stroke-opacity="0.7" stroke-width="1.5"/>
+        <text x="56" y="968" font-size="16" font-weight="700" fill="#EAEAF0">BracketParticipant</text>
+        <text x="56" y="986" font-size="10" font-family="ui-monospace,monospace" fill="#4ee586" letter-spacing="0.12em">SHARED · DRAW SLOT</text>
+        <line x1="40" y1="998" x2="260" y2="998" stroke="#FFFFFF" stroke-opacity="0.06"/>
+        <text x="56" y="1016" font-size="11" font-family="ui-monospace,monospace" fill="#E8B53D">PK · Id</text>
+        <text x="56" y="1032" font-size="11" font-family="ui-monospace,monospace" fill="#3FA9F5">FK · BracketId · SourceEntry / Team</text>
+      </g>
+
+      <g>
+        <rect x="1080" y="940" width="220" height="110" rx="10" fill="#0B1834" stroke="#4ee586" stroke-opacity="0.7" stroke-width="1.5"/>
+        <text x="1096" y="968" font-size="16" font-weight="700" fill="#EAEAF0">BracketRound</text>
+        <text x="1096" y="986" font-size="10" font-family="ui-monospace,monospace" fill="#4ee586" letter-spacing="0.12em">SHARED · ROUND-OF-N / GROUP</text>
+        <line x1="1080" y1="998" x2="1300" y2="998" stroke="#FFFFFF" stroke-opacity="0.06"/>
+        <text x="1096" y="1016" font-size="11" font-family="ui-monospace,monospace" fill="#E8B53D">PK · Id</text>
+        <text x="1096" y="1032" font-size="11" font-family="ui-monospace,monospace" fill="#3FA9F5">FK · BracketId</text>
+      </g>
+
+      <!-- Row 7: Match -->
+      <g>
+        <rect x="700" y="1120" width="220" height="110" rx="10" fill="#0B1834" stroke="#4ee586" stroke-opacity="0.7" stroke-width="1.5"/>
+        <text x="716" y="1148" font-size="16" font-weight="700" fill="#EAEAF0">Match</text>
+        <text x="716" y="1166" font-size="10" font-family="ui-monospace,monospace" fill="#4ee586" letter-spacing="0.12em">SHARED · TWO-SIDED MATCH</text>
+        <line x1="700" y1="1178" x2="920" y2="1178" stroke="#FFFFFF" stroke-opacity="0.06"/>
+        <text x="716" y="1196" font-size="11" font-family="ui-monospace,monospace" fill="#E8B53D">PK · Id</text>
+        <text x="716" y="1212" font-size="11" font-family="ui-monospace,monospace" fill="#3FA9F5">FK · Bracket · Round · Part. ×3 · Next</text>
+      </g>
+
+      <!-- Row 8: MatchGame -->
+      <g>
+        <rect x="700" y="1300" width="220" height="110" rx="10" fill="#0B1834" stroke="#4ee586" stroke-opacity="0.7" stroke-width="1.5"/>
+        <text x="716" y="1328" font-size="16" font-weight="700" fill="#EAEAF0">MatchGame</text>
+        <text x="716" y="1346" font-size="10" font-family="ui-monospace,monospace" fill="#4ee586" letter-spacing="0.12em">SHARED · PER-GAME SCORE</text>
+        <line x1="700" y1="1358" x2="920" y2="1358" stroke="#FFFFFF" stroke-opacity="0.06"/>
+        <text x="716" y="1376" font-size="11" font-family="ui-monospace,monospace" fill="#E8B53D">PK · Id</text>
+        <text x="716" y="1392" font-size="11" font-family="ui-monospace,monospace" fill="#3FA9F5">FK · MatchId · GameIndex · A / B</text>
+      </g>
+
+      <!-- Bottom mini-legend -->
+      <g transform="translate(40, 1450)">
+        <text x="0" y="0" font-size="11" font-family="ui-monospace,monospace" fill="#7A7E92" letter-spacing="0.1em">LINES:</text>
+        <line x1="60" y1="-4" x2="100" y2="-4" stroke="#3FA9F5" stroke-width="1.6"/>
+        <text x="106" y="0" font-size="11" font-family="ui-monospace,monospace" fill="#3FA9F5">EPL existing</text>
+        <line x1="220" y1="-4" x2="260" y2="-4" stroke="#E8B53D" stroke-width="1.6"/>
+        <text x="266" y="0" font-size="11" font-family="ui-monospace,monospace" fill="#E8B53D">Tournament new</text>
+        <line x1="395" y1="-4" x2="435" y2="-4" stroke="#4ee586" stroke-width="1.6"/>
+        <text x="441" y="0" font-size="11" font-family="ui-monospace,monospace" fill="#4ee586">Bracket subsystem</text>
+        <line x1="610" y1="-4" x2="650" y2="-4" stroke="#7A7E92" stroke-width="1.2" stroke-dasharray="4,4"/>
+        <text x="656" y="0" font-size="11" font-family="ui-monospace,monospace" fill="#7A7E92">Nullable / future</text>
+      </g>
+
+    </svg>
+  </div>
+
+  <div class="notes">
+    <b>Reading the diagram.</b>
+    Arrows point from the <i>child</i> (FK side) to the <i>parent</i> (PK side).
+    <b style="color:#3FA9F5">Cyan</b> lines are EPL existing relations.
+    <b style="color:#E8B53D">Gold</b> lines are new Tournament-side relations.
+    <b style="color:#4ee586">Green</b> lines are the shared Bracket subsystem.
+    Faint dashed lines are <i>nullable</i> FKs (e.g. <code>Team.CreatedByUserId</code>,
+    <code>TournamentEntry.PlayerXUserId</code>) and <i>future</i> polymorphic edges
+    (<code>SeasonGame → Bracket</code>, <code>Team → BracketParticipant</code>).
+    The small curved dashed loop on <b>Match</b> is the self-reference via
+    <code>NextMatchId</code> — wires winner advancement in single-elimination brackets.
+    Each line is labelled with the FK column name. The <b>polymorphic</b> Bracket parent isn't a
+    DB-level FK — it's a discriminated pair <code>(ParentType, ParentId)</code> enforced in
+    application code; same for <code>BracketParticipant.Source*</code>.
+  </div>
+  </details>
+
+  <!-- ───── Cross-reference cards ───── -->
+  <div class="sectionHeader">
+    <h2 class="sectionTitle">Tables · cross-reference</h2>
+    <div class="sectionLead">Click any card to expand · each table shows its own columns + outbound + inbound relations</div>
+  </div>
+
+  <div class="toolbar">
+    <span class="label">16 tables · 26 relations</span>
+    <button class="toolbarBtn filterBtn" data-filter="all" data-active="true">All</button>
+    <button class="toolbarBtn filterBtn" data-filter="existing">Existing (7)</button>
+    <button class="toolbarBtn filterBtn" data-filter="new">New (4)</button>
+    <button class="toolbarBtn filterBtn" data-filter="shared">Shared (5)</button>
+    <button class="toolbarBtn" id="expandAll">Expand all</button>
+    <button class="toolbarBtn" id="collapseAll">Collapse all</button>
+  </div>
+
+  <div class="tablesGrid">
+
+    <!-- ─ Existing (EPL) ─ -->
+    <details class="tableCard existing" data-kind="existing">
+      <summary><h3>Game</h3><span class="badge">Existing</span><span class="chev">▶</span></summary>
+      <div class="cardBody">
+        <p class="desc">Master sport row — Cricket / Badminton / Volleyball. Timeless attributes only; season-specific data lives on <b>SeasonGame</b>.</p>
+        <div class="subhead">Columns</div>
+        <ul>
+          <li class="pk">PK · Id (Guid)</li>
+          <li>Name · Slug (unique) · Kind (Sport enum)</li>
+          <li>Description · WhatsAppGroupUrl</li>
+          <li>IsActive · CreatedAt</li>
+        </ul>
+        <div class="subhead">Referenced by</div>
+        <ul class="relList">
+          <li><span class="arrow in">←</span><a class="target">SeasonGame</a><span class="via">GameId</span></li>
+          <li><span class="arrow in">←</span><a class="target">Tournament</a><span class="via">GameId</span></li>
+          <li><span class="arrow in">←</span><a class="target">UserGameSkill</a><span class="via">GameId</span></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="tableCard existing" data-kind="existing">
+      <summary><h3>Season</h3><span class="badge">Existing</span><span class="chev">▶</span></summary>
+      <div class="cardBody">
+        <p class="desc">A yearly EPL season ("Season 2 · 2026"). Exactly one row is <code>IsActive</code> at a time; drives the public home page.</p>
+        <div class="subhead">Columns</div>
+        <ul>
+          <li class="pk">PK · Id (Guid)</li>
+          <li>Name · Year · Slug (unique) · Tagline</li>
+          <li>StartsOn · EndsOn</li>
+          <li>IsActive · RegistrationOpen · CreatedAt</li>
+        </ul>
+        <div class="subhead">Referenced by</div>
+        <ul class="relList">
+          <li><span class="arrow in">←</span><a class="target">SeasonGame</a><span class="via">SeasonId</span></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="tableCard existing" data-kind="existing">
+      <summary><h3>SeasonGame</h3><span class="badge">Existing</span><span class="chev">▶</span></summary>
+      <div class="cardBody">
+        <p class="desc">Season × Game intersection — the actual registration target for EPL (dates, fee, venue, coordinators per sport per season).</p>
+        <div class="subhead">Columns</div>
+        <ul>
+          <li class="pk">PK · Id (Guid)</li>
+          <li class="fk">FK · SeasonId · GameId</li>
+          <li>StartsOn · EndsOn · Venue · Categories</li>
+          <li>EntryFeeRupees · WhatsAppGroupUrl · CardImageUrl</li>
+          <li>RegistrationOpen · Contacts (JSON) · CreatedAt</li>
+        </ul>
+        <div class="subhead">References</div>
+        <ul class="relList">
+          <li><span class="arrow">→</span><a class="target">Season</a><span class="via">SeasonId</span></li>
+          <li><span class="arrow">→</span><a class="target">Game</a><span class="via">GameId</span></li>
+        </ul>
+        <div class="subhead">Referenced by</div>
+        <ul class="relList">
+          <li><span class="arrow in">←</span><a class="target">Team</a><span class="via">SeasonGameId</span></li>
+          <li><span class="arrow in">←</span><a class="target">Bracket</a><span class="via">ParentId (future · polymorphic)</span></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="tableCard existing" data-kind="existing">
+      <summary><h3>Team</h3><span class="badge">Existing+</span><span class="chev">▶</span></summary>
+      <div class="cardBody">
+        <p class="desc">A registered team for a SeasonGame. Tied to an apartment; optionally tied to an AppUser if registered while logged in. <b>New (plan 10):</b> gains a real <code>CaptainUserId</code> FK and a one-to-many to <code>TeamMember</code> for the roster.</p>
+        <div class="subhead">Columns</div>
+        <ul>
+          <li class="pk">PK · Id (Guid)</li>
+          <li class="fk">FK · SeasonGameId (nullable, legacy) · ApartmentId · CreatedByUserId (nullable)</li>
+          <li class="fk">FK · CaptainUserId (nullable while backfill runs) — <b>NEW</b></li>
+          <li>Sport (denormalised) · Name</li>
+          <li>CaptainName · CaptainMobile (display snapshot) · CreatedAt</li>
+        </ul>
+        <div class="subhead">References</div>
+        <ul class="relList">
+          <li><span class="arrow">→</span><a class="target">SeasonGame</a><span class="via">SeasonGameId · nullable</span></li>
+          <li><span class="arrow">→</span><a class="target">Apartment</a><span class="via">ApartmentId</span></li>
+          <li><span class="arrow">→</span><a class="target">AppUser</a><span class="via">CreatedByUserId · nullable</span></li>
+          <li><span class="arrow">→</span><a class="target">AppUser</a><span class="via">CaptainUserId · nullable</span></li>
+        </ul>
+        <div class="subhead">Referenced by</div>
+        <ul class="relList">
+          <li><span class="arrow in">←</span><a class="target">TeamMember</a><span class="via">TeamId · roster</span></li>
+          <li><span class="arrow in">←</span><a class="target">BracketParticipant</a><span class="via">SourceTeamId · future</span></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="tableCard new" data-kind="new">
+      <summary><h3>TeamMember</h3><span class="badge">New</span><span class="chev">▶</span></summary>
+      <div class="cardBody">
+        <p class="desc">Per-player roster row. One row per <code>(Team, User)</code>. Captain is the one row with <code>IsCaptain = true</code>; players added by the captain are <code>Active</code> immediately (no pending state). A player can self-leave at any time, which flips the row to <code>Removed</code>.</p>
+        <div class="subhead">Columns</div>
+        <ul>
+          <li class="pk">PK · Id (Guid)</li>
+          <li class="fk">FK · TeamId · UserId · AddedByUserId</li>
+          <li>IsCaptain · Status (Active · Removed)</li>
+          <li>ShirtNumber · Position (optional)</li>
+          <li>AddedAt · RemovedAt</li>
+          <li class="idx">UNIQUE · (TeamId, UserId) WHERE Status = Active</li>
+          <li class="idx">INDEX · (UserId, Status)</li>
+        </ul>
+        <div class="subhead">References</div>
+        <ul class="relList">
+          <li><span class="arrow">→</span><a class="target">Team</a><span class="via">TeamId</span></li>
+          <li><span class="arrow">→</span><a class="target">AppUser</a><span class="via">UserId · the player</span></li>
+          <li><span class="arrow">→</span><a class="target">AppUser</a><span class="via">AddedByUserId · usually the captain</span></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="tableCard existing" data-kind="existing">
+      <summary><h3>Apartment</h3><span class="badge">Existing</span><span class="chev">▶</span></summary>
+      <div class="cardBody">
+        <p class="desc">Apartment communities — picked from a map during team registration.</p>
+        <div class="subhead">Columns</div>
+        <ul>
+          <li class="pk">PK · Id (Guid)</li>
+          <li>Name · Lat · Lng · Address · MapProvider · CreatedAt</li>
+          <li class="idx">UNIQUE · (Lat, Lng, Name)</li>
+        </ul>
+        <div class="subhead">Referenced by</div>
+        <ul class="relList">
+          <li><span class="arrow in">←</span><a class="target">Team</a><span class="via">ApartmentId</span></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="tableCard existing" data-kind="existing">
+      <summary><h3>UserGameSkill</h3><span class="badge">Existing</span><span class="chev">▶</span></summary>
+      <div class="cardBody">
+        <p class="desc">User's self-rated skill level for each sport (Beginner / Intermediate / Advanced / Professional).</p>
+        <div class="subhead">Columns</div>
+        <ul>
+          <li class="pk">PK · (UserId, GameId) — composite</li>
+          <li class="fk">FK · UserId · GameId</li>
+          <li>Level (SkillLevel enum) · UpdatedAt</li>
+        </ul>
+        <div class="subhead">References</div>
+        <ul class="relList">
+          <li><span class="arrow">→</span><a class="target">AppUser</a><span class="via">UserId</span></li>
+          <li><span class="arrow">→</span><a class="target">Game</a><span class="via">GameId</span></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="tableCard existing" data-kind="existing">
+      <summary><h3>AppUser</h3><span class="badge">Identity</span><span class="chev">▶</span></summary>
+      <div class="cardBody">
+        <p class="desc">ASP.NET Identity user — extended with FullName, AvatarUrl, CreatedAt. The 7 Identity-managed tables (AspNetUserRoles etc.) are omitted to reduce diagram noise.</p>
+        <div class="subhead">Columns (custom additions)</div>
+        <ul>
+          <li class="pk">PK · Id (Guid)</li>
+          <li>FullName · Email · UserName · PhoneNumber</li>
+          <li>AvatarUrl · CreatedAt</li>
+        </ul>
+        <div class="subhead">Referenced by</div>
+        <ul class="relList">
+          <li><span class="arrow in">←</span><a class="target">Team</a><span class="via">CreatedByUserId · nullable</span></li>
+          <li><span class="arrow in">←</span><a class="target">Team</a><span class="via">CaptainUserId · nullable · NEW</span></li>
+          <li><span class="arrow in">←</span><a class="target">TeamMember</a><span class="via">UserId · the player</span></li>
+          <li><span class="arrow in">←</span><a class="target">TeamMember</a><span class="via">AddedByUserId · the captain</span></li>
+          <li><span class="arrow in">←</span><a class="target">UserGameSkill</a><span class="via">UserId</span></li>
+          <li><span class="arrow in">←</span><a class="target">TournamentEntry</a><span class="via">Player1UserId · nullable</span></li>
+          <li><span class="arrow in">←</span><a class="target">TournamentEntry</a><span class="via">Player2UserId · nullable</span></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ─ New (Tournament) ─ -->
+    <details class="tableCard new" data-kind="new">
+      <summary><h3>Tournament</h3><span class="badge">New</span><span class="chev">▶</span></summary>
+      <div class="cardBody">
+        <p class="desc">Stand-alone badminton event (peer to Season). Each Tournament holds one or more Categories. <code>IsPublished</code> gates public visibility.</p>
+        <div class="subhead">Columns</div>
+        <ul>
+          <li class="pk">PK · Id (Guid)</li>
+          <li class="fk">FK · GameId</li>
+          <li>Name · Slug (unique) · Tagline · Description</li>
+          <li>Venue · StartsOn · EndsOn · RegistrationDeadline</li>
+          <li>BannerImageUrl · WhatsAppGroupUrl · EntryFeeRupees</li>
+          <li>RegistrationOpen · IsPublished · Contacts (JSON) · CreatedAt</li>
+        </ul>
+        <div class="subhead">References</div>
+        <ul class="relList">
+          <li><span class="arrow">→</span><a class="target">Game</a><span class="via">GameId</span></li>
+        </ul>
+        <div class="subhead">Referenced by</div>
+        <ul class="relList">
+          <li><span class="arrow in">←</span><a class="target">TournamentCategory</a><span class="via">TournamentId</span></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="tableCard new" data-kind="new">
+      <summary><h3>TournamentCategory</h3><span class="badge">New</span><span class="chev">▶</span></summary>
+      <div class="cardBody">
+        <p class="desc">One bucket per format inside a Tournament — Singles / Men's Doubles / Women's Doubles / Mixed Doubles. Each gets its own Bracket and entries list.</p>
+        <div class="subhead">Columns</div>
+        <ul>
+          <li class="pk">PK · Id (Guid)</li>
+          <li class="fk">FK · TournamentId</li>
+          <li>Name · Format (CategoryFormat enum) · PlayersPerEntry</li>
+          <li>MinEntries · MaxEntries · EntryFeeRupees</li>
+          <li>RegistrationOpen · CreatedAt</li>
+          <li class="idx">UNIQUE · (TournamentId, Format)</li>
+        </ul>
+        <div class="subhead">References</div>
+        <ul class="relList">
+          <li><span class="arrow">→</span><a class="target">Tournament</a><span class="via">TournamentId</span></li>
+        </ul>
+        <div class="subhead">Referenced by</div>
+        <ul class="relList">
+          <li><span class="arrow in">←</span><a class="target">TournamentEntry</a><span class="via">TournamentCategoryId</span></li>
+          <li><span class="arrow in">←</span><a class="target">Bracket</a><span class="via">ParentId (polymorphic)</span></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="tableCard new" data-kind="new">
+      <summary><h3>TournamentEntry</h3><span class="badge">New</span><span class="chev">▶</span></summary>
+      <div class="cardBody">
+        <p class="desc">A registered player (singles) or pair (doubles) inside a category. Optional FK to AppUser per slot; anonymous registration allowed.</p>
+        <div class="subhead">Columns</div>
+        <ul>
+          <li class="pk">PK · Id (Guid)</li>
+          <li class="fk">FK · TournamentCategoryId · Player1UserId (nullable) · Player2UserId (nullable)</li>
+          <li>Player1Name · Player1Mobile</li>
+          <li>Player2Name · Player2Mobile (nullable for Singles)</li>
+          <li>TeamLabel · Seed · Status (EntryStatus enum) · CreatedAt</li>
+          <li class="idx">UNIQUE · (TournamentCategoryId, Player1Mobile)</li>
+        </ul>
+        <div class="subhead">References</div>
+        <ul class="relList">
+          <li><span class="arrow">→</span><a class="target">TournamentCategory</a><span class="via">TournamentCategoryId</span></li>
+          <li><span class="arrow">→</span><a class="target">AppUser</a><span class="via">Player1UserId · nullable</span></li>
+          <li><span class="arrow">→</span><a class="target">AppUser</a><span class="via">Player2UserId · nullable</span></li>
+        </ul>
+        <div class="subhead">Referenced by</div>
+        <ul class="relList">
+          <li><span class="arrow in">←</span><a class="target">BracketParticipant</a><span class="via">SourceEntryId · nullable</span></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ─ Shared bracket subsystem ─ -->
+    <details class="tableCard shared" data-kind="shared">
+      <summary><h3>Bracket</h3><span class="badge">Shared</span><span class="chev">▶</span></summary>
+      <div class="cardBody">
+        <p class="desc"><b>Polymorphic.</b> <code>ParentType</code> + <code>ParentId</code> link to a <code>TournamentCategory</code> (today) or <code>SeasonGame</code> (future). One Bracket per parent. <code>Format</code> selects the draw style. <b>Carries the default scoring rules</b> (D11) that BracketRounds inherit and Matches snapshot.</p>
+        <div class="subhead">Columns</div>
+        <ul>
+          <li class="pk">PK · Id (Guid)</li>
+          <li>ParentType (string) · ParentId (Guid) — app-enforced FK</li>
+          <li>Format (DrawFormat enum: SingleElim · RoundRobin · GroupKnockout)</li>
+          <li>IsPublished · CreatedAt</li>
+          <li>DefaultBestOf · DefaultPointsToWin · DefaultWinByMargin · DefaultPointCap (nullable)</li>
+          <li class="idx">INDEX · (ParentType, ParentId)</li>
+        </ul>
+        <div class="subhead">References (polymorphic — exactly one)</div>
+        <ul class="relList">
+          <li><span class="arrow">→</span><a class="target">TournamentCategory</a><span class="via">ParentId · when ParentType="TournamentCategory"</span></li>
+          <li><span class="arrow">→</span><a class="target">SeasonGame</a><span class="via">ParentId · when ParentType="SeasonGame" (future)</span></li>
+        </ul>
+        <div class="subhead">Referenced by</div>
+        <ul class="relList">
+          <li><span class="arrow in">←</span><a class="target">BracketParticipant</a><span class="via">BracketId</span></li>
+          <li><span class="arrow in">←</span><a class="target">BracketRound</a><span class="via">BracketId</span></li>
+          <li><span class="arrow in">←</span><a class="target">Match</a><span class="via">BracketId</span></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="tableCard shared" data-kind="shared">
+      <summary><h3>BracketParticipant</h3><span class="badge">Shared</span><span class="chev">▶</span></summary>
+      <div class="cardBody">
+        <p class="desc">A seeded slot in a bracket. <code>DisplayName</code> is denormalised so the bracket renders without joining back; <code>SourceEntryId</code> or <code>SourceTeamId</code> traces back to who they really are (never both).</p>
+        <div class="subhead">Columns</div>
+        <ul>
+          <li class="pk">PK · Id (Guid)</li>
+          <li class="fk">FK · BracketId · SourceEntryId (nullable) · SourceTeamId (nullable)</li>
+          <li>DisplayName · Seed (nullable) · IsBye</li>
+        </ul>
+        <div class="subhead">References</div>
+        <ul class="relList">
+          <li><span class="arrow">→</span><a class="target">Bracket</a><span class="via">BracketId</span></li>
+          <li><span class="arrow">→</span><a class="target">TournamentEntry</a><span class="via">SourceEntryId · nullable</span></li>
+          <li><span class="arrow">→</span><a class="target">Team</a><span class="via">SourceTeamId · nullable · future</span></li>
+        </ul>
+        <div class="subhead">Referenced by</div>
+        <ul class="relList">
+          <li><span class="arrow in">←</span><a class="target">Match</a><span class="via">ParticipantAId</span></li>
+          <li><span class="arrow in">←</span><a class="target">Match</a><span class="via">ParticipantBId</span></li>
+          <li><span class="arrow in">←</span><a class="target">Match</a><span class="via">WinnerParticipantId · nullable</span></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="tableCard shared" data-kind="shared">
+      <summary><h3>BracketRound</h3><span class="badge">Shared</span><span class="chev">▶</span></summary>
+      <div class="cardBody">
+        <p class="desc">A round inside a bracket — "Round of 16" / "Quarter-final" / "Final" for knockouts; "League" for round-robin; "Group A/B/…" for group-knockout. <b>Optionally overrides</b> the bracket's default scoring rules (D11) — league rounds may be best-of-1, finals best-of-5, etc.</p>
+        <div class="subhead">Columns</div>
+        <ul>
+          <li class="pk">PK · Id (Guid)</li>
+          <li class="fk">FK · BracketId</li>
+          <li>OrderIndex · Name · GroupLabel (nullable)</li>
+          <li>BestOf · PointsToWin · WinByMargin · PointCap (all nullable — null = inherit from Bracket; -1 in PointCap = explicit "no cap")</li>
+        </ul>
+        <div class="subhead">References</div>
+        <ul class="relList">
+          <li><span class="arrow">→</span><a class="target">Bracket</a><span class="via">BracketId</span></li>
+        </ul>
+        <div class="subhead">Referenced by</div>
+        <ul class="relList">
+          <li><span class="arrow in">←</span><a class="target">Match</a><span class="via">RoundId</span></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="tableCard shared" data-kind="shared">
+      <summary><h3>Match</h3><span class="badge">Shared</span><span class="chev">▶</span></summary>
+      <div class="cardBody">
+        <p class="desc">Two-sided match between bracket participants. <code>NextMatchId</code> wires winner advancement for knockouts; null for round-robin. <b>Snapshots</b> the resolved scoring rules at creation time (Round override → Bracket default) so historical scoring stays coherent if admin edits the rules mid-tournament. This snapshot is the authoritative feed to the future scoring feature.</p>
+        <div class="subhead">Columns</div>
+        <ul>
+          <li class="pk">PK · Id (Guid)</li>
+          <li class="fk">FK · BracketId · RoundId · NextMatchId (self, nullable)</li>
+          <li class="fk">FK · ParticipantAId (nullable) · ParticipantBId (nullable) · WinnerParticipantId (nullable)</li>
+          <li>SlotIndex · Status (MatchStatus enum)</li>
+          <li>ScheduledAt (nullable) · Court (nullable)</li>
+          <li>RulesBestOf · RulesPointsToWin · RulesWinByMargin · RulesPointCap (nullable) — frozen snapshot</li>
+          <li class="idx">UNIQUE · (BracketId, RoundId, SlotIndex)</li>
+        </ul>
+        <div class="subhead">References</div>
+        <ul class="relList">
+          <li><span class="arrow">→</span><a class="target">Bracket</a><span class="via">BracketId</span></li>
+          <li><span class="arrow">→</span><a class="target">BracketRound</a><span class="via">RoundId</span></li>
+          <li><span class="arrow">→</span><a class="target">BracketParticipant</a><span class="via">ParticipantAId · nullable</span></li>
+          <li><span class="arrow">→</span><a class="target">BracketParticipant</a><span class="via">ParticipantBId · nullable</span></li>
+          <li><span class="arrow">→</span><a class="target">BracketParticipant</a><span class="via">WinnerParticipantId · nullable</span></li>
+          <li><span class="arrow">→</span><a class="target">Match</a><span class="via">NextMatchId · self · nullable</span></li>
+        </ul>
+        <div class="subhead">Referenced by</div>
+        <ul class="relList">
+          <li><span class="arrow in">←</span><a class="target">MatchGame</a><span class="via">MatchId</span></li>
+          <li><span class="arrow in">←</span><a class="target">Match</a><span class="via">NextMatchId · previous-round match</span></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="tableCard shared" data-kind="shared">
+      <summary><h3>MatchGame</h3><span class="badge">Shared</span><span class="chev">▶</span></summary>
+      <div class="cardBody">
+        <p class="desc">Per-game scores within a Match — best-of-3 for badminton, but the table doesn't care; just an ordered list of (ScoreA, ScoreB) pairs.</p>
+        <div class="subhead">Columns</div>
+        <ul>
+          <li class="pk">PK · Id (Guid)</li>
+          <li class="fk">FK · MatchId</li>
+          <li>GameIndex · ScoreA · ScoreB</li>
+        </ul>
+        <div class="subhead">References</div>
+        <ul class="relList">
+          <li><span class="arrow">→</span><a class="target">Match</a><span class="via">MatchId</span></li>
+        </ul>
+      </div>
+    </details>
+
+  </div>
+
+  <div class="notes" style="margin-top:32px;">
+    <b>What this diagram is NOT.</b>
+    It omits the seven ASP.NET Identity tables (<code>AspNetRoles</code>, <code>AspNetUserRoles</code>,
+    <code>AspNetUserClaims</code>, <code>AspNetUserLogins</code>, <code>AspNetUserTokens</code>,
+    <code>AspNetRoleClaims</code>, plus the <code>AppRole</code> extension) since they're managed by
+    Identity and never edited directly. It also omits <code>__EFMigrationsHistory</code>, the EF Core
+    bookkeeping table. <b>AppUser</b> is shown as a boundary so you can see what references it.
+  </div>
+
+  <p class="footer-meta">
+    Generated 2026-05-28 · render uses Mermaid 11 via CDN · plan/09-database-diagram.html ·
+    refer to <a href="./08-general-tournaments.md">08-general-tournaments.md</a> for the implementation
+    plan that introduces the new tables.
+  </p>
+
+</div>
+
+<script>
+  // ── Card interactivity ─────────────────────────────────────────────────
+  // Build a name→<details> index so relation links can jump to the target card.
+  const cards = Array.from(document.querySelectorAll("details.tableCard"));
+  const byName = new Map(
+    cards.map(c => [c.querySelector("summary h3").textContent.trim().toLowerCase(), c])
+  );
+
+  // Expand all / Collapse all
+  document.getElementById("expandAll").addEventListener("click",
+    () => cards.forEach(c => c.open = true));
+  document.getElementById("collapseAll").addEventListener("click",
+    () => cards.forEach(c => c.open = false));
+
+  // Kind filter (All / Existing / New / Shared)
+  const filterButtons = document.querySelectorAll(".filterBtn");
+  filterButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const want = btn.dataset.filter;
+      filterButtons.forEach(b => b.dataset.active = b === btn ? "true" : "false");
+      cards.forEach(c => {
+        c.style.display = (want === "all" || c.dataset.kind === want) ? "" : "none";
+      });
+    });
+  });
+
+  // Click any relation target to open + scroll to its card.
+  document.querySelectorAll(".relList .target").forEach(a => {
+    a.style.cursor = "pointer";
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      const name = a.textContent.trim().toLowerCase();
+      const target = byName.get(name);
+      if (!target) return;
+      // Clear any active filter so the target is visible
+      filterButtons.forEach(b => b.dataset.active = b.dataset.filter === "all" ? "true" : "false");
+      cards.forEach(c => c.style.display = "");
+      target.open = true;
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      // brief highlight pulse
+      target.animate(
+        [
+          { boxShadow: "0 0 0 3px rgba(232,181,61,0.55)" },
+          { boxShadow: "0 0 0 0px rgba(232,181,61,0)" }
+        ],
+        { duration: 900, easing: "ease-out" }
+      );
+    });
+  });
+</script>
+</body>
+</html>
