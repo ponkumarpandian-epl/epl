@@ -81,11 +81,11 @@ export function ControlPanel({ seasonId, seasonName, isActive, registrationOpen 
           style={{ marginTop: 10 }}
         >
           <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <span className="toggleLabelHeader">Registration</span>
+            <span className="toggleLabelHeader">Registration (master)</span>
             <span className="toggleLabelHint">
               {optimisticOpen
-                ? "Captains can register their teams from the home page."
-                : "Home page shows the closed-registration notice; sport cards display a “Closed” pill."}
+                ? "Per-sport toggles on each game tile control individual sports. Turn this off to panic-close every sport at once."
+                : "All sports are closed regardless of their individual toggle. Per-sport state is preserved — it restores when this is back on."}
             </span>
           </div>
           <button

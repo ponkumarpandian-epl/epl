@@ -15,4 +15,5 @@ public interface ISeasonService
     Task<Result<SeasonDto>>      AddGameAsync(Guid seasonId, AddSeasonGameRequest req, CancellationToken ct = default);
     Task<Result<SeasonDto>>      SetActiveAsync(Guid seasonId, CancellationToken ct = default);
     Task<Result<SeasonDto>>      SetRegistrationAsync(Guid seasonId, bool open, CancellationToken ct = default);
+    Task<Result<SeasonDto>>      SetGameRegistrationAsync(Guid seasonId, Guid seasonGameId, bool open, CancellationToken ct = default);
 }
