@@ -10,19 +10,23 @@ public class UnitOfWork(AppDbContext db) : IUnitOfWork
     private readonly AppDbContext _db = db;
     private IDbContextTransaction? _tx;
 
-    private ITeamRepository?       _teams;
-    private IApartmentRepository?  _apartments;
-    private IGameRepository?       _games;
-    private ISeasonRepository?     _seasons;
-    private ISeasonGameRepository? _seasonGames;
-    private IUserSkillRepository?  _userSkills;
+    private ITeamRepository?               _teams;
+    private IApartmentRepository?          _apartments;
+    private IGameRepository?               _games;
+    private ISeasonRepository?             _seasons;
+    private ISeasonGameRepository?         _seasonGames;
+    private IUserSkillRepository?          _userSkills;
+    private ITournamentRepository?         _tournaments;
+    private ITournamentCategoryRepository? _tournamentCategories;
 
-    public ITeamRepository       Teams       => _teams       ??= new TeamRepository(_db);
-    public IApartmentRepository  Apartments  => _apartments  ??= new ApartmentRepository(_db);
-    public IGameRepository       Games       => _games       ??= new GameRepository(_db);
-    public ISeasonRepository     Seasons     => _seasons     ??= new SeasonRepository(_db);
-    public ISeasonGameRepository SeasonGames => _seasonGames ??= new SeasonGameRepository(_db);
-    public IUserSkillRepository  UserSkills  => _userSkills  ??= new UserSkillRepository(_db);
+    public ITeamRepository               Teams                => _teams                ??= new TeamRepository(_db);
+    public IApartmentRepository          Apartments           => _apartments           ??= new ApartmentRepository(_db);
+    public IGameRepository               Games                => _games                ??= new GameRepository(_db);
+    public ISeasonRepository             Seasons              => _seasons              ??= new SeasonRepository(_db);
+    public ISeasonGameRepository         SeasonGames          => _seasonGames          ??= new SeasonGameRepository(_db);
+    public IUserSkillRepository          UserSkills           => _userSkills           ??= new UserSkillRepository(_db);
+    public ITournamentRepository         Tournaments          => _tournaments          ??= new TournamentRepository(_db);
+    public ITournamentCategoryRepository TournamentCategories => _tournamentCategories ??= new TournamentCategoryRepository(_db);
 
     public Task<int> SaveChangesAsync(CancellationToken ct = default)
         => _db.SaveChangesAsync(ct);

@@ -26,6 +26,17 @@ public class TeamConfig : IEntityTypeConfiguration<Team>
          .IsRequired(false)
          .OnDelete(DeleteBehavior.SetNull);
 
+        // Captain — real FK to AppUser. Nullable while the backfill from
+        // CaptainMobile → AppUser.PhoneNumber runs, and for legacy rows where
+        // the registrant hasn't signed up yet.
+        b.HasOne(t => t.Captain)
+         .WithMany()
+         .HasForeignKey(t => t.CaptainUserId)
+         .IsRequired(false)
+         .OnDelete(DeleteBehavior.SetNull);
+
+        b.HasIndex(t => t.CaptainUserId);
+
         // Link to the SeasonGame the team registered for.
         // Nullable so legacy rows survive; new code requires it.
         b.HasOne(t => t.SeasonGame)

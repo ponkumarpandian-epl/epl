@@ -27,5 +27,15 @@ public class Team
     public Guid? CreatedByUserId { get; set; }
     public AppUser? CreatedBy { get; set; }
 
+    /// <summary>
+    /// Real FK to the captain's <see cref="AppUser"/>. Nullable while the backfill from
+    /// CaptainMobile → AppUser.PhoneNumber runs, and for legacy rows the registrant of which
+    /// hasn't signed up yet. Drives the TeamCaptainOrAdmin authorization policy.
+    /// </summary>
+    public Guid? CaptainUserId { get; set; }
+    public AppUser? Captain { get; set; }
+
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+
+    public ICollection<TeamMember> Members { get; set; } = new List<TeamMember>();
 }
