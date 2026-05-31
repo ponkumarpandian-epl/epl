@@ -14,7 +14,13 @@ public record TeamResponse(
     string  CaptainMobile,
     Guid?   SeasonGameId,
     string? SeasonName,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    // Payment fields. Populated only on admin endpoints (GET /api/teams,
+    // /api/teams/{id}); the public CreateTeam response never reads from these
+    // because new registrations start with PaymentCompleted = false / PaidTo = null.
+    bool             PaymentCompleted = false,
+    string?          PaidTo           = null,
+    DateTimeOffset?  PaidAt           = null);
 
 public record PagedResponse<T>(
     IReadOnlyList<T> Items,

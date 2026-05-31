@@ -47,4 +47,14 @@ public class TeamRepository(AppDbContext db) : Repository<Team>(db), ITeamReposi
               .Include(t => t.Apartment)
               .Include(t => t.SeasonGame).ThenInclude(sg => sg!.Season)
               .FirstOrDefaultAsync(t => t.Id == id, ct);
+
+    public async Task<IReadOnlyDictionary<Guid, int>> CountBySeasonGameAsync(Guid seasonId, CancellationToken ct = default)
+    {
+        var rows = await Set.AsNoTracking()
+            .Where(t => t.SeasonGameId != null && t.SeasonGame!.SeasonId == seasonId)
+            .GroupBy(t => t.SeasonGameId!.Value)
+            .Select(g => new { SeasonGameId = g.Key, Count = g.Count() })
+            .ToListAsync(ct);
+        return rows.ToDictionary(r => r.SeasonGameId, r => r.Count);
+    }
 }

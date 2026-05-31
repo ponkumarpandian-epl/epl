@@ -1,8 +1,68 @@
-import { getCurrentSeason } from "@/lib/seasons";
+import { getCurrentSeason, getCurrentSeasonStats } from "@/lib/seasons";
+import { buildTickerMessages, type TickerMessage } from "@/lib/ticker-messages";
 import { Topbar } from "./topbar";
 import "./home.css";
 
 const DEFAULT_TAGLINE = "Pride of E-City";
+
+function LockIcon() {
+  return (
+    <svg className="heroTickerLock" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="11" width="18" height="11" rx="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
+}
+
+function TickerItemView({ msg }: { msg: TickerMessage }) {
+  switch (msg.kind) {
+    case "season-closed":
+      return (
+        <span className="heroTickerItem is-closed">
+          <LockIcon />
+          <span>{msg.text}</span>
+        </span>
+      );
+    case "sport-closed":
+      return (
+        <span className="heroTickerItem is-closed">
+          <LockIcon />
+          <span>{msg.text}</span>
+        </span>
+      );
+    case "sport-open":
+      return (
+        <span className="heroTickerItem is-open">
+          <span>{msg.text}</span>
+        </span>
+      );
+    case "sport-empty":
+      return (
+        <span className="heroTickerItem is-open">
+          <span>{msg.text}</span>
+        </span>
+      );
+    case "cta":
+      return (
+        <span className="heroTickerItem is-cta">
+          <span>{msg.text}</span>
+        </span>
+      );
+  }
+}
+
+function TickerCopy({ messages }: { messages: TickerMessage[] }) {
+  return (
+    <>
+      {messages.map((m, i) => (
+        <span key={`m-${i}`} style={{ display: "inline-flex", alignItems: "center" }}>
+          <TickerItemView msg={m} />
+          <span className="heroTickerSep" aria-hidden="true">●</span>
+        </span>
+      ))}
+    </>
+  );
+}
 
 /**
  * Render a tagline with the first word in cyan and the last word in gold.
@@ -28,8 +88,12 @@ function renderTagline(text: string): React.ReactNode {
 }
 
 export async function HeroBanner() {
-  const season  = await getCurrentSeason();
-  const tagline = (season?.tagline?.trim()) || DEFAULT_TAGLINE;
+  const [season, stats] = await Promise.all([
+    getCurrentSeason(),
+    getCurrentSeasonStats(),
+  ]);
+  const tagline  = (season?.tagline?.trim()) || DEFAULT_TAGLINE;
+  const messages = buildTickerMessages(stats);
 
   return (
     <section className="heroWrap" aria-label="EPL hero">
@@ -44,24 +108,11 @@ export async function HeroBanner() {
 
         <div className="heroTicker" aria-hidden="true">
           <div className="heroTickerTrack">
-            <TickerCopy />
-            <TickerCopy />
+            <TickerCopy messages={messages} />
+            <TickerCopy messages={messages} />
           </div>
         </div>
       </div>
     </section>
-  );
-}
-
-function TickerCopy() {
-  return (
-    <>
-      <span><span className="label">Live Updates:</span> Registrations Closing Soon for Cricket</span>
-      <span className="sep">|</span>
-      <span>Volleyball Spots Filling Fast</span>
-      <span className="sep">|</span>
-      <span><span className="label">Badminton:</span> Women&apos;s Doubles New This Season</span>
-      <span className="sep">|</span>
-    </>
   );
 }

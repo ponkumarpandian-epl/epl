@@ -62,3 +62,19 @@ public record GameDto(
     string? Description,
     string? WhatsAppGroupUrl,
     bool    IsActive);
+
+// ── Hero-ticker stats ──────────────────────────────────────────────────────
+public record RegistrationStatsDto(
+    Guid     SeasonId,
+    string   SeasonName,
+    bool     MasterRegistrationOpen,
+    int      TotalTeams,
+    IReadOnlyList<SportRegistrationStatDto> Sports);
+
+public record SportRegistrationStatDto(
+    Guid    SeasonGameId,
+    Sport   Sport,
+    string  Slug,
+    string  Name,
+    int     TeamCount,
+    bool    RegistrationOpen);

@@ -1,4 +1,4 @@
-name: Dev Deploy Backend → epl-sports-api
+name: Dev Deploy Backend → epl-sports-api-lnx
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: epl-sports-api
+  AZURE_WEBAPP_NAME: epl-sports-api-lnx
   DOTNET_VERSION: '10.0.x'
   SOLUTION_FILE: 'apps/api/Epl.Api.slnx'
   WEB_PROJECT:    'apps/api/src/Epl.Api/Epl.Api.csproj'

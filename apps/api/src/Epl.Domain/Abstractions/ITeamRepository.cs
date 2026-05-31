@@ -15,4 +15,10 @@ public interface ITeamRepository : IRepository<Team>
         CancellationToken ct = default);
 
     Task<Team?> GetWithApartmentAsync(Guid id, CancellationToken ct = default);
+
+    /// <summary>
+    /// Per-SeasonGame team counts for the given season. Single GROUP BY query.
+    /// Returns a dictionary keyed by SeasonGame.Id; missing entries imply zero.
+    /// </summary>
+    Task<IReadOnlyDictionary<Guid, int>> CountBySeasonGameAsync(Guid seasonId, CancellationToken ct = default);
 }

@@ -4,6 +4,7 @@ import { requireRole } from "@/lib/auth";
 import { api } from "@/lib/api";
 import { listAllSeasons } from "@/lib/seasons";
 import { AdminFilterBar, type SeasonOption } from "./filter-bar";
+import { PaymentCell } from "./payment-cell";
 import "./admin.css";
 
 export const metadata: Metadata = { title: "Team registrations · Admin" };
@@ -23,6 +24,9 @@ interface TeamRow {
   seasonGameId:     string | null;
   seasonName:       string | null;
   createdAt:        string;
+  paymentCompleted: boolean;
+  paidTo:           string | null;
+  paidAt:           string | null;
 }
 interface PagedResponse<T> { items: T[]; total: number; page: number; pageSize: number; }
 
@@ -126,13 +130,13 @@ export default async function AdminTeamsPage({
                 <th>Season</th>
                 <th>Apartment</th>
                 <th>Captain</th>
-                <th>Mobile</th>
                 <th>Registered</th>
+                <th>Payment</th>
               </tr>
             </thead>
             <tbody>
               {data.items.map((t) => (
-                <tr key={t.id}>
+                <tr key={t.id} className={t.paymentCompleted ? "row-paid" : undefined}>
                   <td data-label="Sport" className="cellSport">
                     <span className={`sportTag ${t.sport.toLowerCase()}`}>{t.sport}</span>
                   </td>
@@ -140,13 +144,23 @@ export default async function AdminTeamsPage({
                   <td data-label="Season" className="cellMono">
                     {t.seasonName ?? <span style={{ color: "var(--color-text-subtle)" }}>—</span>}
                   </td>
-                  <td data-label="Apartment" className="cellMuted">
+                  <td data-label="Apartment" className="cellApartment cellMuted">
                     <div>{t.apartmentName}</div>
-                    <div style={{ fontSize: 12, color: "var(--color-text-subtle)" }}>{t.apartmentAddress}</div>
+                    <div className="cellApartmentAddress">{t.apartmentAddress}</div>
                   </td>
-                  <td data-label="Captain" className="cellMuted">{t.captainName}</td>
-                  <td data-label="Mobile" className="cellMono">{t.captainMobile}</td>
+                  <td data-label="Captain" className="cellCaptain cellMuted">
+                    <div>{t.captainName}</div>
+                    <div className="cellCaptainMobile">{t.captainMobile}</div>
+                  </td>
                   <td data-label="Registered" className="cellMono">{formatDate(t.createdAt)}</td>
+                  <td data-label="Payment" className="cellPayment">
+                    <PaymentCell
+                      teamId={t.id}
+                      teamLabel={`${t.sport} ${t.name}`}
+                      initialPaid={t.paymentCompleted}
+                      initialPaidTo={t.paidTo}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
