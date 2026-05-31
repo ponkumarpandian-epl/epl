@@ -23,6 +23,17 @@ public class SeasonsController(ISeasonService seasons) : ControllerBase
             : Ok(s);
     }
 
+    [HttpGet("current/registration-stats")]
+    [AllowAnonymous]
+    [ResponseCache(Duration = 60)]
+    public async Task<IActionResult> GetCurrentRegistrationStats(CancellationToken ct)
+    {
+        var stats = await seasons.GetCurrentRegistrationStatsAsync(ct);
+        return stats is null
+            ? NotFound(new { code = "no_active_season", message = "No season is currently active." })
+            : Ok(stats);
+    }
+
     [HttpGet("games")]
     [AllowAnonymous]
     public async Task<IActionResult> ListGames(CancellationToken ct)

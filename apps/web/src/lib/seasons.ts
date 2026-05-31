@@ -73,3 +73,25 @@ export const getSeasonById = cache(async (id: string): Promise<SeasonDto | null>
   const res = await api.get<SeasonDto>(`/api/seasons/${id}`);
   return res.ok ? res.data : null;
 });
+
+// ── Hero-ticker stats ─────────────────────────────────────────────────────
+export interface SportRegistrationStat {
+  seasonGameId:     string;
+  sport:            SportName;
+  slug:             string;        // "cricket" | "badminton" | "volleyball"
+  name:             string;
+  teamCount:        number;
+  registrationOpen: boolean;
+}
+export interface RegistrationStats {
+  seasonId:               string;
+  seasonName:             string;
+  masterRegistrationOpen: boolean;
+  totalTeams:             number;
+  sports:                 SportRegistrationStat[];
+}
+
+export const getCurrentSeasonStats = cache(async (): Promise<RegistrationStats | null> => {
+  const res = await api.get<RegistrationStats>("/api/seasons/current/registration-stats");
+  return res.ok ? res.data : null;
+});

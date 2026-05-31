@@ -28,4 +28,11 @@ public class Team
     public AppUser? CreatedBy { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+
+    // Payment tracking — admin-only fields. Captains never see these.
+    // PaidTo holds the name of the organiser who collected (e.g. "Christo").
+    // PaidAt is set when PaymentCompleted flips true; cleared on flip back.
+    public bool             PaymentCompleted { get; set; }
+    public string?          PaidTo           { get; set; }
+    public DateTimeOffset?  PaidAt           { get; set; }
 }

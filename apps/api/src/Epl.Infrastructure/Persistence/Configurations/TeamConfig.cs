@@ -14,6 +14,7 @@ public class TeamConfig : IEntityTypeConfiguration<Team>
         b.Property(t => t.CaptainName).HasMaxLength(80).IsRequired();
         b.Property(t => t.CaptainMobile).HasMaxLength(20).IsRequired();
         b.Property(t => t.Sport).HasConversion<int>().IsRequired();
+        b.Property(t => t.PaidTo).HasMaxLength(80);
 
         b.HasOne(t => t.Apartment)
          .WithMany(a => a.Teams)

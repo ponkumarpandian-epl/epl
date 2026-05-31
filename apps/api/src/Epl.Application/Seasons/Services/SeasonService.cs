@@ -171,6 +171,33 @@ public class SeasonService(IUnitOfWork uow, ILogger<SeasonService> log) : ISeaso
         return Result<SeasonDto>.Ok(ToDto(refreshed!));
     }
 
+    public async Task<RegistrationStatsDto?> GetCurrentRegistrationStatsAsync(CancellationToken ct = default)
+    {
+        var season = await uow.Seasons.GetActiveWithGamesAsync(ct);
+        if (season is null) return null;
+
+        // Team counts per SeasonGame — single GROUP BY query inside the repository.
+        var byId = await uow.Teams.CountBySeasonGameAsync(season.Id, ct);
+
+        var sports = season.Games
+            .OrderBy(sg => sg.Game.Kind)
+            .Select(sg => new SportRegistrationStatDto(
+                SeasonGameId:     sg.Id,
+                Sport:            sg.Game.Kind,
+                Slug:             sg.Game.Slug,
+                Name:             sg.Game.Name,
+                TeamCount:        byId.TryGetValue(sg.Id, out var c) ? c : 0,
+                RegistrationOpen: sg.RegistrationOpen))
+            .ToList();
+
+        return new RegistrationStatsDto(
+            SeasonId:               season.Id,
+            SeasonName:             season.Name,
+            MasterRegistrationOpen: season.RegistrationOpen,
+            TotalTeams:             sports.Sum(s => s.TeamCount),
+            Sports:                 sports);
+    }
+
     private static SeasonDto ToDto(Season s)
     {
         var games = s.Games

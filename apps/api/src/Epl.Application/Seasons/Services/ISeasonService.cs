@@ -16,4 +16,7 @@ public interface ISeasonService
     Task<Result<SeasonDto>>      SetActiveAsync(Guid seasonId, CancellationToken ct = default);
     Task<Result<SeasonDto>>      SetRegistrationAsync(Guid seasonId, bool open, CancellationToken ct = default);
     Task<Result<SeasonDto>>      SetGameRegistrationAsync(Guid seasonId, Guid seasonGameId, bool open, CancellationToken ct = default);
+
+    // Public, cache-friendly stats used by the hero-banner ticker.
+    Task<RegistrationStatsDto?>  GetCurrentRegistrationStatsAsync(CancellationToken ct = default);
 }

@@ -279,6 +279,214 @@
   opacity: 0.4;
 }
 
+/* ── Captain cell — name on top, mobile in mono below ──────────────────── */
+.adminTable td.cellCaptain { color: var(--color-text); font-size: 14px; }
+.adminTable td.cellCaptain .cellCaptainMobile {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* ── Apartment address shown below the name; hidden ≤1080px to save room ─ */
+.adminTable td.cellApartment .cellApartmentAddress {
+  font-size: 12px;
+  color: var(--color-text-subtle);
+  margin-top: 2px;
+}
+@media (max-width: 1080px) {
+  .adminTable td.cellApartment .cellApartmentAddress { display: none; }
+}
+
+/* ── Payment cell — wraps button or pill, right-aligned ────────────────── */
+.adminTable td.cellPayment {
+  text-align: right;
+  white-space: nowrap;
+  min-width: 220px;
+}
+.paymentWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Unpaid: ghost button, gold border, fills on hover */
+.paymentBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  min-height: 36px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--gold-bright);
+  background: transparent;
+  color: var(--gold-bright);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  touch-action: manipulation;
+}
+.paymentBtn:hover:not(:disabled) { background: var(--gold-bright); color: var(--ink); }
+.paymentBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.paymentBtn:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
+
+/* Paid pill — green, optional "paid to" inline */
+.paymentPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px 5px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  color: rgba(52, 211, 153, 1);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  min-height: 32px;
+}
+.paymentPill .check { width: 12px; height: 12px; }
+.paymentPill .sep   { color: rgba(52, 211, 153, 0.5); margin: 0 2px; }
+.paymentPill .paidTo {
+  color: var(--bone);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+/* ⋯ menu button next to the pill */
+.paymentMenuBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--bone-dim);
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+.paymentMenuBtn:hover:not(:disabled) {
+  color: var(--bone);
+  background: rgba(255,255,255,0.04);
+  border-color: var(--color-border);
+}
+.paymentMenuBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+.paymentMenuBtn:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 1px; }
+
+/* Popover menu — portalled to <body>, positioned via inline style (fixed coords) */
+.paymentMenu {
+  z-index: 100;
+  min-width: 180px;
+  padding: 4px;
+  background: var(--color-bg-elevated, #0a1a3a);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.paymentMenu button {
+  text-align: left;
+  padding: 9px 12px;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--bone);
+  cursor: pointer;
+  min-height: 36px;
+}
+.paymentMenu button:hover {
+  background: rgba(255, 209, 92, 0.10);
+  color: var(--gold-bright);
+}
+
+/* Inline edit: input + ✓ / × buttons */
+.paymentEditWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.paymentEditWrap input {
+  width: 130px;
+  height: 34px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: rgba(255,255,255,0.04);
+  color: var(--bone);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.paymentEditWrap input:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 1px;
+  border-color: var(--gold-bright);
+}
+.paymentCommit,
+.paymentCancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.paymentCommit {
+  border: 1px solid rgba(52, 211, 153, 0.5);
+  background: rgba(52, 211, 153, 0.10);
+  color: rgba(52, 211, 153, 1);
+}
+.paymentCommit:hover:not(:disabled) { background: rgba(52, 211, 153, 0.22); }
+.paymentCommit .check { width: 14px; height: 14px; }
+.paymentCancel {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--bone-dim);
+  font-size: 18px;
+  line-height: 1;
+}
+.paymentCancel:hover:not(:disabled) { color: var(--bone); background: rgba(255,255,255,0.04); }
+.paymentCommit:disabled,
+.paymentCancel:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Whole-row subtle paid tint + accent on the leftmost cell */
+.adminTable tbody tr.row-paid { background: rgba(52, 211, 153, 0.025); }
+.adminTable tbody tr.row-paid:hover { background: rgba(52, 211, 153, 0.05); }
+.adminTable tbody tr.row-paid td:first-child {
+  box-shadow: inset 3px 0 0 rgba(52, 211, 153, 0.55);
+}
+
+/* Pending: subtle spinner before the cell content */
+.paymentError {
+  display: inline-block;
+  margin-left: 8px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--color-danger);
+}
+
+/* Hidden label for the inline-edit input */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0);
+  white-space: nowrap; border: 0;
+}
+
 @media (max-width: 760px) {
   .adminTable thead { display: none; }
   .adminTable, .adminTable tbody, .adminTable tr, .adminTable td {
@@ -303,4 +511,15 @@
     color: var(--color-text-subtle);
     margin-bottom: 2px;
   }
+  /* Mobile: payment cell becomes full-width on its own row */
+  .adminTable td.cellPayment {
+    text-align: left;
+    min-width: 0;
+    white-space: normal;
+  }
+  /* Paid-row tint: keep the green left border in card view too */
+  .adminTable tbody tr.row-paid {
+    box-shadow: inset 3px 0 0 rgba(52, 211, 153, 0.55);
+  }
+  .adminTable tbody tr.row-paid td:first-child { box-shadow: none; }
 }

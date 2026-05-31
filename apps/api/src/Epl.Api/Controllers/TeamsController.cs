@@ -53,4 +53,16 @@ public class TeamsController(ITeamService teams) : ControllerBase
         var t = await teams.GetAsync(id, ct);
         return t is null ? NotFound() : Ok(t);
     }
+
+    public record SetPaymentRequest(bool Paid, string? PaidTo);
+
+    [HttpPatch("{id:guid}/payment")]
+    [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+    public async Task<IActionResult> SetPayment(Guid id, [FromBody] SetPaymentRequest req, CancellationToken ct)
+    {
+        var result = await teams.SetPaymentAsync(id, req.Paid, req.PaidTo, ct);
+        if (!result.IsSuccess)
+            return NotFound(new { code = result.Error!.Value.Code, message = result.Error!.Value.Message });
+        return Ok(result.Value);
+    }
 }
