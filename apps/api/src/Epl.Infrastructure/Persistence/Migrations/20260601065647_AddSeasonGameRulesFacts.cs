@@ -89,30 +89,8 @@ namespace Epl.Infrastructure.Persistence.Migrations
                  WHERE G.Kind = 3;
             ");
 
-            // ── Promote midnight StartsOn → match-start hour so /rules can compute
-            //    reporting time = startsOn − 1h. Only rewrites rows that still
-            //    have midnight (00:00:00) — admin-set times are preserved.
-            //    9:00 AM IST for cricket & volleyball, 7:00 AM for badminton.
-            migrationBuilder.Sql(@"
-                UPDATE SG
-                   SET SG.StartsOn = DATEADD(hour, 9, SG.StartsOn)
-                  FROM SeasonGames SG
-                  JOIN Games       G  ON G.Id = SG.GameId
-                 WHERE G.Kind IN (1, 3)
-                   AND SG.StartsOn IS NOT NULL
-                   AND DATEPART(hour, SG.StartsOn) = 0
-                   AND DATEPART(minute, SG.StartsOn) = 0;
-            ");
-            migrationBuilder.Sql(@"
-                UPDATE SG
-                   SET SG.StartsOn = DATEADD(hour, 7, SG.StartsOn)
-                  FROM SeasonGames SG
-                  JOIN Games       G  ON G.Id = SG.GameId
-                 WHERE G.Kind = 2
-                   AND SG.StartsOn IS NOT NULL
-                   AND DATEPART(hour, SG.StartsOn) = 0
-                   AND DATEPART(minute, SG.StartsOn) = 0;
-            ");
+            // (Match start-time backfill lives in the follow-up migration
+            // SetMatchStartTimes — this one only adds the rules-facts columns.)
         }
 
         /// <inheritdoc />
