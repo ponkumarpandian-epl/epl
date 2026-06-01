@@ -18,6 +18,12 @@ public record SeasonGameDto(
     DateTimeOffset? EndsOn,
     string?        WhatsAppGroupUrl,
     string?        CardImageUrl,
+    string?        RegistrationUrl,
+    string?        Hashtag,
+    string?        ReportingTime,
+    DateTimeOffset? RegistrationDeadline,
+    string?        FormatNote,
+    string?        SquadNote,
     bool           RegistrationOpen,
     IReadOnlyList<ContactDto> Contacts);
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getCurrentSeason, type SeasonGameDto, type SportName } from "@/lib/seasons";
 import "./rules.css";
 
 export const metadata: Metadata = {
@@ -9,15 +10,40 @@ export const metadata: Metadata = {
 
 type Tab = "cricket" | "badminton" | "volleyball" | "common";
 
+/** Maps a tab key to its SportName for SeasonGame lookup. */
+const SPORT_FOR_TAB: Record<Exclude<Tab, "common">, SportName> = {
+  cricket:    "Cricket",
+  badminton:  "Badminton",
+  volleyball: "Volleyball",
+};
+
 const TABS: { key: Tab; label: string; eyebrow: string }[] = [
-  { key: "cricket",    label: "Cricket",      eyebrow: "13 – 14 Jun · JMR Ground"      },
-  { key: "badminton",  label: "Badminton",    eyebrow: "20 Jun · Smashify Academy"    },
-  { key: "volleyball", label: "Volleyball",   eyebrow: "Season 2 · TBD"              },
-  { key: "common",     label: "Common Rules", eyebrow: "Applies to every sport"      },
+  { key: "cricket",    label: "Cricket",      eyebrow: "Red tennis ball" },
+  { key: "badminton",  label: "Badminton",    eyebrow: "Team format · doubles" },
+  { key: "volleyball", label: "Volleyball",   eyebrow: "6-a-side · rally" },
+  { key: "common",     label: "Common Rules", eyebrow: "Applies to every sport" },
 ];
 
 interface PageProps {
   searchParams: Promise<{ sport?: string }>;
+}
+
+// ── Date / money / range helpers ─────────────────────────────────────────
+function fmtDateRange(start?: string, end?: string): string {
+  if (!start) return "Dates to be announced";
+  const fmt = (iso: string) =>
+    new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+  return end ? `${fmt(start)} – ${fmt(end)}` : fmt(start);
+}
+function fmtRupees(amount: number) {
+  return "₹" + amount.toLocaleString("en-IN") + " / team";
+}
+function fmtDate(iso?: string): string | undefined {
+  if (!iso) return undefined;
+  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
+function stripUrlPrefix(url: string): string {
+  return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -66,23 +92,74 @@ function CommonRef() {
   );
 }
 
+/**
+ * Renders the at-a-glance facts strip from the SeasonGame row served by the API.
+ * Cards for which the row has no value are simply omitted, so each sport shows
+ * only the fields the admin has filled in (e.g. Badminton has Reporting + Deadline,
+ * Cricket has Format + Squad, Volleyball typically has Format + Squad only).
+ * `fallbacks` lets the caller pass per-sport defaults for the very first run before
+ * the migration's backfill SQL has touched the row.
+ */
+function SportFactGrid({
+  sg, fallbacks,
+}: {
+  sg: SeasonGameDto | null;
+  fallbacks: {
+    format?: string;
+    squad?:  string;
+  };
+}) {
+  const dates = sg?.startsOn ? fmtDateRange(sg.startsOn, sg.endsOn) : null;
+  const venue = sg?.venue?.trim();
+  const fee   = sg && sg.entryFeeRupees > 0 ? fmtRupees(sg.entryFeeRupees) : null;
+
+  const format    = sg?.formatNote?.trim()    || fallbacks.format;
+  const squad     = sg?.squadNote?.trim()     || fallbacks.squad;
+  const reporting = sg?.reportingTime?.trim();
+  const deadline  = fmtDate(sg?.registrationDeadline);
+  const regUrl    = sg?.registrationUrl?.trim();
+
+  return (
+    <div className="rulesFactGrid">
+      {dates  && <Fact label="Dates"   value={dates} />}
+      {venue  && <Fact label="Venue"   value={venue} />}
+      {format && <Fact label="Format"  value={format} />}
+      {fee    && <Fact label="Entry"   value={fee} />}
+      {squad  && <Fact label="Squad"   value={squad} />}
+      {reporting && <Fact label="Reporting" value={reporting} />}
+      {deadline  && <Fact label="Reg. closes" value={deadline} />}
+      {regUrl && (
+        <Fact
+          label="Register"
+          value={
+            <a href={regUrl} target="_blank" rel="noopener noreferrer">
+              {stripUrlPrefix(regUrl)} →
+            </a>
+          }
+        />
+      )}
+    </div>
+  );
+}
+
+/** Eyebrow line above the sport title — uses the SeasonGame's hashtag if set. */
+function sportEyebrow(sportLabel: string, sg: SeasonGameDto | null, fallbackHashtag?: string): string {
+  const seasonLabel = "Season 2";
+  const tag = sg?.hashtag?.trim() || fallbackHashtag;
+  return tag
+    ? `EPL ${sportLabel} · ${seasonLabel} · ${tag}`
+    : `EPL ${sportLabel} · ${seasonLabel}`;
+}
+
 // ─── Per-sport panels ─────────────────────────────────────────────────────
 
-function CricketPanel() {
+function CricketPanel({ sg }: { sg: SeasonGameDto | null }) {
   return (
     <>
       <header className="rulesPanelHeader cricketAccent">
-        <div className="rulesPanelEyebrow">EPL Cricket · Season 2 · #BeyondBoundaries</div>
+        <div className="rulesPanelEyebrow">{sportEyebrow("Cricket", sg, "#BeyondBoundaries")}</div>
         <h2 className="rulesPanelTitle">Cricket</h2>
-        <div className="rulesFactGrid">
-          <Fact label="Dates"   value="13 – 14 Jun 2026" />
-          <Fact label="Venue"   value="JMR Cricket Ground" />
-          <Fact label="Format"  value="Red tennis ball" />
-          <Fact label="Entry"   value="₹6,500 / team" />
-          <Fact label="Squad"   value="Up to 15 players" />
-          <Fact label="Register"
-                value={<a href="https://tinyurl.com/EPLCricketRegister" target="_blank" rel="noopener noreferrer">tinyurl.com/EPLCricketRegister →</a>} />
-        </div>
+        <SportFactGrid sg={sg} fallbacks={{ format: "Red tennis ball", squad: "Up to 15 players" }} />
       </header>
 
       <CommonRef />
@@ -130,7 +207,7 @@ function CricketPanel() {
 
       <Section id="cricket-fielding" title="Fielding restrictions">
         <ul>
-          <li>During powerplay — maximum <strong>3 fielders</strong> outside the circle.</li>
+          <li>During powerplay — maximum <strong>2 fielders</strong> outside the circle.</li>
           <li>During regular overs — minimum <strong>4 fielders</strong> inside the circle.</li>
         </ul>
       </Section>
@@ -161,21 +238,19 @@ function CricketPanel() {
   );
 }
 
-function BadmintonPanel() {
+function BadmintonPanel({ sg }: { sg: SeasonGameDto | null }) {
   return (
     <>
       <header className="rulesPanelHeader badmintonAccent">
-        <div className="rulesPanelEyebrow">EPL Badminton · Season 2 · #BattleofBaddies</div>
+        <div className="rulesPanelEyebrow">{sportEyebrow("Badminton", sg, "#BattleofBaddies")}</div>
         <h2 className="rulesPanelTitle">Badminton</h2>
-        <div className="rulesFactGrid">
-          <Fact label="Date"      value="20 Jun 2026" />
-          <Fact label="Venue"     value="TBD · In &amp; around Electronic City" />
-          <Fact label="Reporting" value="6:00 AM" />
-          <Fact label="Entry"     value="₹6,000 / team" />
-          <Fact label="Deadline"  value="7 Jun 2026" />
-          <Fact label="Register"
-                value={<a href="https://tinyurl.com/EPL-BadmintonRegister" target="_blank" rel="noopener noreferrer">tinyurl.com/EPL-BadmintonRegister →</a>} />
-        </div>
+        <SportFactGrid
+          sg={sg}
+          fallbacks={{
+            format: "5 doubles per team (4 Men's + 1 Women's)",
+            squad:  "10 – 13 players incl. 3 backups",
+          }}
+        />
       </header>
 
       <CommonRef />
@@ -239,20 +314,19 @@ function BadmintonPanel() {
   );
 }
 
-function VolleyballPanel() {
+function VolleyballPanel({ sg }: { sg: SeasonGameDto | null }) {
   return (
     <>
       <header className="rulesPanelHeader volleyballAccent">
-        <div className="rulesPanelEyebrow">EPL Volleyball · Season 2026</div>
+        <div className="rulesPanelEyebrow">{sportEyebrow("Volleyball", sg)}</div>
         <h2 className="rulesPanelTitle">Volleyball</h2>
-        <div className="rulesFactGrid">
-          <Fact label="Format"   value="6-a-side, no libero" />
-          <Fact label="League"   value="1 set to 25" />
-          <Fact label="SF / Final" value="Best of 3 — 25 · 25 · 15" />
-          <Fact label="Net (M/W/Mixed)" value="2.43 / 2.24 / 2.35 m" />
-          <Fact label="Court"    value="18 m × 9 m" />
-          <Fact label="Squad"    value="12 players" />
-        </div>
+        <SportFactGrid
+          sg={sg}
+          fallbacks={{
+            format: "6-a-side · no libero · rally scoring",
+            squad:  "12 in squad · 6 on court",
+          }}
+        />
       </header>
 
       <CommonRef />
@@ -455,6 +529,15 @@ export default async function RulesPage({ searchParams }: PageProps) {
   const sp     = await searchParams;
   const active = (TABS.find((t) => t.key === sp.sport)?.key) ?? "cricket";
 
+  // Pull the live SeasonGame rows so the facts strip (Dates / Venue / Fee /
+  // Format / Squad / Register link / Reporting / Deadline / Hashtag) renders
+  // from API data rather than hardcoded strings. Admin edits flow straight here.
+  const season = await getCurrentSeason();
+  const sgFor  = (tab: Tab): SeasonGameDto | null => {
+    if (tab === "common") return null;
+    return season?.games.find((g) => g.sport === SPORT_FOR_TAB[tab]) ?? null;
+  };
+
   return (
     <div className="rulesShell">
       <section className="rulesHero">
@@ -483,9 +566,9 @@ export default async function RulesPage({ searchParams }: PageProps) {
       </nav>
 
       <main className={`rulesPanel rulesPanel-${active}`}>
-        {active === "cricket"    && <CricketPanel />}
-        {active === "badminton"  && <BadmintonPanel />}
-        {active === "volleyball" && <VolleyballPanel />}
+        {active === "cricket"    && <CricketPanel    sg={sgFor("cricket")} />}
+        {active === "badminton"  && <BadmintonPanel  sg={sgFor("badminton")} />}
+        {active === "volleyball" && <VolleyballPanel sg={sgFor("volleyball")} />}
         {active === "common"     && <CommonPanel />}
       </main>
 

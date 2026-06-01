@@ -24,6 +24,15 @@ export interface SeasonGameDto {
   endsOn?:          string;
   whatsAppGroupUrl?: string;
   cardImageUrl?:    string;
+
+  /** Rules-page facts — all optional, hide the corresponding card when null. */
+  registrationUrl?:      string;
+  hashtag?:              string;
+  reportingTime?:        string;
+  registrationDeadline?: string;     // ISO
+  formatNote?:           string;
+  squadNote?:            string;
+
   registrationOpen: boolean;
   contacts:         ContactDto[];
 }
