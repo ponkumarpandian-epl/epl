@@ -10,7 +10,10 @@ export const metadata: Metadata = {
 
 type Tab = "cricket" | "badminton" | "volleyball" | "common";
 
-/** Maps a tab key to its SportName for SeasonGame lookup. */
+/** Maps a tab key to its SportName for SeasonGame lookup (Sport enum is serialised
+ *  as PascalCase by JsonStringEnumConverter; we also fall back to matching by slug
+ *  in case the enum ever serialises as a number).
+ */
 const SPORT_FOR_TAB: Record<Exclude<Tab, "common">, SportName> = {
   cricket:    "Cricket",
   badminton:  "Badminton",
@@ -105,19 +108,31 @@ function SportFactGrid({
 }: {
   sg: SeasonGameDto | null;
   fallbacks: {
-    format?: string;
-    squad?:  string;
+    /** Per-sport hardcoded defaults used when the API row is null or hasn't
+     *  been backfilled yet. Keep these in sync with the migration's
+     *  AddSeasonGameRulesFacts backfill SQL. */
+    dates?:           string;
+    venue?:           string;
+    fee?:             string;
+    format?:          string;
+    squad?:           string;
+    reporting?:       string;
+    deadline?:        string;
+    registrationUrl?: string;
   };
 }) {
-  const dates = sg?.startsOn ? fmtDateRange(sg.startsOn, sg.endsOn) : null;
-  const venue = sg?.venue?.trim();
-  const fee   = sg && sg.entryFeeRupees > 0 ? fmtRupees(sg.entryFeeRupees) : null;
+  const dates =
+    sg?.startsOn ? fmtDateRange(sg.startsOn, sg.endsOn) : fallbacks.dates;
+  const venue = sg?.venue?.trim() || fallbacks.venue;
+  const fee   = sg && sg.entryFeeRupees > 0
+    ? fmtRupees(sg.entryFeeRupees)
+    : fallbacks.fee;
 
   const format    = sg?.formatNote?.trim()    || fallbacks.format;
   const squad     = sg?.squadNote?.trim()     || fallbacks.squad;
-  const reporting = sg?.reportingTime?.trim();
-  const deadline  = fmtDate(sg?.registrationDeadline);
-  const regUrl    = sg?.registrationUrl?.trim();
+  const reporting = sg?.reportingTime?.trim() || fallbacks.reporting;
+  const deadline  = fmtDate(sg?.registrationDeadline) || fallbacks.deadline;
+  const regUrl    = sg?.registrationUrl?.trim() || fallbacks.registrationUrl;
 
   return (
     <div className="rulesFactGrid">
@@ -126,7 +141,7 @@ function SportFactGrid({
       {format && <Fact label="Format"  value={format} />}
       {fee    && <Fact label="Entry"   value={fee} />}
       {squad  && <Fact label="Squad"   value={squad} />}
-      {reporting && <Fact label="Reporting" value={reporting} />}
+      {reporting && <Fact label="Reporting"   value={reporting} />}
       {deadline  && <Fact label="Reg. closes" value={deadline} />}
       {regUrl && (
         <Fact
@@ -159,7 +174,17 @@ function CricketPanel({ sg }: { sg: SeasonGameDto | null }) {
       <header className="rulesPanelHeader cricketAccent">
         <div className="rulesPanelEyebrow">{sportEyebrow("Cricket", sg, "#BeyondBoundaries")}</div>
         <h2 className="rulesPanelTitle">Cricket</h2>
-        <SportFactGrid sg={sg} fallbacks={{ format: "Red tennis ball", squad: "Up to 15 players" }} />
+        <SportFactGrid
+          sg={sg}
+          fallbacks={{
+            dates:           "13 – 14 Jun 2026",
+            venue:           "JMR Cricket Ground",
+            fee:             "₹6,500 / team",
+            format:          "Red tennis ball",
+            squad:           "Up to 15 players",
+            registrationUrl: "https://tinyurl.com/EPLCricketRegister",
+          }}
+        />
       </header>
 
       <CommonRef />
@@ -247,8 +272,14 @@ function BadmintonPanel({ sg }: { sg: SeasonGameDto | null }) {
         <SportFactGrid
           sg={sg}
           fallbacks={{
-            format: "5 doubles per team (4 Men's + 1 Women's)",
-            squad:  "10 – 13 players incl. 3 backups",
+            dates:           "20 Jun 2026",
+            venue:           "TBD · In & around Electronic City",
+            fee:             "₹6,000 / team",
+            format:          "5 doubles per team (4 Men's + 1 Women's)",
+            squad:           "10 – 13 players incl. 3 backups",
+            reporting:       "6:00 AM",
+            deadline:        "7 Jun 2026",
+            registrationUrl: "https://tinyurl.com/EPL-BadmintonRegister",
           }}
         />
       </header>
@@ -535,7 +566,13 @@ export default async function RulesPage({ searchParams }: PageProps) {
   const season = await getCurrentSeason();
   const sgFor  = (tab: Tab): SeasonGameDto | null => {
     if (tab === "common") return null;
-    return season?.games.find((g) => g.sport === SPORT_FOR_TAB[tab]) ?? null;
+    return (
+      // Slug match is robust to enum serialisation quirks; sport-name match is
+      // the canonical path. First hit wins.
+      season?.games.find((g) => g.slug === tab) ??
+      season?.games.find((g) => g.sport === SPORT_FOR_TAB[tab]) ??
+      null
+    );
   };
 
   return (
