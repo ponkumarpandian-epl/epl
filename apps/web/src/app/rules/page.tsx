@@ -41,13 +41,6 @@ function fmtDateRange(start?: string, end?: string): string {
 function fmtRupees(amount: number) {
   return "₹" + amount.toLocaleString("en-IN") + " / team";
 }
-function fmtDate(iso?: string): string | undefined {
-  if (!iso) return undefined;
-  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-}
-function stripUrlPrefix(url: string): string {
-  return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
-}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 function ChevronIcon() {
@@ -96,43 +89,44 @@ function CommonRef() {
 }
 
 /**
- * Renders the at-a-glance facts strip from the SeasonGame row served by the API.
- * Cards for which the row has no value are simply omitted, so each sport shows
- * only the fields the admin has filled in (e.g. Badminton has Reporting + Deadline,
- * Cricket has Format + Squad, Volleyball typically has Format + Squad only).
- * `fallbacks` lets the caller pass per-sport defaults for the very first run before
- * the migration's backfill SQL has touched the row.
+ * Renders the at-a-glance facts strip purely from the SeasonGame row served by
+ * the API. No hardcoded fallbacks — what you see is what's in the database. If
+ * the admin hasn't populated a field, its card just doesn't render.
+ *
+ * Derived fields:
+ *   - Reporting time = sg.startsOn − 1 hour (computed)
+ *   - Reg. closes    = sg.startsOn − 7 days (computed)
+ *   - Register link  = internal /teams/register?sport=…&seasonGameId=…
  */
-function SportFactGrid({
-  sg, fallbacks,
-}: {
-  sg: SeasonGameDto | null;
-  fallbacks: {
-    /** Per-sport hardcoded defaults used when the API row is null or hasn't
-     *  been backfilled yet. Keep these in sync with the migration's
-     *  AddSeasonGameRulesFacts backfill SQL. */
-    dates?:           string;
-    venue?:           string;
-    fee?:             string;
-    format?:          string;
-    squad?:           string;
-    reporting?:       string;
-    deadline?:        string;
-    registrationUrl?: string;
-  };
-}) {
-  const dates =
-    sg?.startsOn ? fmtDateRange(sg.startsOn, sg.endsOn) : fallbacks.dates;
-  const venue = sg?.venue?.trim() || fallbacks.venue;
-  const fee   = sg && sg.entryFeeRupees > 0
-    ? fmtRupees(sg.entryFeeRupees)
-    : fallbacks.fee;
+function SportFactGrid({ sg, seasonRegOpen }: { sg: SeasonGameDto | null; seasonRegOpen: boolean }) {
+  if (!sg) {
+    return (
+      <div className="rulesFactGrid">
+        <p style={{ gridColumn: "1 / -1", color: "var(--bone-fade)", fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.06em" }}>
+          This sport isn&apos;t scheduled in the current season yet — details will appear here once an admin
+          adds it to the active season.
+        </p>
+      </div>
+    );
+  }
 
-  const format    = sg?.formatNote?.trim()    || fallbacks.format;
-  const squad     = sg?.squadNote?.trim()     || fallbacks.squad;
-  const reporting = sg?.reportingTime?.trim() || fallbacks.reporting;
-  const deadline  = fmtDate(sg?.registrationDeadline) || fallbacks.deadline;
-  const regUrl    = sg?.registrationUrl?.trim() || fallbacks.registrationUrl;
+  const dates  = sg.startsOn ? fmtDateRange(sg.startsOn, sg.endsOn) : null;
+  const venue  = sg.venue?.trim() || null;
+  const fee    = sg.entryFeeRupees > 0 ? fmtRupees(sg.entryFeeRupees) : null;
+  const format = sg.formatNote?.trim() || null;
+  const squad  = sg.squadNote?.trim()  || null;
+
+  // Reporting time — startsOn − 1 hour, formatted as time-of-day. Only renders when
+  // the start time has a meaningful hour (not stored as midnight, which is the
+  // "we don't know the time yet" placeholder).
+  const reporting = computeReportingTime(sg.startsOn);
+
+  // Registration close date — startsOn − 7 days.
+  const deadline = computeRegistrationCloseDate(sg.startsOn);
+
+  // Always the app's internal registration route — never the external form.
+  const registerHref = `/teams/register?sport=${sg.slug}&seasonGameId=${sg.id}`;
+  const registerOpen = sg.registrationOpen && seasonRegOpen;
 
   return (
     <div className="rulesFactGrid">
@@ -143,48 +137,54 @@ function SportFactGrid({
       {squad  && <Fact label="Squad"   value={squad} />}
       {reporting && <Fact label="Reporting"   value={reporting} />}
       {deadline  && <Fact label="Reg. closes" value={deadline} />}
-      {regUrl && (
-        <Fact
-          label="Register"
-          value={
-            <a href={regUrl} target="_blank" rel="noopener noreferrer">
-              {stripUrlPrefix(regUrl)} →
-            </a>
-          }
-        />
-      )}
+      <Fact
+        label="Register"
+        value={
+          registerOpen
+            ? <Link href={registerHref}>Register your team →</Link>
+            : <span style={{ color: "var(--bone-fade)" }}>Closed</span>
+        }
+      />
     </div>
   );
 }
 
-/** Eyebrow line above the sport title — uses the SeasonGame's hashtag if set. */
-function sportEyebrow(sportLabel: string, sg: SeasonGameDto | null, fallbackHashtag?: string): string {
-  const seasonLabel = "Season 2";
-  const tag = sg?.hashtag?.trim() || fallbackHashtag;
+/** Eyebrow line above the sport title — reads sg.hashtag from the API only. */
+function sportEyebrow(sportLabel: string, season: { name?: string } | null, sg: SeasonGameDto | null): string {
+  const seasonLabel = season?.name?.trim() || "Season";
+  const tag         = sg?.hashtag?.trim();
   return tag
     ? `EPL ${sportLabel} · ${seasonLabel} · ${tag}`
     : `EPL ${sportLabel} · ${seasonLabel}`;
 }
 
+/** Returns "8:00 AM"-style time-of-day for (startsOn − 1 h), or null if startsOn
+ *  is missing or stored as midnight (treated as "time not set"). */
+function computeReportingTime(startsOnIso: string | undefined): string | null {
+  if (!startsOnIso) return null;
+  const start = new Date(startsOnIso);
+  if (start.getHours() === 0 && start.getMinutes() === 0) return null; // midnight = unset
+  const reporting = new Date(start.getTime() - 60 * 60 * 1000);
+  return reporting.toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit", hour12: true });
+}
+
+/** Returns "6 Jun 2026"-style date for (startsOn − 7 days), or null if missing. */
+function computeRegistrationCloseDate(startsOnIso: string | undefined): string | null {
+  if (!startsOnIso) return null;
+  const start    = new Date(startsOnIso);
+  const deadline = new Date(start.getTime() - 7 * 24 * 60 * 60 * 1000);
+  return deadline.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
+
 // ─── Per-sport panels ─────────────────────────────────────────────────────
 
-function CricketPanel({ sg }: { sg: SeasonGameDto | null }) {
+function CricketPanel({ sg, season, seasonRegOpen }: { sg: SeasonGameDto | null; season: { name?: string } | null; seasonRegOpen: boolean }) {
   return (
     <>
       <header className="rulesPanelHeader cricketAccent">
-        <div className="rulesPanelEyebrow">{sportEyebrow("Cricket", sg, "#BeyondBoundaries")}</div>
+        <div className="rulesPanelEyebrow">{sportEyebrow("Cricket", season, sg)}</div>
         <h2 className="rulesPanelTitle">Cricket</h2>
-        <SportFactGrid
-          sg={sg}
-          fallbacks={{
-            dates:           "13 – 14 Jun 2026",
-            venue:           "JMR Cricket Ground",
-            fee:             "₹6,500 / team",
-            format:          "Red tennis ball",
-            squad:           "Up to 15 players",
-            registrationUrl: "https://tinyurl.com/EPLCricketRegister",
-          }}
-        />
+        <SportFactGrid sg={sg} seasonRegOpen={seasonRegOpen} />
       </header>
 
       <CommonRef />
@@ -263,25 +263,13 @@ function CricketPanel({ sg }: { sg: SeasonGameDto | null }) {
   );
 }
 
-function BadmintonPanel({ sg }: { sg: SeasonGameDto | null }) {
+function BadmintonPanel({ sg, season, seasonRegOpen }: { sg: SeasonGameDto | null; season: { name?: string } | null; seasonRegOpen: boolean }) {
   return (
     <>
       <header className="rulesPanelHeader badmintonAccent">
-        <div className="rulesPanelEyebrow">{sportEyebrow("Badminton", sg, "#BattleofBaddies")}</div>
+        <div className="rulesPanelEyebrow">{sportEyebrow("Badminton", season, sg)}</div>
         <h2 className="rulesPanelTitle">Badminton</h2>
-        <SportFactGrid
-          sg={sg}
-          fallbacks={{
-            dates:           "20 Jun 2026",
-            venue:           "TBD · In & around Electronic City",
-            fee:             "₹6,000 / team",
-            format:          "5 doubles per team (4 Men's + 1 Women's)",
-            squad:           "10 – 13 players incl. 3 backups",
-            reporting:       "6:00 AM",
-            deadline:        "7 Jun 2026",
-            registrationUrl: "https://tinyurl.com/EPL-BadmintonRegister",
-          }}
-        />
+        <SportFactGrid sg={sg} seasonRegOpen={seasonRegOpen} />
       </header>
 
       <CommonRef />
@@ -345,19 +333,13 @@ function BadmintonPanel({ sg }: { sg: SeasonGameDto | null }) {
   );
 }
 
-function VolleyballPanel({ sg }: { sg: SeasonGameDto | null }) {
+function VolleyballPanel({ sg, season, seasonRegOpen }: { sg: SeasonGameDto | null; season: { name?: string } | null; seasonRegOpen: boolean }) {
   return (
     <>
       <header className="rulesPanelHeader volleyballAccent">
-        <div className="rulesPanelEyebrow">{sportEyebrow("Volleyball", sg)}</div>
+        <div className="rulesPanelEyebrow">{sportEyebrow("Volleyball", season, sg)}</div>
         <h2 className="rulesPanelTitle">Volleyball</h2>
-        <SportFactGrid
-          sg={sg}
-          fallbacks={{
-            format: "6-a-side · no libero · rally scoring",
-            squad:  "12 in squad · 6 on court",
-          }}
-        />
+        <SportFactGrid sg={sg} seasonRegOpen={seasonRegOpen} />
       </header>
 
       <CommonRef />
@@ -563,7 +545,8 @@ export default async function RulesPage({ searchParams }: PageProps) {
   // Pull the live SeasonGame rows so the facts strip (Dates / Venue / Fee /
   // Format / Squad / Register link / Reporting / Deadline / Hashtag) renders
   // from API data rather than hardcoded strings. Admin edits flow straight here.
-  const season = await getCurrentSeason();
+  const season         = await getCurrentSeason();
+  const seasonRegOpen  = season?.registrationOpen ?? false;
   const sgFor  = (tab: Tab): SeasonGameDto | null => {
     if (tab === "common") return null;
     return (
@@ -603,9 +586,9 @@ export default async function RulesPage({ searchParams }: PageProps) {
       </nav>
 
       <main className={`rulesPanel rulesPanel-${active}`}>
-        {active === "cricket"    && <CricketPanel    sg={sgFor("cricket")} />}
-        {active === "badminton"  && <BadmintonPanel  sg={sgFor("badminton")} />}
-        {active === "volleyball" && <VolleyballPanel sg={sgFor("volleyball")} />}
+        {active === "cricket"    && <CricketPanel    sg={sgFor("cricket")}    season={season} seasonRegOpen={seasonRegOpen} />}
+        {active === "badminton"  && <BadmintonPanel  sg={sgFor("badminton")}  season={season} seasonRegOpen={seasonRegOpen} />}
+        {active === "volleyball" && <VolleyballPanel sg={sgFor("volleyball")} season={season} seasonRegOpen={seasonRegOpen} />}
         {active === "common"     && <CommonPanel />}
       </main>
 
