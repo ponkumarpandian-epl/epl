@@ -137,15 +137,38 @@ function SportFactGrid({ sg, seasonRegOpen }: { sg: SeasonGameDto | null; season
       {squad  && <Fact label="Squad"   value={squad} />}
       {reporting && <Fact label="Reporting"   value={reporting} />}
       {deadline  && <Fact label="Reg. closes" value={deadline} />}
-      <Fact
-        label="Register"
-        value={
-          registerOpen
-            ? <Link href={registerHref}>Register your team →</Link>
-            : <span style={{ color: "var(--bone-fade)" }}>Closed</span>
-        }
-      />
+      <RegisterCta open={registerOpen} href={registerHref} />
     </div>
+  );
+}
+
+/** Primary CTA — replaces a plain Fact for the register slot so the action
+ *  reads like a button, not a tucked-away link. Sport-tinted via parent
+ *  .rulesPanel-{sport} accent (see rules.css). */
+function RegisterCta({ open, href }: { open: boolean; href: string }) {
+  if (!open) {
+    return (
+      <div className="rulesFact rulesFactRegister is-closed" aria-disabled="true">
+        <span className="rulesFactLabel">Registration</span>
+        <span className="rulesFactValue">
+          <span className="registerCtaText">Currently closed</span>
+        </span>
+      </div>
+    );
+  }
+  return (
+    <Link href={href} className="rulesFact rulesFactRegister is-open" aria-label="Register your team for this sport">
+      <span className="rulesFactLabel">Register</span>
+      <span className="rulesFactValue">
+        <span className="registerCtaText">Register your team</span>
+        <span className="registerCtaArrow" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </span>
+      </span>
+    </Link>
   );
 }
 
