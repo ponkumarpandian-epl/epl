@@ -203,25 +203,31 @@ public class SeasonService(IUnitOfWork uow, ILogger<SeasonService> log) : ISeaso
         var games = s.Games
             .OrderBy(g => g.StartsOn ?? DateTimeOffset.MaxValue)
             .Select(sg => new SeasonGameDto(
-                Id:               sg.Id,
-                GameId:           sg.GameId,
-                Sport:            sg.Game.Kind,
-                Slug:             sg.Game.Slug,
-                Name:             sg.Game.Name,
-                Description:      sg.Game.Description,
-                Venue:            sg.Venue,
-                Categories:       sg.Categories,
-                EntryFeeRupees:   sg.EntryFeeRupees,
-                StartsOn:         sg.StartsOn,
-                EndsOn:           sg.EndsOn,
+                Id:                   sg.Id,
+                GameId:               sg.GameId,
+                Sport:                sg.Game.Kind,
+                Slug:                 sg.Game.Slug,
+                Name:                 sg.Game.Name,
+                Description:          sg.Game.Description,
+                Venue:                sg.Venue,
+                Categories:           sg.Categories,
+                EntryFeeRupees:       sg.EntryFeeRupees,
+                StartsOn:             sg.StartsOn,
+                EndsOn:               sg.EndsOn,
                 // SeasonGame override wins over the Game default for WhatsApp.
-                WhatsAppGroupUrl: sg.WhatsAppGroupUrl ?? sg.Game.WhatsAppGroupUrl,
-                CardImageUrl:     sg.CardImageUrl,
+                WhatsAppGroupUrl:     sg.WhatsAppGroupUrl ?? sg.Game.WhatsAppGroupUrl,
+                CardImageUrl:         sg.CardImageUrl,
+                RegistrationUrl:      sg.RegistrationUrl,
+                Hashtag:              sg.Hashtag,
+                ReportingTime:        sg.ReportingTime,
+                RegistrationDeadline: sg.RegistrationDeadline,
+                FormatNote:           sg.FormatNote,
+                SquadNote:            sg.SquadNote,
                 // Raw per-game flag. Consumers (home page, TeamService guard) compute the
                 // effective state as (Season.RegistrationOpen AND SeasonGame.RegistrationOpen).
                 // Admin UI needs the raw value so per-game state is visible while master is OFF.
-                RegistrationOpen: sg.RegistrationOpen,
-                Contacts:         sg.Contacts.Select(c => new ContactDto(c.Name, c.PhoneDisplay, c.PhoneE164)).ToList()))
+                RegistrationOpen:     sg.RegistrationOpen,
+                Contacts:             sg.Contacts.Select(c => new ContactDto(c.Name, c.PhoneDisplay, c.PhoneE164)).ToList()))
             .ToList();
 
         return new SeasonDto(

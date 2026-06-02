@@ -14,6 +14,11 @@ public class SeasonGameConfig : IEntityTypeConfiguration<SeasonGame>
         b.Property(sg => sg.Categories).HasMaxLength(200);
         b.Property(sg => sg.WhatsAppGroupUrl).HasMaxLength(400);
         b.Property(sg => sg.CardImageUrl).HasMaxLength(400);
+        b.Property(sg => sg.RegistrationUrl).HasMaxLength(400);
+        b.Property(sg => sg.Hashtag).HasMaxLength(60);
+        b.Property(sg => sg.ReportingTime).HasMaxLength(40);
+        b.Property(sg => sg.FormatNote).HasMaxLength(200);
+        b.Property(sg => sg.SquadNote).HasMaxLength(200);
 
         b.HasOne(sg => sg.Season)
             .WithMany(s => s.Games)
