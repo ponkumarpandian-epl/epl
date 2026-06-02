@@ -149,9 +149,9 @@ function RegisterCta({ open, href }: { open: boolean; href: string }) {
   if (!open) {
     return (
       <div className="rulesFact rulesFactRegister is-closed" aria-disabled="true">
-        <span className="rulesFactLabel">Registration</span>
+        <span className="rulesFactLabel">Register</span>
         <span className="rulesFactValue">
-          <span className="registerCtaText">Currently closed</span>
+          <span className="registerCtaText">Closed</span>
         </span>
       </div>
     );
@@ -162,7 +162,7 @@ function RegisterCta({ open, href }: { open: boolean; href: string }) {
       <span className="rulesFactValue">
         <span className="registerCtaText">Register your team</span>
         <span className="registerCtaArrow" aria-hidden="true">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
             <line x1="5" y1="12" x2="19" y2="12"/>
             <polyline points="12 5 19 12 12 19"/>
           </svg>

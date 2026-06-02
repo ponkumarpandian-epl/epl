@@ -244,83 +244,54 @@
 .rulesPanel-volleyball { --ctaRgb: 200, 47, 60;  --ctaSolid: #FF8C95; }
 .rulesPanel-common     { --ctaRgb: 200, 200, 210; --ctaSolid: #C8C8D2; }
 
+/* Register CTA — same tile geometry as every other Fact (.rulesFact handles
+   the base padding/border/radius/min-width). The CTA-ness is signalled by
+   colour and the trailing arrow chip, not by size — so it looks interactive
+   at rest (touch-friendly) instead of relying on hover. */
 .rulesFactRegister {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 16px 18px;
   text-decoration: none;
   color: inherit;
+  position: relative;
   overflow: hidden;
   isolation: isolate;
+  /* Inherits padding 12px 14px + flex-column + gap 4px from .rulesFact above */
 }
 .rulesFactRegister.is-open {
-  background:
-    linear-gradient(135deg, rgba(var(--ctaRgb), 0.22) 0%, rgba(var(--ctaRgb), 0.07) 100%);
-  border-color: rgba(var(--ctaRgb), 0.55);
-  box-shadow:
-    inset 0 0 0 1px rgba(var(--ctaRgb), 0.10),
-    0 6px 18px rgba(0, 0, 0, 0.35);
+  background: linear-gradient(135deg,
+    rgba(var(--ctaRgb), 0.18) 0%,
+    rgba(var(--ctaRgb), 0.06) 100%);
+  border-color: rgba(var(--ctaRgb), 0.50);
   transition:
-    transform 0.2s var(--ease),
-    box-shadow 0.25s var(--ease),
-    border-color 0.2s var(--ease),
-    background 0.25s var(--ease);
-}
-.rulesFactRegister.is-open::after {
-  /* Sport-tinted glow that sweeps across on hover */
-  content: "";
-  position: absolute;
-  inset: -1px;
-  background: linear-gradient(120deg,
-    transparent 30%,
-    rgba(var(--ctaRgb), 0.18) 50%,
-    transparent 70%);
-  transform: translateX(-110%);
-  transition: transform 0.7s var(--ease);
-  pointer-events: none;
-  z-index: 0;
+    transform 0.18s var(--ease),
+    border-color 0.18s var(--ease),
+    box-shadow 0.18s var(--ease);
 }
 .rulesFactRegister.is-open:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   border-color: var(--ctaSolid);
-  box-shadow:
-    inset 0 0 0 1px rgba(var(--ctaRgb), 0.18),
-    0 14px 30px rgba(0, 0, 0, 0.45),
-    0 0 24px rgba(var(--ctaRgb), 0.30);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(var(--ctaRgb), 0.20);
 }
-.rulesFactRegister.is-open:hover::after { transform: translateX(110%); }
 .rulesFactRegister.is-open:focus-visible {
   outline: 2px solid var(--ctaSolid);
   outline-offset: 2px;
 }
 
-.rulesFactRegister .rulesFactLabel {
-  position: relative;
-  z-index: 1;
-  color: var(--ctaSolid);
-}
+.rulesFactRegister .rulesFactLabel { color: var(--ctaSolid); }
 .rulesFactRegister.is-closed .rulesFactLabel { color: var(--bone-fade); }
 
 .rulesFactRegister .rulesFactValue {
-  position: relative;
-  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  font-size: 15.5px;
+  gap: 8px;
 }
 
 .registerCtaText {
   color: var(--bone);
-  font-family: var(--font-display);
-  font-size: 18px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  font-weight: 400;
-  line-height: 1.05;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
 }
 .rulesFactRegister.is-closed .registerCtaText { color: var(--bone-fade); }
 
@@ -328,33 +299,26 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 22px;
+  height: 22px;
   border-radius: 999px;
-  background: rgba(var(--ctaRgb), 0.18);
-  border: 1px solid rgba(var(--ctaRgb), 0.45);
+  background: rgba(var(--ctaRgb), 0.16);
+  border: 1px solid rgba(var(--ctaRgb), 0.40);
   color: var(--ctaSolid);
   flex-shrink: 0;
-  transition: transform 0.25s var(--ease), background 0.2s, border-color 0.2s;
+  transition: transform 0.18s var(--ease), background 0.18s, border-color 0.18s, color 0.18s;
 }
+.registerCtaArrow svg { width: 12px; height: 12px; }
 .rulesFactRegister.is-open:hover .registerCtaArrow {
-  transform: translateX(4px);
+  transform: translateX(2px);
   background: var(--ctaSolid);
   color: var(--ink);
   border-color: var(--ctaSolid);
 }
 
-/* Span the CTA across two columns on the desktop grid so it reads as the
-   primary action rather than just another fact tile. Stays single-column on
-   tablet / mobile via the existing media queries. */
-@media (min-width: 761px) {
-  .rulesFactRegister { grid-column: span 2; }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .rulesFactRegister.is-open,
-  .registerCtaArrow,
-  .rulesFactRegister.is-open::after { transition: none; }
+  .registerCtaArrow { transition: none; }
   .rulesFactRegister.is-open:hover { transform: none; }
   .rulesFactRegister.is-open:hover .registerCtaArrow { transform: none; }
 }
