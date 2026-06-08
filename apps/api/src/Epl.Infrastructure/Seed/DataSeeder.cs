@@ -89,7 +89,8 @@ public static class DataSeeder
         // ── 3) SeasonGames — one row per (Season 2 × Game) ──────────────────
         await SeedSeasonGameAsync(db, log, ct,
             season: season2, game: cricket,
-            startsOn: new DateTimeOffset(2026, 6, 13, 0, 0, 0, TimeSpan.FromHours(5.5)),
+            // 6:30 AM IST start — reporting card on /rules computes startsOn − 1h = 5:30 AM.
+            startsOn: new DateTimeOffset(2026, 6, 13, 6, 30, 0, TimeSpan.FromHours(5.5)),
             endsOn:   new DateTimeOffset(2026, 6, 14, 23, 59, 59, TimeSpan.FromHours(5.5)),
             venue: "JMR Cricket Ground, EC Phase 1",
             categories: "Men's",
@@ -105,7 +106,8 @@ public static class DataSeeder
 
         await SeedSeasonGameAsync(db, log, ct,
             season: season2, game: badminton,
-            startsOn: new DateTimeOffset(2026, 6, 20, 0, 0, 0, TimeSpan.FromHours(5.5)),
+            // 7:00 AM IST start — reporting card computes 6:00 AM (matches the PDF).
+            startsOn: new DateTimeOffset(2026, 6, 20, 7, 0, 0, TimeSpan.FromHours(5.5)),
             endsOn:   new DateTimeOffset(2026, 6, 20, 23, 59, 59, TimeSpan.FromHours(5.5)),
             venue: "In & around Electronic City",
             categories: "Men's & Women's Doubles",
@@ -120,7 +122,8 @@ public static class DataSeeder
 
         await SeedSeasonGameAsync(db, log, ct,
             season: season2, game: volleyball,
-            startsOn: new DateTimeOffset(2026, 6, 27, 0, 0, 0, TimeSpan.FromHours(5.5)),
+            // 5:00 PM IST start — reporting card computes 4:00 PM.
+            startsOn: new DateTimeOffset(2026, 6, 27, 17, 0, 0, TimeSpan.FromHours(5.5)),
             endsOn:   new DateTimeOffset(2026, 6, 28, 23, 59, 59, TimeSpan.FromHours(5.5)),
             venue: "In & around Electronic City",
             categories: "Men's",

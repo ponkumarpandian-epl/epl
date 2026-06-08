@@ -23,6 +23,17 @@ public class SeasonsController(ISeasonService seasons) : ControllerBase
             : Ok(s);
     }
 
+    [HttpGet("current/registration-stats")]
+    [AllowAnonymous]
+    [ResponseCache(Duration = 60)]
+    public async Task<IActionResult> GetCurrentRegistrationStats(CancellationToken ct)
+    {
+        var stats = await seasons.GetCurrentRegistrationStatsAsync(ct);
+        return stats is null
+            ? NotFound(new { code = "no_active_season", message = "No season is currently active." })
+            : Ok(stats);
+    }
+
     [HttpGet("games")]
     [AllowAnonymous]
     public async Task<IActionResult> ListGames(CancellationToken ct)
@@ -91,6 +102,21 @@ public class SeasonsController(ISeasonService seasons) : ControllerBase
     {
         var result = await seasons.SetRegistrationAsync(seasonId, req.Open, ct);
         if (!result.IsSuccess) return NotFound(new { code = result.Error!.Value.Code, message = result.Error!.Value.Message });
+        return Ok(result.Value);
+    }
+
+    [HttpPost("{seasonId:guid}/games/{seasonGameId:guid}/registration")]
+    [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+    public async Task<IActionResult> SetGameRegistration(Guid seasonId, Guid seasonGameId, [FromBody] SetRegistrationRequest req, CancellationToken ct)
+    {
+        var result = await seasons.SetGameRegistrationAsync(seasonId, seasonGameId, req.Open, ct);
+        if (!result.IsSuccess)
+            return result.Error!.Value.Code switch
+            {
+                "season_game_not_found"  => NotFound(new   { code = result.Error!.Value.Code, message = result.Error!.Value.Message }),
+                "season_game_mismatch"   => BadRequest(new { code = result.Error!.Value.Code, message = result.Error!.Value.Message }),
+                _                        => BadRequest(new { code = result.Error!.Value.Code, message = result.Error!.Value.Message }),
+            };
         return Ok(result.Value);
     }
 }

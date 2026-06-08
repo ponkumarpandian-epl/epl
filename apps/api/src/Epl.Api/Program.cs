@@ -49,8 +49,15 @@ builder.Services.AddFluentValidationAutoValidation(c =>
 });
 
 // ── Cookie auth (browser-friendly) ──────────────────────────────────────────
+// Register BOTH cookies AND bearer schemes so MapIdentityApi works whichever
+// mode the caller picks. The browser flow sends ?useCookies=true and uses
+// IdentityConstants.ApplicationScheme (cookies); a missing query param falls
+// back to IdentityConstants.BearerScheme and returns a JWT in JSON. Without
+// the bearer registration the fallback throws:
+//   "No sign-in authentication handler is registered for the scheme 'Identity.Bearer'."
 builder.Services
     .AddAuthentication(IdentityConstants.ApplicationScheme)
+    .AddBearerToken(IdentityConstants.BearerScheme)
     .AddIdentityCookies();
 
 builder.Services.ConfigureApplicationCookie(o =>

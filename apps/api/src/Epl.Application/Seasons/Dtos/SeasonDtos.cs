@@ -18,6 +18,12 @@ public record SeasonGameDto(
     DateTimeOffset? EndsOn,
     string?        WhatsAppGroupUrl,
     string?        CardImageUrl,
+    string?        RegistrationUrl,
+    string?        Hashtag,
+    string?        ReportingTime,
+    DateTimeOffset? RegistrationDeadline,
+    string?        FormatNote,
+    string?        SquadNote,
     bool           RegistrationOpen,
     IReadOnlyList<ContactDto> Contacts);
 
@@ -62,3 +68,19 @@ public record GameDto(
     string? Description,
     string? WhatsAppGroupUrl,
     bool    IsActive);
+
+// ── Hero-ticker stats ──────────────────────────────────────────────────────
+public record RegistrationStatsDto(
+    Guid     SeasonId,
+    string   SeasonName,
+    bool     MasterRegistrationOpen,
+    int      TotalTeams,
+    IReadOnlyList<SportRegistrationStatDto> Sports);
+
+public record SportRegistrationStatDto(
+    Guid    SeasonGameId,
+    Sport   Sport,
+    string  Slug,
+    string  Name,
+    int     TeamCount,
+    bool    RegistrationOpen);

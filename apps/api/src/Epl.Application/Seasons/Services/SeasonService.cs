@@ -140,18 +140,62 @@ public class SeasonService(IUnitOfWork uow, ILogger<SeasonService> log) : ISeaso
         if (season is null) return Result<SeasonDto>.Fail("season_not_found", "Season not found.");
         season.RegistrationOpen = open;
 
-        // Cascade to every SeasonGame so the home-page sport-card pills reflect the change.
-        // ListBySeasonForUpdateAsync returns TRACKED entities (no AsNoTracking).
-        var games = await uow.SeasonGames.ListBySeasonForUpdateAsync(seasonId, ct);
-        foreach (var sg in games) sg.RegistrationOpen = open;
-
-        var rows = await uow.SaveChangesAsync(ct);
+        // Master is a true override — per-game flags are preserved so admins can pre-stage
+        // "Cricket closed, others open" and have that restored when the master flips back on.
+        // Effective state at the registration entrypoint (TeamService) and the home page is
+        // computed as (season.RegistrationOpen AND seasonGame.RegistrationOpen).
+        await uow.SaveChangesAsync(ct);
         log.LogInformation(
-            "Season {SeasonId} ({Name}) registration set to {State} — {Rows} rows updated ({GameCount} games)",
-            season.Id, season.Name, open ? "OPEN" : "CLOSED", rows, games.Count);
+            "Season {SeasonId} ({Name}) master registration set to {State}",
+            season.Id, season.Name, open ? "OPEN" : "CLOSED");
 
         var refreshed = await uow.Seasons.GetWithGamesAsync(seasonId, ct);
         return Result<SeasonDto>.Ok(ToDto(refreshed!));
+    }
+
+    public async Task<Result<SeasonDto>> SetGameRegistrationAsync(Guid seasonId, Guid seasonGameId, bool open, CancellationToken ct = default)
+    {
+        // GetByIdAsync uses Set.FindAsync — returns a TRACKED entity.
+        var sg = await uow.SeasonGames.GetByIdAsync(seasonGameId, ct);
+        if (sg is null) return Result<SeasonDto>.Fail("season_game_not_found", "Sport not found in this season.");
+        if (sg.SeasonId != seasonId)
+            return Result<SeasonDto>.Fail("season_game_mismatch", "Sport does not belong to the specified season.");
+
+        sg.RegistrationOpen = open;
+        await uow.SaveChangesAsync(ct);
+        log.LogInformation(
+            "Season {SeasonId} game {SeasonGameId} registration set to {State}",
+            seasonId, seasonGameId, open ? "OPEN" : "CLOSED");
+
+        var refreshed = await uow.Seasons.GetWithGamesAsync(seasonId, ct);
+        return Result<SeasonDto>.Ok(ToDto(refreshed!));
+    }
+
+    public async Task<RegistrationStatsDto?> GetCurrentRegistrationStatsAsync(CancellationToken ct = default)
+    {
+        var season = await uow.Seasons.GetActiveWithGamesAsync(ct);
+        if (season is null) return null;
+
+        // Team counts per SeasonGame — single GROUP BY query inside the repository.
+        var byId = await uow.Teams.CountBySeasonGameAsync(season.Id, ct);
+
+        var sports = season.Games
+            .OrderBy(sg => sg.Game.Kind)
+            .Select(sg => new SportRegistrationStatDto(
+                SeasonGameId:     sg.Id,
+                Sport:            sg.Game.Kind,
+                Slug:             sg.Game.Slug,
+                Name:             sg.Game.Name,
+                TeamCount:        byId.TryGetValue(sg.Id, out var c) ? c : 0,
+                RegistrationOpen: sg.RegistrationOpen))
+            .ToList();
+
+        return new RegistrationStatsDto(
+            SeasonId:               season.Id,
+            SeasonName:             season.Name,
+            MasterRegistrationOpen: season.RegistrationOpen,
+            TotalTeams:             sports.Sum(s => s.TeamCount),
+            Sports:                 sports);
     }
 
     private static SeasonDto ToDto(Season s)
@@ -159,22 +203,31 @@ public class SeasonService(IUnitOfWork uow, ILogger<SeasonService> log) : ISeaso
         var games = s.Games
             .OrderBy(g => g.StartsOn ?? DateTimeOffset.MaxValue)
             .Select(sg => new SeasonGameDto(
-                Id:               sg.Id,
-                GameId:           sg.GameId,
-                Sport:            sg.Game.Kind,
-                Slug:             sg.Game.Slug,
-                Name:             sg.Game.Name,
-                Description:      sg.Game.Description,
-                Venue:            sg.Venue,
-                Categories:       sg.Categories,
-                EntryFeeRupees:   sg.EntryFeeRupees,
-                StartsOn:         sg.StartsOn,
-                EndsOn:           sg.EndsOn,
+                Id:                   sg.Id,
+                GameId:               sg.GameId,
+                Sport:                sg.Game.Kind,
+                Slug:                 sg.Game.Slug,
+                Name:                 sg.Game.Name,
+                Description:          sg.Game.Description,
+                Venue:                sg.Venue,
+                Categories:           sg.Categories,
+                EntryFeeRupees:       sg.EntryFeeRupees,
+                StartsOn:             sg.StartsOn,
+                EndsOn:               sg.EndsOn,
                 // SeasonGame override wins over the Game default for WhatsApp.
-                WhatsAppGroupUrl: sg.WhatsAppGroupUrl ?? sg.Game.WhatsAppGroupUrl,
-                CardImageUrl:     sg.CardImageUrl,
-                RegistrationOpen: sg.RegistrationOpen && s.RegistrationOpen,
-                Contacts:         sg.Contacts.Select(c => new ContactDto(c.Name, c.PhoneDisplay, c.PhoneE164)).ToList()))
+                WhatsAppGroupUrl:     sg.WhatsAppGroupUrl ?? sg.Game.WhatsAppGroupUrl,
+                CardImageUrl:         sg.CardImageUrl,
+                RegistrationUrl:      sg.RegistrationUrl,
+                Hashtag:              sg.Hashtag,
+                ReportingTime:        sg.ReportingTime,
+                RegistrationDeadline: sg.RegistrationDeadline,
+                FormatNote:           sg.FormatNote,
+                SquadNote:            sg.SquadNote,
+                // Raw per-game flag. Consumers (home page, TeamService guard) compute the
+                // effective state as (Season.RegistrationOpen AND SeasonGame.RegistrationOpen).
+                // Admin UI needs the raw value so per-game state is visible while master is OFF.
+                RegistrationOpen:     sg.RegistrationOpen,
+                Contacts:             sg.Contacts.Select(c => new ContactDto(c.Name, c.PhoneDisplay, c.PhoneE164)).ToList()))
             .ToList();
 
         return new SeasonDto(

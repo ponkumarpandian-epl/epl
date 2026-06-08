@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { getSeasonById, listAllGames } from "@/lib/seasons";
 import { ControlPanel } from "./control-panel";
 import { AddGameForm } from "./add-game-form";
+import { GamesGrid } from "./games-grid";
 import "../../admin.css";
 import "./edit.css";
 
@@ -69,33 +70,23 @@ export default async function EditSeasonPage({
                 No sports yet — add one below to make registration open for it.
               </p>
             ) : (
-              <div className="gamesGrid">
-                {season.games.map((g) => (
-                  <article key={g.id} className={`gameTile ${g.slug}`}>
-                    <h3 className="gameTileName">{g.name}</h3>
-                    <div className="gameTileMeta">
-                      {g.venue      && <span><strong>Venue:</strong> {g.venue}</span>}
-                      {g.categories && <span><strong>Categories:</strong> {g.categories}</span>}
-                      <span><strong>Entry fee:</strong> ₹{g.entryFeeRupees.toLocaleString("en-IN")}</span>
-                      {(g.startsOn || g.endsOn) && (
-                        <span><strong>When:</strong> {formatRange(g.startsOn, g.endsOn)}</span>
-                      )}
-                    </div>
-                    {g.contacts.length > 0 && (
-                      <div className="gameTileContacts">
-                        {g.contacts.map((c) => (
-                          <span key={c.phoneE164}>{c.name} · {c.phoneDisplay}</span>
-                        ))}
-                      </div>
-                    )}
-                    {g.whatsAppGroupUrl && (
-                      <a className="gameTileLink" href={g.whatsAppGroupUrl} target="_blank" rel="noopener noreferrer">
-                        WhatsApp Group ↗
-                      </a>
-                    )}
-                  </article>
-                ))}
-              </div>
+              <GamesGrid
+                seasonId={season.id}
+                masterOpen={season.registrationOpen}
+                games={season.games.map((g) => ({
+                  id:               g.id,
+                  slug:             g.slug,
+                  name:             g.name,
+                  venue:            g.venue,
+                  categories:       g.categories,
+                  entryFeeRupees:   g.entryFeeRupees,
+                  startsOn:         g.startsOn,
+                  endsOn:           g.endsOn,
+                  whatsAppGroupUrl: g.whatsAppGroupUrl,
+                  registrationOpen: g.registrationOpen,
+                  contacts:         g.contacts,
+                }))}
+              />
             )}
 
             <AddGameForm

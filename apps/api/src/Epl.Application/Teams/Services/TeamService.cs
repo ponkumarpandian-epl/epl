@@ -98,10 +98,31 @@ public class TeamService(IUnitOfWork uow, ILogger<TeamService> log) : ITeamServi
         return t is null ? null : ToResponse(t, t.Apartment, t.SeasonGame?.Season?.Name);
     }
 
+    public async Task<Result<TeamResponse>> SetPaymentAsync(Guid teamId, bool paid, string? paidTo, CancellationToken ct = default)
+    {
+        // GetByIdAsync uses Set.FindAsync — returns a TRACKED entity.
+        var team = await uow.Teams.GetByIdAsync(teamId, ct);
+        if (team is null) return Result<TeamResponse>.Fail("team_not_found", "Team not found.");
+
+        var trimmedPaidTo = string.IsNullOrWhiteSpace(paidTo) ? null : paidTo.Trim();
+        team.PaymentCompleted = paid;
+        team.PaidTo           = paid ? trimmedPaidTo : null;
+        team.PaidAt           = paid ? DateTimeOffset.UtcNow : null;
+
+        await uow.SaveChangesAsync(ct);
+        log.LogInformation(
+            "Team {TeamId} payment set to {State} (paidTo={PaidTo})",
+            teamId, paid ? "PAID" : "UNPAID", team.PaidTo ?? "(none)");
+
+        var refreshed = await uow.Teams.GetWithApartmentAsync(teamId, ct);
+        return Result<TeamResponse>.Ok(ToResponse(refreshed!, refreshed!.Apartment, refreshed.SeasonGame?.Season?.Name));
+    }
+
     private static TeamResponse ToResponse(Team t, Apartment apt, string? seasonName) => new(
         t.Id, t.Sport, t.Name,
         apt.Name, apt.Address, apt.Lat, apt.Lng,
         t.CaptainName, t.CaptainMobile,
         t.SeasonGameId, seasonName,
-        t.CreatedAt);
+        t.CreatedAt,
+        t.PaymentCompleted, t.PaidTo, t.PaidAt);
 }

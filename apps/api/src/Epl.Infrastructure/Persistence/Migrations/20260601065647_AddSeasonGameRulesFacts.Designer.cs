@@ -4,6 +4,7 @@ using Epl.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Epl.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260601065647_AddSeasonGameRulesFacts")]
+    partial class AddSeasonGameRulesFacts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -357,9 +360,6 @@ namespace Epl.Infrastructure.Persistence.Migrations
                         .HasMaxLength(80)
                         .HasColumnType("nvarchar(80)");
 
-                    b.Property<Guid?>("CaptainUserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -391,8 +391,6 @@ namespace Epl.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ApartmentId");
 
-                    b.HasIndex("CaptainUserId");
-
                     b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("SeasonGameId");
@@ -401,165 +399,6 @@ namespace Epl.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Teams");
-                });
-
-            modelBuilder.Entity("Epl.Domain.Entities.TeamMember", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("AddedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid>("AddedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsCaptain")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Position")
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
-
-                    b.Property<DateTimeOffset?>("RemovedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("ShirtNumber")
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("TeamId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TeamId", "UserId")
-                        .IsUnique()
-                        .HasFilter("[Status] = 1");
-
-                    b.HasIndex("UserId", "Status");
-
-                    b.ToTable("TeamMembers");
-                });
-
-            modelBuilder.Entity("Epl.Domain.Entities.Tournament", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("BannerImageUrl")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(1200)
-                        .HasColumnType("nvarchar(1200)");
-
-                    b.Property<DateTimeOffset?>("EndsOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int>("EntryFeeRupees")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("GameId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsPublished")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("nvarchar(120)");
-
-                    b.Property<DateTimeOffset?>("RegistrationDeadline")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<bool>("RegistrationOpen")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Slug")
-                        .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)");
-
-                    b.Property<DateTimeOffset?>("StartsOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Tagline")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Venue")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("WhatsAppGroupUrl")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GameId");
-
-                    b.HasIndex("Slug")
-                        .IsUnique();
-
-                    b.ToTable("Tournaments");
-                });
-
-            modelBuilder.Entity("Epl.Domain.Entities.TournamentCategory", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int>("EntryFeeRupees")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Format")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MaxEntries")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MinEntries")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)");
-
-                    b.Property<int>("PlayersPerEntry")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("RegistrationOpen")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("TournamentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TournamentId", "Format")
-                        .IsUnique();
-
-                    b.ToTable("TournamentCategories");
                 });
 
             modelBuilder.Entity("Epl.Domain.Entities.UserGameSkill", b =>
@@ -746,11 +585,6 @@ namespace Epl.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Epl.Domain.Entities.AppUser", "Captain")
-                        .WithMany()
-                        .HasForeignKey("CaptainUserId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.HasOne("Epl.Domain.Entities.AppUser", "CreatedBy")
                         .WithMany("CaptainedTeams")
                         .HasForeignKey("CreatedByUserId")
@@ -763,83 +597,9 @@ namespace Epl.Infrastructure.Persistence.Migrations
 
                     b.Navigation("Apartment");
 
-                    b.Navigation("Captain");
-
                     b.Navigation("CreatedBy");
 
                     b.Navigation("SeasonGame");
-                });
-
-            modelBuilder.Entity("Epl.Domain.Entities.TeamMember", b =>
-                {
-                    b.HasOne("Epl.Domain.Entities.Team", "Team")
-                        .WithMany("Members")
-                        .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Epl.Domain.Entities.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Team");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Epl.Domain.Entities.Tournament", b =>
-                {
-                    b.HasOne("Epl.Domain.Entities.Game", "Game")
-                        .WithMany()
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.OwnsMany("Epl.Domain.Entities.TournamentContact", "Contacts", b1 =>
-                        {
-                            b1.Property<Guid>("TournamentId");
-
-                            b1.Property<int>("__synthesizedOrdinal")
-                                .ValueGeneratedOnAddOrUpdate();
-
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasMaxLength(80);
-
-                            b1.Property<string>("PhoneDisplay")
-                                .IsRequired()
-                                .HasMaxLength(20);
-
-                            b1.Property<string>("PhoneE164")
-                                .IsRequired()
-                                .HasMaxLength(20);
-
-                            b1.HasKey("TournamentId", "__synthesizedOrdinal");
-
-                            b1.ToTable("Tournaments");
-
-                            b1.ToJson("Contacts");
-
-                            b1.WithOwner()
-                                .HasForeignKey("TournamentId");
-                        });
-
-                    b.Navigation("Contacts");
-
-                    b.Navigation("Game");
-                });
-
-            modelBuilder.Entity("Epl.Domain.Entities.TournamentCategory", b =>
-                {
-                    b.HasOne("Epl.Domain.Entities.Tournament", "Tournament")
-                        .WithMany("Categories")
-                        .HasForeignKey("TournamentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tournament");
                 });
 
             modelBuilder.Entity("Epl.Domain.Entities.UserGameSkill", b =>
@@ -937,16 +697,6 @@ namespace Epl.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Epl.Domain.Entities.SeasonGame", b =>
                 {
                     b.Navigation("Teams");
-                });
-
-            modelBuilder.Entity("Epl.Domain.Entities.Team", b =>
-                {
-                    b.Navigation("Members");
-                });
-
-            modelBuilder.Entity("Epl.Domain.Entities.Tournament", b =>
-                {
-                    b.Navigation("Categories");
                 });
 #pragma warning restore 612, 618
         }

@@ -421,6 +421,40 @@
   to   { transform: translateX(-50%); }
 }
 
+/* Dynamic ticker items — open / closed / cta states */
+.heroTickerItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.heroTickerItem.is-open   { color: var(--bone); }
+.heroTickerItem.is-closed { color: var(--bone-fade); }
+.heroTickerItem.is-cta    { color: var(--cyan-bright, var(--gold-bright)); font-weight: 700; }
+.heroTickerSep {
+  color: var(--bone-fade);
+  margin: 0 12px;
+}
+.heroTickerLock {
+  width: 12px;
+  height: 12px;
+  color: var(--color-danger, #e83642);
+  flex-shrink: 0;
+}
+
+/* Reduced-motion: kill marquee, show only first copy statically */
+@media (prefers-reduced-motion: reduce) {
+  .heroTickerTrack {
+    animation: none;
+    transform: none;
+    overflow: hidden;
+    width: 100%;
+    flex-wrap: nowrap;
+    text-overflow: ellipsis;
+  }
+  /* Show only the first set of messages (second is the marquee duplicate) */
+  .heroTickerTrack > :nth-child(n+2) { display: none; }
+}
+
 /* ─── Intro block ────────────────────────────────────────────────────────── */
 .intro {
   max-width: 760px;
