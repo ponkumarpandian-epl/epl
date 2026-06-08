@@ -517,6 +517,7 @@ function CommonPanel() {
         <ul>
           <li>Apartments with <strong>500 or more flats</strong> must form separate teams.</li>
           <li>Apartments with fewer than 500 flats <strong>can combine</strong> — up to <strong>4 apartments</strong> per team.</li>
+          <li>When combining, the <strong>total flat count across the combined apartments must not exceed 500</strong>. (Same threshold as the standalone rule — a combined entry can&apos;t be larger than what a single 500-flat apartment would field on its own.)</li>
           <li>Combined apartments must be within a <strong>1 km radius</strong> of each other.</li>
           <li>Individual houses cannot combine.</li>
         </ul>
