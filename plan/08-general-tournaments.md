@@ -393,14 +393,18 @@ Tabbed panel inside the tournament detail:
 
 ### G. Registration form (drawer / page)
 
-Fields, per CategoryFormat:
+**Logged-in users never re-enter their own identity.** If `/api/auth/me` returns a profile, Slot 1 (Player 1) is read from the server — name, mobile, and `userId` are stamped onto the entry directly. The form shows an "identity card" block ("Registering as **<full name>** · +91…") with a "Not you? Switch accounts →" link, and the Player 1 input fields are not rendered. If the logged-in user has no `phoneNumber` on their profile, the mobile field appears so they can supply one (their name still comes from the profile).
 
-| Format | Slot 1 | Slot 2 |
+Fields per CategoryFormat (anonymous flow shown — logged-in flow drops Slot 1 inputs entirely):
+
+| Format | Slot 1 (anonymous only) | Slot 2 |
 |---|---|---|
-| Singles | Name (req), Mobile (req), prefilled from `/api/profile/me` if logged in | — |
+| Singles | Name (req), Mobile (req) | — |
 | Men's Doubles | Name (req), Mobile (req) | Partner Name (req), Partner Mobile (req) |
 | Women's Doubles | same as MD | same as MD |
 | Mixed Doubles | same as MD, with gender label "(F)" / "(M)" | same as MD |
+
+**Trust boundary:** when a logged-in user submits, the server action overwrites any client-supplied Slot 1 fields with the authenticated profile values. The client never gets to decide whose name lands in `Player1Name` — it's whoever the cookie identifies. This avoids a class of "I'm logged in but I'll type my friend's name" support cases.
 
 Submit → returns the new `TournamentEntry`. On success, show a confirmation drawer with the tournament's WhatsApp group link and the entry's position in the queue.
 
@@ -471,7 +475,7 @@ Each iteration ends with a working slice deployed to dev. Suggested chunking:
 | **T-3** | Bracket subsystem skeleton — `Bracket`, `BracketParticipant`, `BracketRound`, `Match`. Admin can create a SingleElimination bracket, drag-seed, and publish it. Public bracket view (desktop tree). |
 | **T-4** | Mobile bracket view (stacked rounds, swipe). Per-game score entry. Walkover handling. Winner auto-advancement. |
 | **T-5** | RoundRobin format + standings table. GroupKnockout format (league + tree composite). |
-| **T-6** | Polish — registration deadline countdown, sticky mobile CTA, empty states, e-mail/WhatsApp share buttons on results. |
+| **T-6** | Polish — registration deadline countdown, sticky mobile CTA, empty states, e-mail/WhatsApp share buttons on results. **Concurrent-scheduling soft check:** when an admin sets a match's court + start time, warn (non-blocking toast) if another match on the same court overlaps the proposed slot. Server returns the conflicts; admin can override. |
 | **T-7** | **Scoring rules** (D11) — Bracket default columns + BracketRound override columns + Match snapshot. `MatchRules.Resolve` + `IMatchScoreValidator`. Admin bracket-builder gains the rules panel with the three quick-presets and a per-round override table. Result-entry validates against the snapshot. **Unblocks the future live-scoring / umpire console feature** (separate plan), which reads the same snapshot point-by-point. |
 
 Each iteration is independently shippable — the public site doesn't break if a later iteration isn't done.
@@ -485,7 +489,7 @@ Each iteration is independently shippable — the public site doesn't break if a
 3. **Payments.** Entry fees are stored but currently informational only. UPI/payment-gateway integration is a separate stream.
 4. **Multi-sport tournaments.** Today `Tournament.GameId` allows any sport, but only badminton is in scope. The `TournamentCategory.Format` enum is badminton-shaped (Singles/MD/WD/XD). If we ever do cricket-only tournaments, we'll need either a new format set or a generic category that doesn't pre-suppose doubles.
 5. **Walkovers and retirements.** Should we model retirement (a player concedes mid-match) separately from walkover (no-show)? `MatchStatus.Walkover` covers no-shows; retirements can be added later if needed.
-6. **Concurrent scheduling.** No constraint right now stops admin from scheduling two matches on the same court at the same time. Worth a soft check (warning toast) in iteration T-6.
+6. **Concurrent scheduling.** No DB constraint stops an admin from scheduling two matches on the same court at the same time — a hard constraint is overkill for an apartment-league tournament where last-minute rescheduling is the norm. Scheduled as a **soft check in T-6**: when saving a match, the API returns the list of overlapping matches (same court, time windows intersect) and the admin UI surfaces them as a warning toast with a "Save anyway" affordance. Resolution: soft-warn, do not block.
 
 ---
 

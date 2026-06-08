@@ -10,6 +10,8 @@ public interface IUnitOfWork : IAsyncDisposable
     IUserSkillRepository          UserSkills           { get; }
     ITournamentRepository         Tournaments          { get; }
     ITournamentCategoryRepository TournamentCategories { get; }
+    ITournamentEntryRepository    TournamentEntries    { get; }
+    IBracketRepository            Brackets             { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
     Task BeginTransactionAsync(CancellationToken ct = default);

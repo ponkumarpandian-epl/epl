@@ -1,60 +1,15 @@
 import "server-only";
 import { cache } from "react";
-import { api } from "./api";
+import { api, type ApiResult } from "./api";
+import type {
+  TournamentSummaryDto,
+  TournamentDetailDto,
+  TournamentEntryDto,
+  AdminTournamentEntryDto,
+  EntryStatus,
+} from "./tournaments-types";
 
-export type CategoryFormat = "Singles" | "MensDoubles" | "WomensDoubles" | "MixedDoubles";
-
-export const FORMAT_LABEL: Record<CategoryFormat, string> = {
-  Singles:       "Singles",
-  MensDoubles:   "Men's Doubles",
-  WomensDoubles: "Women's Doubles",
-  MixedDoubles:  "Mixed Doubles",
-};
-
-export type TournamentStatus = "Draft" | "Upcoming" | "Open" | "InProgress" | "Completed";
-
-export interface TournamentContactDto {
-  name:         string;
-  phoneDisplay: string;
-  phoneE164:    string;
-}
-
-export interface TournamentCategoryDto {
-  id:               string;
-  name:             string;
-  format:           CategoryFormat;
-  playersPerEntry:  number;
-  minEntries:       number;
-  maxEntries:       number;
-  entryFeeRupees:   number;
-  registrationOpen: boolean;
-}
-
-export interface TournamentSummaryDto {
-  id:                    string;
-  slug:                  string;
-  name:                  string;
-  gameId:                string;
-  gameName:              string;
-  venue?:                string;
-  startsOn?:             string;
-  endsOn?:               string;
-  registrationDeadline?: string;
-  bannerImageUrl?:       string;
-  entryFeeRupees:        number;
-  registrationOpen:      boolean;
-  isPublished:           boolean;
-  status:                TournamentStatus;
-  categoryCount:         number;
-  categories:            TournamentCategoryDto[];
-}
-
-export interface TournamentDetailDto extends Omit<TournamentSummaryDto, "categoryCount"> {
-  tagline?:        string;
-  description?:    string;
-  whatsAppGroupUrl?: string;
-  contacts:        TournamentContactDto[];
-}
+export * from "./tournaments-types";
 
 // ── Public fetchers ──────────────────────────────────────────────────────
 export const listPublishedTournaments = cache(async (): Promise<TournamentSummaryDto[]> => {
@@ -67,6 +22,16 @@ export const getTournamentBySlug = cache(async (slug: string): Promise<Tournamen
   return res.ok ? res.data : null;
 });
 
+export const listCategoryEntries = cache(async (
+  slug: string,
+  categoryId: string,
+): Promise<TournamentEntryDto[]> => {
+  const res = await api.get<TournamentEntryDto[]>(
+    `/api/tournaments/${encodeURIComponent(slug)}/categories/${encodeURIComponent(categoryId)}/entries`,
+  );
+  return res.ok ? res.data : [];
+});
+
 // ── Admin fetchers ───────────────────────────────────────────────────────
 export const listAllTournaments = cache(async (): Promise<TournamentSummaryDto[]> => {
   const res = await api.get<TournamentSummaryDto[]>("/api/tournaments/admin");
@@ -77,3 +42,54 @@ export const getTournamentById = cache(async (id: string): Promise<TournamentDet
   const res = await api.get<TournamentDetailDto>(`/api/tournaments/admin/${id}`);
   return res.ok ? res.data : null;
 });
+
+export const listAdminCategoryEntries = cache(async (
+  categoryId: string,
+): Promise<AdminTournamentEntryDto[]> => {
+  const res = await api.get<AdminTournamentEntryDto[]>(
+    `/api/tournaments/admin/categories/${encodeURIComponent(categoryId)}/entries`,
+  );
+  return res.ok ? res.data : [];
+});
+
+// ── Mutations ────────────────────────────────────────────────────────────
+// Server-action callers go through these — they forward cookies + correlation-id via api.ts.
+
+export interface RegisterEntryPayload {
+  player1Name:   string;
+  player1Mobile: string;
+  player2Name?:  string;
+  player2Mobile?:string;
+  teamLabel?:    string;
+}
+
+export function registerEntry(
+  slug: string,
+  categoryId: string,
+  payload: RegisterEntryPayload,
+): Promise<ApiResult<TournamentEntryDto>> {
+  return api.post<TournamentEntryDto>(
+    `/api/tournaments/${encodeURIComponent(slug)}/categories/${encodeURIComponent(categoryId)}/entries`,
+    payload,
+  );
+}
+
+export function updateEntrySeed(
+  entryId: string,
+  seed: number | null,
+): Promise<ApiResult<AdminTournamentEntryDto>> {
+  return api.put<AdminTournamentEntryDto>(
+    `/api/tournaments/admin/entries/${encodeURIComponent(entryId)}/seed`,
+    { seed },
+  );
+}
+
+export function updateEntryStatus(
+  entryId: string,
+  status: EntryStatus,
+): Promise<ApiResult<AdminTournamentEntryDto>> {
+  return api.put<AdminTournamentEntryDto>(
+    `/api/tournaments/admin/entries/${encodeURIComponent(entryId)}/status`,
+    { status },
+  );
+}

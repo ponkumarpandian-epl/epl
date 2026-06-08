@@ -1,6 +1,6 @@
 "use client";
 import { useActionState } from "react";
-import { FORMAT_LABEL, type CategoryFormat } from "@/lib/tournaments";
+import { FORMAT_LABEL, type CategoryFormat } from "@/lib/tournaments-types";
 import { addCategoryAction, type AddCategoryState } from "./actions";
 
 const ALL_FORMATS: CategoryFormat[] = ["Singles", "MensDoubles", "WomensDoubles", "MixedDoubles"];

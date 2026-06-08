@@ -16,6 +16,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<UserGameSkill>       UserGameSkills      => Set<UserGameSkill>();
     public DbSet<Tournament>          Tournaments         => Set<Tournament>();
     public DbSet<TournamentCategory>  TournamentCategories => Set<TournamentCategory>();
+    public DbSet<TournamentEntry>     TournamentEntries   => Set<TournamentEntry>();
+    public DbSet<Bracket>             Brackets            => Set<Bracket>();
+    public DbSet<BracketRound>        BracketRounds       => Set<BracketRound>();
+    public DbSet<BracketParticipant>  BracketParticipants => Set<BracketParticipant>();
+    public DbSet<Match>               Matches             => Set<Match>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {

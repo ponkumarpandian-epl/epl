@@ -2,7 +2,7 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import type { GameMasterDto } from "@/lib/seasons";
-import { FORMAT_LABEL, type CategoryFormat } from "@/lib/tournaments";
+import { FORMAT_LABEL, type CategoryFormat } from "@/lib/tournaments-types";
 import { createTournamentAction, type NewTournamentState } from "./actions";
 
 const ALL_FORMATS: CategoryFormat[] = ["Singles", "MensDoubles", "WomensDoubles", "MixedDoubles"];
@@ -276,19 +276,47 @@ export function NewTournamentForm({ games }: { games: GameMasterDto[] }) {
         <h2>Status</h2>
         <p className="help">Keep it as a draft until you&apos;re ready to share the link publicly.</p>
 
-        <div className="adminTournField">
+        <div className="adminTournField adminTournFieldToggle">
           <label htmlFor="regOpen">Registration</label>
-          <label style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "var(--bone)", padding: 8 }}>
-            <input id="regOpen" name="regOpen" type="checkbox" defaultChecked={state?.values?.regOpen === "on" || !state?.values}/>
-            Open for entries
+          <label className="adminTournToggle" htmlFor="regOpen">
+            <span className="adminTournToggleText">
+              <span className="adminTournToggleTitle">Open for entries</span>
+              <span className="adminTournToggleHint">
+                Players can submit team entries while this is on. Turn off to freeze new registrations.
+              </span>
+            </span>
+            <input
+              id="regOpen"
+              name="regOpen"
+              type="checkbox"
+              className="adminTournToggleInput"
+              defaultChecked={state?.values?.regOpen === "on" || !state?.values}
+            />
+            <span className="adminTournToggleTrack" aria-hidden="true">
+              <span className="adminTournToggleThumb" />
+            </span>
           </label>
         </div>
 
-        <div className="adminTournField">
+        <div className="adminTournField adminTournFieldToggle">
           <label htmlFor="publish">Publish</label>
-          <label style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "var(--bone)", padding: 8 }}>
-            <input id="publish" name="publish" type="checkbox" defaultChecked={state?.values?.publish === "on"}/>
-            Show on the public Tournaments hub immediately
+          <label className="adminTournToggle" htmlFor="publish">
+            <span className="adminTournToggleText">
+              <span className="adminTournToggleTitle">Show on the public Tournaments hub</span>
+              <span className="adminTournToggleHint">
+                When off, the tournament stays as a draft and is hidden from the public list.
+              </span>
+            </span>
+            <input
+              id="publish"
+              name="publish"
+              type="checkbox"
+              className="adminTournToggleInput"
+              defaultChecked={state?.values?.publish === "on"}
+            />
+            <span className="adminTournToggleTrack" aria-hidden="true">
+              <span className="adminTournToggleThumb" />
+            </span>
           </label>
         </div>
       </section>

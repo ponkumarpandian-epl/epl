@@ -12,26 +12,42 @@ public class TournamentService(IUnitOfWork uow, ILogger<TournamentService> log) 
     public async Task<IReadOnlyList<TournamentSummaryDto>> ListPublishedAsync(CancellationToken ct = default)
     {
         var rows = await uow.Tournaments.ListPublishedAsync(ct);
-        return rows.Select(ToSummary).ToList();
+        var list = new List<TournamentSummaryDto>(rows.Count);
+        foreach (var t in rows)
+        {
+            var counts = await uow.TournamentEntries.CountByTournamentAsync(t.Id, ct);
+            list.Add(ToSummary(t, counts));
+        }
+        return list;
     }
 
     public async Task<TournamentDetailDto?> GetBySlugAsync(string slug, CancellationToken ct = default)
     {
         var t = await uow.Tournaments.GetBySlugAsync(slug, ct);
-        return t is null || !t.IsPublished ? null : ToDetail(t);
+        if (t is null || !t.IsPublished) return null;
+        var counts = await uow.TournamentEntries.CountByTournamentAsync(t.Id, ct);
+        return ToDetail(t, counts);
     }
 
     // ── Admin ──────────────────────────────────────────────────────────────
     public async Task<IReadOnlyList<TournamentSummaryDto>> ListAllAsync(CancellationToken ct = default)
     {
         var rows = await uow.Tournaments.ListAllWithCategoriesAsync(ct);
-        return rows.Select(ToSummary).ToList();
+        var list = new List<TournamentSummaryDto>(rows.Count);
+        foreach (var t in rows)
+        {
+            var counts = await uow.TournamentEntries.CountByTournamentAsync(t.Id, ct);
+            list.Add(ToSummary(t, counts));
+        }
+        return list;
     }
 
     public async Task<TournamentDetailDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         var t = await uow.Tournaments.GetWithCategoriesAsync(id, ct);
-        return t is null ? null : ToDetail(t);
+        if (t is null) return null;
+        var counts = await uow.TournamentEntries.CountByTournamentAsync(t.Id, ct);
+        return ToDetail(t, counts);
     }
 
     public async Task<Result<TournamentDetailDto>> CreateAsync(CreateTournamentRequest req, CancellationToken ct = default)
@@ -96,7 +112,8 @@ public class TournamentService(IUnitOfWork uow, ILogger<TournamentService> log) 
         log.LogInformation("Created tournament {TournamentId} ({Name}) published={Published}", tournament.Id, tournament.Name, tournament.IsPublished);
 
         var saved = await uow.Tournaments.GetWithCategoriesAsync(tournament.Id, ct);
-        return Result<TournamentDetailDto>.Ok(ToDetail(saved!));
+        var counts = await uow.TournamentEntries.CountByTournamentAsync(tournament.Id, ct);
+        return Result<TournamentDetailDto>.Ok(ToDetail(saved!, counts));
     }
 
     public async Task<Result<TournamentDetailDto>> UpdateAsync(Guid id, UpdateTournamentRequest req, CancellationToken ct = default)
@@ -128,7 +145,8 @@ public class TournamentService(IUnitOfWork uow, ILogger<TournamentService> log) 
 
         await uow.SaveChangesAsync(ct);
         var refreshed = await uow.Tournaments.GetWithCategoriesAsync(id, ct);
-        return Result<TournamentDetailDto>.Ok(ToDetail(refreshed!));
+        var counts    = await uow.TournamentEntries.CountByTournamentAsync(id, ct);
+        return Result<TournamentDetailDto>.Ok(ToDetail(refreshed!, counts));
     }
 
     public async Task<Result<TournamentDetailDto>> PublishAsync(Guid id, bool publish, CancellationToken ct = default)
@@ -141,7 +159,8 @@ public class TournamentService(IUnitOfWork uow, ILogger<TournamentService> log) 
         log.LogInformation("Tournament {Id} published={Published}", id, publish);
 
         var refreshed = await uow.Tournaments.GetWithCategoriesAsync(id, ct);
-        return Result<TournamentDetailDto>.Ok(ToDetail(refreshed!));
+        var counts    = await uow.TournamentEntries.CountByTournamentAsync(id, ct);
+        return Result<TournamentDetailDto>.Ok(ToDetail(refreshed!, counts));
     }
 
     public async Task<Result<TournamentDetailDto>> SetRegistrationAsync(Guid id, bool open, CancellationToken ct = default)
@@ -153,7 +172,8 @@ public class TournamentService(IUnitOfWork uow, ILogger<TournamentService> log) 
         await uow.SaveChangesAsync(ct);
 
         var refreshed = await uow.Tournaments.GetWithCategoriesAsync(id, ct);
-        return Result<TournamentDetailDto>.Ok(ToDetail(refreshed!));
+        var counts    = await uow.TournamentEntries.CountByTournamentAsync(id, ct);
+        return Result<TournamentDetailDto>.Ok(ToDetail(refreshed!, counts));
     }
 
     public async Task<Result<TournamentDetailDto>> UpsertCategoryAsync(Guid tournamentId, UpsertTournamentCategoryRequest req, CancellationToken ct = default)
@@ -202,7 +222,8 @@ public class TournamentService(IUnitOfWork uow, ILogger<TournamentService> log) 
 
         await uow.SaveChangesAsync(ct);
         var refreshed = await uow.Tournaments.GetWithCategoriesAsync(tournamentId, ct);
-        return Result<TournamentDetailDto>.Ok(ToDetail(refreshed!));
+        var counts    = await uow.TournamentEntries.CountByTournamentAsync(tournamentId, ct);
+        return Result<TournamentDetailDto>.Ok(ToDetail(refreshed!, counts));
     }
 
     public async Task<Result<TournamentDetailDto>> DeleteCategoryAsync(Guid tournamentId, Guid categoryId, CancellationToken ct = default)
@@ -215,16 +236,35 @@ public class TournamentService(IUnitOfWork uow, ILogger<TournamentService> log) 
         await uow.SaveChangesAsync(ct);
 
         var refreshed = await uow.Tournaments.GetWithCategoriesAsync(tournamentId, ct);
-        return Result<TournamentDetailDto>.Ok(ToDetail(refreshed!));
+        var counts    = await uow.TournamentEntries.CountByTournamentAsync(tournamentId, ct);
+        return Result<TournamentDetailDto>.Ok(ToDetail(refreshed!, counts));
     }
 
     // ── Mappers ────────────────────────────────────────────────────────────
-    private static TournamentSummaryDto ToSummary(Tournament t)
+    private static TournamentCategoryDto MakeCategoryDto(
+        TournamentCategory c,
+        IReadOnlyDictionary<Guid, (int Total, int Confirmed)> counts)
+    {
+        var (total, confirmed) = counts.TryGetValue(c.Id, out var v) ? v : (0, 0);
+        return new TournamentCategoryDto(
+            Id:               c.Id,
+            Name:             c.Name,
+            Format:           c.Format,
+            PlayersPerEntry:  c.PlayersPerEntry,
+            MinEntries:       c.MinEntries,
+            MaxEntries:       c.MaxEntries,
+            EntryFeeRupees:   c.EntryFeeRupees,
+            RegistrationOpen: c.RegistrationOpen,
+            TotalEntries:     total,
+            ConfirmedEntries: confirmed);
+    }
+
+    private static TournamentSummaryDto ToSummary(
+        Tournament t,
+        IReadOnlyDictionary<Guid, (int Total, int Confirmed)> counts)
     {
         var cats = t.Categories.OrderBy(c => c.Format)
-            .Select(c => new TournamentCategoryDto(
-                c.Id, c.Name, c.Format, c.PlayersPerEntry,
-                c.MinEntries, c.MaxEntries, c.EntryFeeRupees, c.RegistrationOpen))
+            .Select(c => MakeCategoryDto(c, counts))
             .ToList();
 
         return new TournamentSummaryDto(
@@ -246,30 +286,30 @@ public class TournamentService(IUnitOfWork uow, ILogger<TournamentService> log) 
             Categories:           cats);
     }
 
-    private static TournamentDetailDto ToDetail(Tournament t) => new(
-        Id:                   t.Id,
-        Slug:                 t.Slug,
-        Name:                 t.Name,
-        GameId:               t.GameId,
-        GameName:             t.Game?.Name ?? string.Empty,
-        Tagline:              t.Tagline,
-        Description:          t.Description,
-        Venue:                t.Venue,
-        StartsOn:             t.StartsOn,
-        EndsOn:               t.EndsOn,
-        RegistrationDeadline: t.RegistrationDeadline,
-        BannerImageUrl:       t.BannerImageUrl,
-        WhatsAppGroupUrl:     t.WhatsAppGroupUrl,
-        EntryFeeRupees:       t.EntryFeeRupees,
-        RegistrationOpen:     t.RegistrationOpen,
-        IsPublished:          t.IsPublished,
-        Status:               ComputeStatus(t),
-        Categories:           t.Categories.OrderBy(c => c.Format)
-                                .Select(c => new TournamentCategoryDto(
-                                    c.Id, c.Name, c.Format, c.PlayersPerEntry,
-                                    c.MinEntries, c.MaxEntries, c.EntryFeeRupees, c.RegistrationOpen))
-                                .ToList(),
-        Contacts:             t.Contacts.Select(c => new TournamentContactDto(c.Name, c.PhoneDisplay, c.PhoneE164)).ToList());
+    private static TournamentDetailDto ToDetail(
+        Tournament t,
+        IReadOnlyDictionary<Guid, (int Total, int Confirmed)> counts) => new(
+            Id:                   t.Id,
+            Slug:                 t.Slug,
+            Name:                 t.Name,
+            GameId:               t.GameId,
+            GameName:             t.Game?.Name ?? string.Empty,
+            Tagline:              t.Tagline,
+            Description:          t.Description,
+            Venue:                t.Venue,
+            StartsOn:             t.StartsOn,
+            EndsOn:               t.EndsOn,
+            RegistrationDeadline: t.RegistrationDeadline,
+            BannerImageUrl:       t.BannerImageUrl,
+            WhatsAppGroupUrl:     t.WhatsAppGroupUrl,
+            EntryFeeRupees:       t.EntryFeeRupees,
+            RegistrationOpen:     t.RegistrationOpen,
+            IsPublished:          t.IsPublished,
+            Status:               ComputeStatus(t),
+            Categories:           t.Categories.OrderBy(c => c.Format)
+                                    .Select(c => MakeCategoryDto(c, counts))
+                                    .ToList(),
+            Contacts:             t.Contacts.Select(c => new TournamentContactDto(c.Name, c.PhoneDisplay, c.PhoneE164)).ToList());
 
     private static TournamentStatus ComputeStatus(Tournament t)
     {

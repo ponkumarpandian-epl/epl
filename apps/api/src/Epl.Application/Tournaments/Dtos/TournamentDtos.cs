@@ -25,7 +25,11 @@ public record TournamentCategoryDto(
     int            MinEntries,
     int            MaxEntries,
     int            EntryFeeRupees,
-    bool           RegistrationOpen);
+    bool           RegistrationOpen,
+    /// <summary>Total non-withdrawn entries. 0 unless the caller asks for rolled-up counts.</summary>
+    int            TotalEntries     = 0,
+    /// <summary>Subset of TotalEntries that are status=Confirmed.</summary>
+    int            ConfirmedEntries = 0);
 
 public record TournamentSummaryDto(
     Guid             Id,

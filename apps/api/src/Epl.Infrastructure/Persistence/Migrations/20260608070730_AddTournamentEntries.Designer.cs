@@ -4,6 +4,7 @@ using Epl.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Epl.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260608070730_AddTournamentEntries")]
+    partial class AddTournamentEntries
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -168,124 +171,6 @@ namespace Epl.Infrastructure.Persistence.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Epl.Domain.Entities.Bracket", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int>("DefaultBestOf")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("DefaultPointCap")
-                        .HasColumnType("int");
-
-                    b.Property<int>("DefaultPointsToWin")
-                        .HasColumnType("int");
-
-                    b.Property<int>("DefaultWinByMargin")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Format")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsPublished")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("ParentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ParentType")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ParentType", "ParentId");
-
-                    b.ToTable("Brackets");
-                });
-
-            modelBuilder.Entity("Epl.Domain.Entities.BracketParticipant", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BracketId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasMaxLength(160)
-                        .HasColumnType("nvarchar(160)");
-
-                    b.Property<bool>("IsBye")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("Seed")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("SourceEntryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("SourceTeamId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BracketId");
-
-                    b.HasIndex("SourceEntryId");
-
-                    b.ToTable("BracketParticipants");
-                });
-
-            modelBuilder.Entity("Epl.Domain.Entities.BracketRound", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int?>("BestOf")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("BracketId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("GroupLabel")
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)");
-
-                    b.Property<int>("OrderIndex")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PointCap")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PointsToWin")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("WinByMargin")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BracketId", "OrderIndex")
-                        .IsUnique();
-
-                    b.ToTable("BracketRounds");
-                });
-
             modelBuilder.Entity("Epl.Domain.Entities.Game", b =>
                 {
                     b.Property<Guid>("Id")
@@ -328,67 +213,6 @@ namespace Epl.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Games");
-                });
-
-            modelBuilder.Entity("Epl.Domain.Entities.Match", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BracketId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Court")
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
-
-                    b.Property<Guid?>("NextMatchId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ParticipantAId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ParticipantBId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("RoundId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("RulesBestOf")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("RulesPointCap")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RulesPointsToWin")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RulesWinByMargin")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("ScheduledAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int>("SlotIndex")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("WinnerParticipantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NextMatchId");
-
-                    b.HasIndex("RoundId");
-
-                    b.HasIndex("BracketId", "RoundId", "SlotIndex")
-                        .IsUnique();
-
-                    b.ToTable("Matches");
                 });
 
             modelBuilder.Entity("Epl.Domain.Entities.Season", b =>
@@ -924,47 +748,6 @@ namespace Epl.Infrastructure.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Epl.Domain.Entities.BracketParticipant", b =>
-                {
-                    b.HasOne("Epl.Domain.Entities.Bracket", "Bracket")
-                        .WithMany("Participants")
-                        .HasForeignKey("BracketId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Bracket");
-                });
-
-            modelBuilder.Entity("Epl.Domain.Entities.BracketRound", b =>
-                {
-                    b.HasOne("Epl.Domain.Entities.Bracket", "Bracket")
-                        .WithMany("Rounds")
-                        .HasForeignKey("BracketId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Bracket");
-                });
-
-            modelBuilder.Entity("Epl.Domain.Entities.Match", b =>
-                {
-                    b.HasOne("Epl.Domain.Entities.Bracket", "Bracket")
-                        .WithMany("Matches")
-                        .HasForeignKey("BracketId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Epl.Domain.Entities.BracketRound", "Round")
-                        .WithMany()
-                        .HasForeignKey("RoundId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Bracket");
-
-                    b.Navigation("Round");
-                });
-
             modelBuilder.Entity("Epl.Domain.Entities.SeasonGame", b =>
                 {
                     b.HasOne("Epl.Domain.Entities.Game", "Game")
@@ -1210,15 +993,6 @@ namespace Epl.Infrastructure.Persistence.Migrations
                     b.Navigation("CaptainedTeams");
 
                     b.Navigation("Skills");
-                });
-
-            modelBuilder.Entity("Epl.Domain.Entities.Bracket", b =>
-                {
-                    b.Navigation("Matches");
-
-                    b.Navigation("Participants");
-
-                    b.Navigation("Rounds");
                 });
 
             modelBuilder.Entity("Epl.Domain.Entities.Game", b =>

@@ -1,0 +1,80 @@
+/* ═════════════════════════════════════════════════════════════════════════
+   BRACKET VIEW — public knockout SVG (T-3)
+   Geometry constants come from the archive (CARD_W=180, CARD_H=70, COL_GAP=60).
+   Mobile-stacked layout lands in T-4.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+.bracketView {
+  background: linear-gradient(160deg, var(--ink-3), var(--ink));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 8px;
+}
+.bracketViewScroll {
+  /* On narrow viewports the SVG scrolls horizontally — better than shrinking 180px cards. */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 0;
+}
+
+.bracketViewEmpty {
+  padding: 32px 24px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--bone-fade);
+  background: linear-gradient(160deg, var(--ink-3), var(--ink));
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+/* ── SVG primitives ───────────────────────────────────────────────────── */
+.bracketRoundLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  fill: var(--bone-fade);
+}
+
+.bracketCard {
+  fill: var(--ink-2);
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+.bracketCard.is-complete   { stroke: rgba(52, 211, 153, 0.42); }
+.bracketCard.is-live       { stroke: rgba(200, 47, 60, 0.7); stroke-width: 2; }
+.bracketCard.is-highlighted { stroke: var(--gold-bright); stroke-width: 1.5; }
+
+.bracketCardAccent { fill: var(--cyan-bright); }
+
+.bracketCardName {
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  fill: var(--bone);
+}
+.bracketCardName.is-bye    { fill: var(--bone-fade); font-style: italic; font-weight: 400; }
+.bracketCardName.is-winner { fill: var(--gold-bright); }
+
+.bracketCardSeed {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  fill: var(--bone-fade);
+  letter-spacing: 0.04em;
+}
+.bracketCardSeed.is-bye { fill: rgba(255, 255, 255, 0.15); }
+
+.bracketCardStatus {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  fill: var(--bone-fade);
+}
+.bracketCardStatus.is-inprogress { fill: #FF8C95; }
+.bracketCardStatus.is-complete   { fill: #6EE7B7; }
+.bracketCardStatus.is-walkover   { fill: var(--bone-fade); }
+.bracketCardStatus.is-scheduled  { fill: var(--cyan-bright); }

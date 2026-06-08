@@ -441,3 +441,128 @@
   color: var(--cyan-bright);
   line-height: 1.55;
 }
+
+/* ── Register CTA + entries list (T-2) ─────────────────────────────────── */
+.tournRegisterBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 14px 18px;
+  background: var(--gold-bright);
+  color: var(--ink);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: transform 0.15s var(--ease), box-shadow 0.15s var(--ease);
+}
+.tournRegisterBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(232, 181, 61, 0.36);
+}
+.tournRegisterBtn:focus-visible {
+  outline: 2px solid var(--bone);
+  outline-offset: 3px;
+}
+
+.tournEntryList {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.tournEntryListTitle {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bone-fade);
+  margin: 0 0 10px;
+}
+.tournEntryList ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.tournEntryRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  color: var(--bone);
+}
+.tournEntryNames { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tournEntryTeam  { color: var(--bone-fade); }
+.tournEntryStatus {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--bone-fade);
+  flex-shrink: 0;
+}
+.tournEntryRow-confirmed .tournEntryStatus {
+  background: rgba(52, 211, 153, 0.12);
+  color: #6EE7B7;
+}
+.tournEntryRow-pending .tournEntryStatus {
+  background: rgba(232, 181, 61, 0.12);
+  color: var(--gold-bright);
+}
+.tournEntryRow-withdrawn .tournEntryStatus {
+  background: rgba(200, 47, 60, 0.12);
+  color: #FF8C95;
+}
+/* ── Bracket section on detail page (T-3) ─────────────────────────────── */
+.tournBracketSection {
+  margin-top: 24px;
+}
+.tournBracketHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.tournBracketHeader h2 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  margin: 0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bone);
+}
+.tournBracketEyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--cyan-bright);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(63, 169, 245, 0.08);
+  border: 1px solid rgba(63, 169, 245, 0.32);
+}
+
+.tournEntryEmpty {
+  margin: 18px 0 0;
+  padding: 14px 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--bone-fade);
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+}

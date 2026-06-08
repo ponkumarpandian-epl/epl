@@ -1,4 +1,5 @@
 using Epl.Application.Auth.Services;
+using Epl.Application.Brackets.Services;
 using Epl.Application.Gallery.Services;
 using Epl.Application.Profile.Services;
 using Epl.Application.Seasons.Services;
@@ -20,7 +21,9 @@ public static class DependencyInjection
         services.AddScoped<IGalleryService,    GalleryService>();
         services.AddScoped<ISeasonService,     SeasonService>();
         services.AddScoped<IProfileService,    ProfileService>();
-        services.AddScoped<ITournamentService, TournamentService>();
+        services.AddScoped<ITournamentService,      TournamentService>();
+        services.AddScoped<ITournamentEntryService, TournamentEntryService>();
+        services.AddScoped<IBracketService,         BracketService>();
 
         return services;
     }

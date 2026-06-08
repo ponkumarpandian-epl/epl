@@ -4,13 +4,18 @@ import { notFound } from "next/navigation";
 import {
   FORMAT_LABEL,
   getTournamentBySlug,
+  listCategoryEntries,
   type CategoryFormat,
+  type TournamentCategoryDto,
+  type TournamentDetailDto,
 } from "@/lib/tournaments";
+import { getPublicBracketByParent } from "@/lib/brackets";
+import { BracketView } from "@/components/bracket/bracket-view";
 import "../tournaments.css";
 
 interface PageProps {
   params:       Promise<{ slug: string }>;
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; registered?: string }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -43,9 +48,18 @@ function BackIcon() {
   );
 }
 
+function canRegister(t: TournamentDetailDto, c: TournamentCategoryDto): { ok: boolean; reason?: string } {
+  if (!t.registrationOpen)   return { ok: false, reason: "Registration is closed for the whole tournament." };
+  if (!c.registrationOpen)   return { ok: false, reason: `${FORMAT_LABEL[c.format]} is not accepting entries.` };
+  if (c.totalEntries >= c.maxEntries) return { ok: false, reason: `${FORMAT_LABEL[c.format]} is full (${c.maxEntries} entries).` };
+  if (t.registrationDeadline && new Date(t.registrationDeadline) < new Date())
+    return { ok: false, reason: "The registration deadline has passed." };
+  return { ok: true };
+}
+
 export default async function TournamentDetailPage({ params, searchParams }: PageProps) {
   const { slug }     = await params;
-  const { category } = await searchParams;
+  const { category, registered } = await searchParams;
 
   const t = await getTournamentBySlug(slug);
   if (!t) notFound();
@@ -53,6 +67,10 @@ export default async function TournamentDetailPage({ params, searchParams }: Pag
   // Pick which category tab is active: query param wins; otherwise the first category by Format order.
   const activeFormat = (category as CategoryFormat | undefined) ?? t.categories[0]?.format;
   const active = t.categories.find((c) => c.format === activeFormat) ?? t.categories[0];
+
+  const entries = active ? await listCategoryEntries(slug, active.id) : [];
+  const gate    = active ? canRegister(t, active) : { ok: false };
+  const bracket = active ? await getPublicBracketByParent("TournamentCategory", active.id) : null;
 
   return (
     <div className="tournDetailShell">
@@ -101,12 +119,22 @@ export default async function TournamentDetailPage({ params, searchParams }: Pag
             ))}
           </div>
 
+          {active && bracket && (
+            <section className="tournBracketSection" aria-label={`${FORMAT_LABEL[active.format]} bracket`}>
+              <header className="tournBracketHeader">
+                <h2>Bracket · {FORMAT_LABEL[active.format]}</h2>
+                <span className="tournBracketEyebrow">Knockout</span>
+              </header>
+              <BracketView bracket={bracket} />
+            </section>
+          )}
+
           {active && (
             <section className="tournCategoryPanel" aria-label={`${FORMAT_LABEL[active.format]} details`}>
               <div>
                 <span className="tournCategoryStats">
                   <b>{FORMAT_LABEL[active.format]}</b>
-                  Spots: <strong style={{ color: "var(--bone)" }}>{active.maxEntries}</strong>
+                  Spots: <strong style={{ color: "var(--bone)" }}>{active.totalEntries} / {active.maxEntries}</strong> filled
                   {" · "}
                   Minimum to run: <strong style={{ color: "var(--bone)" }}>{active.minEntries}</strong>
                   {" · "}
@@ -115,20 +143,48 @@ export default async function TournamentDetailPage({ params, searchParams }: Pag
                   Entry fee: <strong style={{ color: "var(--gold-bright)" }}>{fmtFee(active.entryFeeRupees > 0 ? active.entryFeeRupees : t.entryFeeRupees)}</strong>
                 </span>
 
-                <div className="tournCategoryHint">
-                  Registration UI &amp; live entry list ship in the next iteration. For now, the
-                  category is set up and ready for the registration form when it lands.
-                </div>
+                {registered === "1" && (
+                  <div className="tournCategoryHint" style={{ borderColor: "rgba(52, 211, 153, 0.5)", background: "rgba(52, 211, 153, 0.08)", color: "var(--bone)" }} role="status">
+                    ✓ You&apos;re registered. The organisers will reach out on WhatsApp once entries are confirmed.
+                  </div>
+                )}
+
+                {entries.length > 0 ? (
+                  <div className="tournEntryList" aria-label={`Entries in ${FORMAT_LABEL[active.format]}`}>
+                    <h3 className="tournEntryListTitle">Entries so far</h3>
+                    <ul>
+                      {entries.map((e) => (
+                        <li key={e.id} className={`tournEntryRow tournEntryRow-${e.status.toLowerCase()}`}>
+                          <span className="tournEntryNames">
+                            {e.player1Name}{e.player2Name ? <> &nbsp;/&nbsp; {e.player2Name}</> : null}
+                            {e.teamLabel && <span className="tournEntryTeam">&nbsp;· {e.teamLabel}</span>}
+                          </span>
+                          <span className="tournEntryStatus">{e.status}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <p className="tournEntryEmpty">No entries yet — be the first to register.</p>
+                )}
               </div>
 
               <div>
-                {!active.registrationOpen || !t.registrationOpen ? (
-                  <div className="tournCategoryHint" style={{ borderColor: "rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.03)", color: "var(--bone-fade)" }}>
-                    Registration is currently <b style={{ color: "var(--bone)" }}>closed</b> for this category.
-                  </div>
+                {gate.ok ? (
+                  <Link
+                    href={`/tournaments/${t.slug}/register?category=${active.format}`}
+                    className="tournRegisterBtn"
+                    aria-label={`Register for ${FORMAT_LABEL[active.format]}`}
+                  >
+                    Register for {FORMAT_LABEL[active.format]} →
+                  </Link>
                 ) : (
-                  <div className="tournCategoryHint">
-                    Registration window: <b style={{ color: "var(--bone)" }}>open</b>. The form arrives in iteration T-2.
+                  <div
+                    className="tournCategoryHint"
+                    style={{ borderColor: "rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.03)", color: "var(--bone-fade)" }}
+                    role="status"
+                  >
+                    {gate.reason ?? "Registration is not available right now."}
                   </div>
                 )}
               </div>

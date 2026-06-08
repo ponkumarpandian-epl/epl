@@ -1,0 +1,205 @@
+/* ═════════════════════════════════════════════════════════════════════════
+   TOURNAMENT REGISTRATION FORM — public route /tournaments/[slug]/register
+   Mirrors the admin tournament-form structure with the public theme tweaks.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+.tournRegisterForm {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.tournRegisterCard {
+  background: linear-gradient(160deg, var(--ink-3), var(--ink));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px;
+}
+.tournRegisterCard h2 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0 0 4px;
+  color: var(--bone);
+}
+.tournRegisterHelp {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--bone-fade);
+  letter-spacing: 0.04em;
+  margin: 0 0 16px;
+}
+
+.tournRegisterField {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 14px;
+  align-items: start;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.tournRegisterField:last-child { border-bottom: none; }
+.tournRegisterField > label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--bone-dim);
+  text-transform: uppercase;
+  padding-top: 10px;
+}
+.tournRegisterField input {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--bone);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  min-height: 44px; /* mobile tap target */
+}
+.tournRegisterField input:focus {
+  outline: 2px solid rgba(232, 181, 61, 0.4);
+  outline-offset: 1px;
+}
+.tournRegisterFieldErr {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #FF8C95;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 640px) {
+  .tournRegisterField { grid-template-columns: 1fr; gap: 6px; }
+  .tournRegisterField > label { padding-top: 0; }
+}
+
+/* ── Logged-in identity card (replaces Player 1 name/mobile inputs) ─────── */
+.tournRegisterIdentity {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 6px 16px;
+  padding: 14px 16px;
+  background: linear-gradient(140deg, rgba(63, 169, 245, 0.10), rgba(232, 181, 61, 0.06));
+  border: 1px solid rgba(63, 169, 245, 0.32);
+  border-radius: var(--radius-md);
+}
+.tournRegisterIdentityLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bone-fade);
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+.tournRegisterIdentityBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.tournRegisterIdentityName {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--bone);
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+}
+.tournRegisterIdentityPhone {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--bone-dim);
+  letter-spacing: 0.04em;
+}
+.tournRegisterIdentitySwitch {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--cyan-bright);
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(63, 169, 245, 0.4);
+  transition: background 0.15s, border-color 0.15s;
+}
+.tournRegisterIdentitySwitch:hover {
+  background: rgba(63, 169, 245, 0.12);
+  border-color: rgba(63, 169, 245, 0.7);
+}
+@media (max-width: 560px) {
+  .tournRegisterIdentity {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .tournRegisterIdentityLabel { grid-row: 1; }
+  .tournRegisterIdentitySwitch { justify-self: start; }
+}
+
+.tournRegisterTopErr {
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: rgba(200, 47, 60, 0.10);
+  border: 1px solid rgba(200, 47, 60, 0.45);
+  color: #FFD0D4;
+  font-size: 13px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+.tournRegisterFoot {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: stretch;
+  padding-top: 4px;
+}
+@media (min-width: 640px) {
+  .tournRegisterFoot { flex-direction: row; align-items: center; justify-content: space-between; }
+}
+.tournRegisterFootHint {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--bone-fade);
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+}
+.tournRegisterFootHint a {
+  color: var(--cyan-bright);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.tournRegisterSubmit {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  padding: 14px 22px;
+  background: var(--gold-bright);
+  color: var(--ink);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  transition: transform 0.15s var(--ease), box-shadow 0.15s var(--ease), opacity 0.15s;
+  min-height: 48px;
+  white-space: nowrap;
+}
+.tournRegisterSubmit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(232, 181, 61, 0.36);
+}
+.tournRegisterSubmit:disabled { opacity: 0.55; cursor: progress; }
+.tournRegisterSubmit:focus-visible {
+  outline: 2px solid var(--bone);
+  outline-offset: 3px;
+}

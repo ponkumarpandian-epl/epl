@@ -7,6 +7,8 @@ import {
 } from "@/lib/tournaments";
 import { TournamentControlPanel } from "./control-panel";
 import { AddCategoryForm } from "./add-category-form";
+import { EntriesSection } from "./entries-section";
+import { BracketSection } from "./bracket-section";
 import { deleteCategoryAction } from "./actions";
 import "../../admin.css";
 import "../admin-tournaments.css";
@@ -112,6 +114,14 @@ export default async function AdminTournamentDetailPage({ params }: PageProps) {
 
         <AddCategoryForm tournamentId={t.id} usedFormats={t.categories.map((c) => c.format)} />
       </section>
+
+      {t.categories.map((c) => (
+        <EntriesSection key={c.id} tournamentId={t.id} category={c} />
+      ))}
+
+      {t.categories.map((c) => (
+        <BracketSection key={`bracket-${c.id}`} tournamentId={t.id} category={c} />
+      ))}
     </>
   );
 }

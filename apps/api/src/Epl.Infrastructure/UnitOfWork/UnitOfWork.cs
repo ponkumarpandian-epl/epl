@@ -18,6 +18,8 @@ public class UnitOfWork(AppDbContext db) : IUnitOfWork
     private IUserSkillRepository?          _userSkills;
     private ITournamentRepository?         _tournaments;
     private ITournamentCategoryRepository? _tournamentCategories;
+    private ITournamentEntryRepository?    _tournamentEntries;
+    private IBracketRepository?            _brackets;
 
     public ITeamRepository               Teams                => _teams                ??= new TeamRepository(_db);
     public IApartmentRepository          Apartments           => _apartments           ??= new ApartmentRepository(_db);
@@ -27,6 +29,8 @@ public class UnitOfWork(AppDbContext db) : IUnitOfWork
     public IUserSkillRepository          UserSkills           => _userSkills           ??= new UserSkillRepository(_db);
     public ITournamentRepository         Tournaments          => _tournaments          ??= new TournamentRepository(_db);
     public ITournamentCategoryRepository TournamentCategories => _tournamentCategories ??= new TournamentCategoryRepository(_db);
+    public ITournamentEntryRepository    TournamentEntries    => _tournamentEntries    ??= new TournamentEntryRepository(_db);
+    public IBracketRepository            Brackets             => _brackets             ??= new BracketRepository(_db);
 
     public Task<int> SaveChangesAsync(CancellationToken ct = default)
         => _db.SaveChangesAsync(ct);
