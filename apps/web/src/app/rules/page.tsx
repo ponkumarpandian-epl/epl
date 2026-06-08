@@ -486,11 +486,21 @@ function CommonPanel() {
       <Section id="common-eligibility" title="Player eligibility &amp; documents" defaultOpen>
         <ul>
           <li><strong>Minimum age</strong> — 22 years.</li>
-          <li><strong>Accepted address proofs</strong> — Aadhaar Card, Flat Ownership Deed, Gas Bill (last 3 months), Passport. <strong>Rental agreements are not accepted.</strong></li>
+          <li><strong>Accepted address proofs</strong> — Aadhaar Card, Flat Ownership Deed, Gas Bill (last 3 months), Passport, or a Rental Agreement (see conditions below).</li>
           <li>Bring <strong>one photo proof</strong> and <strong>one address proof</strong> to the venue.</li>
           <li>Players must be registered with the Tournament Committee before the team&apos;s first match.</li>
           <li>If a player turns out for a second team, that team forfeits every match the player participated in.</li>
         </ul>
+
+        <div className="rulesNote">
+          <strong>Rental Agreement — all three conditions must be met:</strong>
+          <ul>
+            <li>Executed at least <strong>2 months prior</strong> to the tournament start date.</li>
+            <li>Must be in the <strong>player&apos;s own name</strong>.</li>
+            <li>If the agreement is in a <strong>spouse&apos;s or parent&apos;s name</strong>, the player must additionally submit a <strong>relationship proof</strong> — e.g. marriage certificate, family-linked Aadhaar, or birth certificate.</li>
+          </ul>
+        </div>
+
         <p className="rulesNote">
           <strong>Not eligible</strong> — coaches and medalled players in the sport.
         </p>
@@ -507,6 +517,7 @@ function CommonPanel() {
         <ul>
           <li>Apartments with <strong>500 or more flats</strong> must form separate teams.</li>
           <li>Apartments with fewer than 500 flats <strong>can combine</strong> — up to <strong>4 apartments</strong> per team.</li>
+          <li>When combining, the <strong>total flat count across the combined apartments must not exceed 500</strong>. (Same threshold as the standalone rule — a combined entry can&apos;t be larger than what a single 500-flat apartment would field on its own.)</li>
           <li>Combined apartments must be within a <strong>1 km radius</strong> of each other.</li>
           <li>Individual houses cannot combine.</li>
         </ul>
