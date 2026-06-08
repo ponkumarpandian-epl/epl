@@ -495,7 +495,7 @@ function CommonPanel() {
         <div className="rulesNote">
           <strong>Rental Agreement — all three conditions must be met:</strong>
           <ul>
-            <li>Executed at least <strong>3 months prior</strong> to the tournament start date.</li>
+            <li>Executed at least <strong>2 months prior</strong> to the tournament start date.</li>
             <li>Must be in the <strong>player&apos;s own name</strong>.</li>
             <li>If the agreement is in a <strong>spouse&apos;s or parent&apos;s name</strong>, the player must additionally submit a <strong>relationship proof</strong> — e.g. marriage certificate, family-linked Aadhaar, or birth certificate.</li>
           </ul>
