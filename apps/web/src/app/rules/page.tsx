@@ -486,11 +486,21 @@ function CommonPanel() {
       <Section id="common-eligibility" title="Player eligibility &amp; documents" defaultOpen>
         <ul>
           <li><strong>Minimum age</strong> — 22 years.</li>
-          <li><strong>Accepted address proofs</strong> — Aadhaar Card, Flat Ownership Deed, Gas Bill (last 3 months), Passport. <strong>Rental agreements are not accepted.</strong></li>
+          <li><strong>Accepted address proofs</strong> — Aadhaar Card, Flat Ownership Deed, Gas Bill (last 3 months), Passport, or a Rental Agreement (see conditions below).</li>
           <li>Bring <strong>one photo proof</strong> and <strong>one address proof</strong> to the venue.</li>
           <li>Players must be registered with the Tournament Committee before the team&apos;s first match.</li>
           <li>If a player turns out for a second team, that team forfeits every match the player participated in.</li>
         </ul>
+
+        <div className="rulesNote">
+          <strong>Rental Agreement — all three conditions must be met:</strong>
+          <ul>
+            <li>Executed at least <strong>3 months prior</strong> to the tournament start date.</li>
+            <li>Must be in the <strong>player&apos;s own name</strong>.</li>
+            <li>If the agreement is in a <strong>spouse&apos;s or parent&apos;s name</strong>, the player must additionally submit a <strong>relationship proof</strong> — e.g. marriage certificate, family-linked Aadhaar, or birth certificate.</li>
+          </ul>
+        </div>
+
         <p className="rulesNote">
           <strong>Not eligible</strong> — coaches and medalled players in the sport.
         </p>
