@@ -119,6 +119,9 @@
   letter-spacing: 0.04em;
 }
 .tournRegisterIdentitySwitch {
+  appearance: none;
+  cursor: pointer;
+  background: transparent;
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.06em;
@@ -133,6 +136,10 @@
 .tournRegisterIdentitySwitch:hover {
   background: rgba(63, 169, 245, 0.12);
   border-color: rgba(63, 169, 245, 0.7);
+}
+.tournRegisterIdentitySwitch:focus-visible {
+  outline: 2px solid var(--bone);
+  outline-offset: 2px;
 }
 @media (max-width: 560px) {
   .tournRegisterIdentity {

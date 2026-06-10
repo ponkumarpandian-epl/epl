@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useTransition } from "react";
 import type { CategoryFormat } from "@/lib/tournaments-types";
-import { registerEntryAction, type RegisterEntryState } from "./actions";
+import { registerEntryAction, switchAccountAction, type RegisterEntryState } from "./actions";
 
 export interface RegisterIdentity {
   fullName:    string;
@@ -26,6 +26,7 @@ export function RegisterEntryForm({ slug, categoryId, format, whatsAppGroupUrl, 
     boundAction,
     undefined,
   );
+  const [switching, startSwitch] = useTransition();
 
   const v  = state?.values ?? {};
   const fe = state?.fieldErrors ?? {};
@@ -57,12 +58,18 @@ export function RegisterEntryForm({ slug, categoryId, format, whatsAppGroupUrl, 
               <span className="tournRegisterIdentityName">{me.fullName}</span>
               {me.phoneNumber && <span className="tournRegisterIdentityPhone">{me.phoneNumber}</span>}
             </div>
-            <a
-              href={`/login?next=${encodeURIComponent(`/tournaments/${slug}/register?category=${format}`)}`}
+            <button
+              type="button"
               className="tournRegisterIdentitySwitch"
+              disabled={switching}
+              onClick={() =>
+                startSwitch(() =>
+                  switchAccountAction(`/tournaments/${slug}/register?category=${format}`),
+                )
+              }
             >
-              Not you? Switch accounts →
-            </a>
+              {switching ? "Signing out…" : "Not you? Switch accounts →"}
+            </button>
           </div>
         ) : (
           <div className="tournRegisterField">

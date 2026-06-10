@@ -5,6 +5,21 @@ import { revalidatePath } from "next/cache";
 import { registerEntry } from "@/lib/tournaments";
 import type { CategoryFormat } from "@/lib/tournaments";
 import { getCurrentUser } from "@/lib/auth";
+import { api } from "@/lib/api";
+
+/**
+ * Sign the current user out, then send them to /login with a `next` parameter
+ * that brings them back to this registration page after they re-authenticate.
+ *
+ * Why this exists: a logged-in user clicking /login?next=… is bounced straight
+ * back to `next` by the login page (auth-gate short-circuit), so a plain anchor
+ * can't "switch accounts". Clearing the cookie first means /login renders the
+ * form normally for the next sign-in.
+ */
+export async function switchAccountAction(nextUrl: string) {
+  await api.post("/identity/logout", {});
+  redirect(`/login?next=${encodeURIComponent(nextUrl)}`);
+}
 
 /** Shape used by `useActionState` — persisted across re-renders when validation fails. */
 export interface RegisterEntryState {
