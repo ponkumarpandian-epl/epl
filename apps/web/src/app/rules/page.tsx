@@ -319,7 +319,7 @@ function BadmintonPanel({ sg, season, seasonRegOpen }: { sg: SeasonGameDto | nul
 
       <Section id="badminton-tournament" title="Tournament format" defaultOpen>
         <ul>
-          <li>Teams divided into <strong>Pool A and Pool B</strong> by random draw.</li>
+          <li>Teams divided into <strong>Pool A and Pool B</strong> by random lot draw, conducted in the presence of all team captains.</li>
           <li>Top 2 from each pool qualify for the semi-finals.</li>
           <li>Semi-finals — <strong>Pool A #1 vs Pool B #2</strong> and <strong>Pool B #1 vs Pool A #2</strong>.</li>
           <li>Winners advance to the Final.</li>
@@ -332,6 +332,7 @@ function BadmintonPanel({ sg, season, seasonRegOpen }: { sg: SeasonGameDto | nul
           <li>Regular doubles win — <strong>10 points</strong>.</li>
           <li><strong>Trump match</strong> win — <strong>20 points</strong>; loss — <strong>−10 points</strong>.</li>
           <li>League encounter — 4 regular doubles + 1 trump match.</li>
+          <li><strong>Trump restriction</strong> — a player cannot feature in more than <strong>one</strong> Trump match across the league stage.</li>
           <li>No trump matches in semi-finals or finals.</li>
           <li>Shuttlecock — <strong>Yonex Mavis 350</strong>.</li>
         </ul>
@@ -342,6 +343,18 @@ function BadmintonPanel({ sg, season, seasonRegOpen }: { sg: SeasonGameDto | nul
           <li>First — head-to-head result.</li>
           <li>If still tied — <strong>Supreme Doubles</strong>: best pair from each team plays a <strong>30 Golden Points</strong> shootout.</li>
         </ul>
+      </Section>
+
+      <Section id="badminton-eligibility" title="Player eligibility & substitutions" defaultOpen>
+        <ul>
+          <li><strong>Coaches and medalists</strong> are not eligible to participate.</li>
+          <li>If a player is injured <strong>mid-match</strong>, a backup may <strong>not</strong> enter to continue that match.</li>
+          <li>If both the primary player and their backup are unavailable, the match is a <strong>walkover</strong>.</li>
+          <li>Backup rotation between encounters is allowed, but must be finalised <strong>before lineups are exchanged</strong> with the opposing captain.</li>
+        </ul>
+        <p className="rulesNote">
+          <strong>Example:</strong> against Team 1 you may field Player X. For the next encounter against Team 2, swap in backup Player Y. Against Team 3, Player X may return.
+        </p>
       </Section>
 
       <Section id="badminton-other" title="Other important rules">
