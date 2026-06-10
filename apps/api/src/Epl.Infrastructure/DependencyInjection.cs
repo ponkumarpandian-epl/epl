@@ -1,5 +1,7 @@
+using Epl.Application.Common.Caching;
 using Epl.Domain.Abstractions;
 using Epl.Domain.Entities;
+using Epl.Infrastructure.Caching;
 using Epl.Infrastructure.Persistence;
 using Epl.Infrastructure.Storage;
 using Microsoft.AspNetCore.Identity;
@@ -27,6 +29,16 @@ public static class DependencyInjection
 
         services.AddScoped<IUnitOfWork, UnitOfWork.UnitOfWork>();
         services.AddSingleton<IProfileImageStore, LocalProfileImageStore>();
+
+        // Process-level cache for low-volatility reads (Season, SeasonGame, Game master).
+        // Singletons because the cache and its metric counters are shared across all requests.
+        // SizeLimit keeps a stray key explosion from OOM-ing the App Service.
+        services.AddMemoryCache(o =>
+        {
+            o.SizeLimit = null; // No size cap — entries are small DTOs; revisit if heap grows.
+        });
+        services.AddSingleton<ICacheMetrics, InMemoryCacheMetrics>();
+        services.AddSingleton<ICacheStore,   MemoryCacheStore>();
 
         // Identity core + role manager + sign-in manager + EF stores
         services
