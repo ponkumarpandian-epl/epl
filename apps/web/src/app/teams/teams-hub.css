@@ -1,0 +1,93 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Teams hub — /teams
+   Three sport cards. Each routes to /teams/by-game/<slug>.
+   Reuses .publicTeamsShell / Header / Eyebrow / Title / Lead from
+   teams-by-game.css for visual consistency.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.teamsHubGrid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+@media (min-width: 720px) {
+  .teamsHubGrid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.teamsHubCard {
+  display: block;
+  border-radius: var(--radius-lg, 12px);
+  overflow: hidden;
+}
+.teamsHubLink {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px 22px 26px;
+  min-height: 180px;
+  background: linear-gradient(160deg, var(--ink-3, #0A1838), var(--ink, #03081A));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg, 12px);
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+}
+.teamsHubLink:hover {
+  transform: translateY(-2px);
+  border-color: rgba(232, 181, 61, 0.42);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.45);
+}
+.teamsHubLink:focus-visible {
+  outline: 2px solid var(--gold-bright, #E8B53D);
+  outline-offset: 3px;
+}
+
+/* Sport accents — a colored top stripe per card */
+.teamsHubCard::before {
+  content: "";
+  display: block;
+  height: 4px;
+  width: 100%;
+}
+.teamsHubCard.cricketAccent::before    { background: var(--crimson, #C82F3C); }
+.teamsHubCard.badmintonAccent::before  { background: var(--gold-bright, #E8B53D); }
+.teamsHubCard.volleyballAccent::before { background: var(--cyan-bright, #3FA9F5); }
+
+.teamsHubEyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--bone-fade);
+}
+.teamsHubName {
+  font-family: var(--font-display);
+  font-size: 32px;
+  letter-spacing: 0.025em;
+  line-height: 1;
+  color: var(--bone);
+  margin: 0;
+}
+.teamsHubCount {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--bone-dim);
+  margin-top: auto;
+}
+.teamsHubCount strong { color: var(--bone); font-weight: 700; }
+.teamsHubArrow {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--bone-fade);
+  transition: color 0.18s, transform 0.18s;
+}
+.teamsHubLink:hover .teamsHubArrow { color: var(--gold-bright, #E8B53D); transform: translateX(3px); }

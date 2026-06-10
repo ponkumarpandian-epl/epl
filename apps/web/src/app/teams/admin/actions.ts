@@ -14,3 +14,18 @@ export async function setTeamPaymentAction(
   revalidatePath("/teams/admin");
   return { ok: true };
 }
+
+export type TeamStatus = "Active" | "Withdrawn" | "Waitlist";
+
+export async function setTeamStatusAction(
+  teamId: string,
+  status: TeamStatus,
+  comment: string | null,
+): Promise<ActionResult> {
+  const res = await api.patch(`/api/teams/${teamId}/status`, { status, comment });
+  if (!res.ok) return { ok: false, message: res.message };
+  // Admin list re-renders; public listing also reflects the change.
+  revalidatePath("/teams/admin");
+  revalidatePath("/teams/by-game", "page");   // catches any sport slug
+  return { ok: true };
+}

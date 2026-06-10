@@ -1,3 +1,4 @@
+using Epl.Application.Common.Caching;
 using Epl.Application.Seasons.Dtos;
 using Epl.Domain.Abstractions;
 using Epl.Domain.Common;
@@ -6,38 +7,59 @@ using Microsoft.Extensions.Logging;
 
 namespace Epl.Application.Seasons.Services;
 
-public class SeasonService(IUnitOfWork uow, ILogger<SeasonService> log) : ISeasonService
+/// <summary>
+/// Season + per-season SeasonGame orchestration. Reads are cached via <see cref="ICacheStore"/>;
+/// every write path invalidates the touched keys BEFORE returning success
+/// (see plan/13-readside-inmemory-cache.md §Core contract).
+///
+/// Cache invariants:
+///   - <c>season:active</c> is invalidated on every write because any of them can flip the
+///     "which season is active" pointer (CreateAsync with SetActive=true, SetActiveAsync) or
+///     mutate fields embedded in the active-season DTO (AddGame, SetRegistration, SetGameRegistration).
+///   - <c>season:{id}</c> for the affected id is also invalidated.
+///   - Over-invalidating is safe (Remove on a missing key is a no-op). Under-invalidating
+///     is a correctness bug — when in doubt, drop more keys.
+/// </summary>
+public class SeasonService(IUnitOfWork uow, ICacheStore cache, ILogger<SeasonService> log) : ISeasonService
 {
-    public async Task<SeasonDto?> GetCurrentAsync(CancellationToken ct = default)
-    {
-        var s = await uow.Seasons.GetActiveWithGamesAsync(ct);
-        return s is null ? null : ToDto(s);
-    }
+    public Task<SeasonDto?> GetCurrentAsync(CancellationToken ct = default)
+        => cache.GetOrCreateAsync(CacheKeys.SeasonActive, CacheTtl.Default, async token =>
+        {
+            var s = await uow.Seasons.GetActiveWithGamesAsync(token);
+            return s is null ? null : ToDto(s);
+        }, ct);
 
-    public async Task<SeasonDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
-    {
-        var s = await uow.Seasons.GetWithGamesAsync(id, ct);
-        return s is null ? null : ToDto(s);
-    }
+    public Task<SeasonDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
+        => cache.GetOrCreateAsync(CacheKeys.SeasonById(id), CacheTtl.Default, async token =>
+        {
+            var s = await uow.Seasons.GetWithGamesAsync(id, token);
+            return s is null ? null : ToDto(s);
+        }, ct);
 
     public async Task<IReadOnlyList<SeasonDto>> ListAllAsync(CancellationToken ct = default)
     {
+        // Admin-only endpoint, low traffic. Skip a top-level list cache — the per-id calls
+        // below already hit cache.SeasonById, so warm pages share work between admin views.
         var seasons = await uow.Seasons.ListAllAsync(ct);
         var dtos    = new List<SeasonDto>(seasons.Count);
         foreach (var s in seasons)
         {
-            var withGames = await uow.Seasons.GetWithGamesAsync(s.Id, ct);
-            if (withGames is not null) dtos.Add(ToDto(withGames));
+            var dto = await GetByIdAsync(s.Id, ct);   // cached per-id lookup
+            if (dto is not null) dtos.Add(dto);
         }
         return dtos;
     }
 
+    public Task<IReadOnlyList<GameDto>?> ListGamesAsyncCached(CancellationToken ct = default)
+        => cache.GetOrCreateAsync<IReadOnlyList<GameDto>>(CacheKeys.GamesAll, CacheTtl.Default, async token =>
+        {
+            var list = await uow.Games.ListAsync(token);
+            return list.Select(g => new GameDto(
+                g.Id, g.Name, g.Slug, g.Kind, g.Description, g.WhatsAppGroupUrl, g.IsActive)).ToList();
+        }, ct);
+
     public async Task<IReadOnlyList<GameDto>> ListGamesAsync(CancellationToken ct = default)
-    {
-        var list = await uow.Games.ListAsync(ct);
-        return list.Select(g => new GameDto(
-            g.Id, g.Name, g.Slug, g.Kind, g.Description, g.WhatsAppGroupUrl, g.IsActive)).ToList();
-    }
+        => (await ListGamesAsyncCached(ct)) ?? Array.Empty<GameDto>();
 
     // ── Admin ──────────────────────────────────────────────────────────────
     public async Task<Result<SeasonDto>> CreateAsync(CreateSeasonRequest req, CancellationToken ct = default)
@@ -72,6 +94,11 @@ public class SeasonService(IUnitOfWork uow, ILogger<SeasonService> log) : ISeaso
         });
 
         await uow.SaveChangesAsync(ct);
+
+        // INVALIDATION: if this season took over the active flag, the cached "season:active"
+        // and the previously-active season's per-id cache both need to go. We don't know the
+        // previous id without a query, so blow the whole family — cheap and correct.
+        if (req.SetActive) cache.RemoveByPrefix(CacheKeys.SeasonFamilyPrefix);
         log.LogInformation("Created season {SeasonId} ({Name}) active={IsActive}", season.Id, season.Name, season.IsActive);
 
         var withGames = await uow.Seasons.GetWithGamesAsync(season.Id, ct);
@@ -108,6 +135,11 @@ public class SeasonService(IUnitOfWork uow, ILogger<SeasonService> log) : ISeaso
         });
 
         await uow.SaveChangesAsync(ct);
+
+        // INVALIDATION: the season's per-id DTO embeds its games; "season:active" also
+        // embeds them if this happens to be the active season. Drop both.
+        cache.Remove(CacheKeys.SeasonById(seasonId));
+        cache.Remove(CacheKeys.SeasonActive);
         log.LogInformation("Attached {Game} to season {Season}", game.Name, season.Name);
 
         var refreshed = await uow.Seasons.GetWithGamesAsync(seasonId, ct);
@@ -127,6 +159,11 @@ public class SeasonService(IUnitOfWork uow, ILogger<SeasonService> log) : ISeaso
         }
 
         await uow.SaveChangesAsync(ct);
+
+        // INVALIDATION: this flipped IsActive on potentially every season row. Cheapest
+        // correct move is to blow the whole family — every per-id DTO's IsActive flag
+        // may now be stale.
+        cache.RemoveByPrefix(CacheKeys.SeasonFamilyPrefix);
         log.LogInformation("Activated season {SeasonId} ({Name})", target.Id, target.Name);
 
         var refreshed = await uow.Seasons.GetWithGamesAsync(seasonId, ct);
@@ -145,6 +182,11 @@ public class SeasonService(IUnitOfWork uow, ILogger<SeasonService> log) : ISeaso
         // Effective state at the registration entrypoint (TeamService) and the home page is
         // computed as (season.RegistrationOpen AND seasonGame.RegistrationOpen).
         await uow.SaveChangesAsync(ct);
+
+        // INVALIDATION: changes RegistrationOpen on the row. Both per-id and active keys
+        // expose this flag — drop both.
+        cache.Remove(CacheKeys.SeasonById(seasonId));
+        cache.Remove(CacheKeys.SeasonActive);
         log.LogInformation(
             "Season {SeasonId} ({Name}) master registration set to {State}",
             season.Id, season.Name, open ? "OPEN" : "CLOSED");
@@ -163,6 +205,12 @@ public class SeasonService(IUnitOfWork uow, ILogger<SeasonService> log) : ISeaso
 
         sg.RegistrationOpen = open;
         await uow.SaveChangesAsync(ct);
+
+        // INVALIDATION: the SeasonGame's RegistrationOpen flag is embedded in the parent
+        // SeasonDto's Games[] — drop the season's cached DTOs so the rules / register
+        // pages immediately reflect the toggle.
+        cache.Remove(CacheKeys.SeasonById(seasonId));
+        cache.Remove(CacheKeys.SeasonActive);
         log.LogInformation(
             "Season {SeasonId} game {SeasonGameId} registration set to {State}",
             seasonId, seasonGameId, open ? "OPEN" : "CLOSED");

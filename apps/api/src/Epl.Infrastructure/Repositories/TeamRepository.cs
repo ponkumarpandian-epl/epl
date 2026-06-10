@@ -13,7 +13,8 @@ public class TeamRepository(AppDbContext db) : Repository<Team>(db), ITeamReposi
             ct);
 
     public async Task<(IReadOnlyList<Team> Items, int Total)> ListAsync(
-        Sport? sport, string? search, Guid? seasonId, int page, int pageSize, CancellationToken ct = default)
+        Sport? sport, string? search, Guid? seasonId, TeamStatus? status,
+        int page, int pageSize, CancellationToken ct = default)
     {
         var q = Set.AsNoTracking()
                     .Include(t => t.Apartment)
@@ -22,6 +23,7 @@ public class TeamRepository(AppDbContext db) : Repository<Team>(db), ITeamReposi
 
         if (sport.HasValue)    q = q.Where(t => t.Sport == sport.Value);
         if (seasonId.HasValue) q = q.Where(t => t.SeasonGame != null && t.SeasonGame.SeasonId == seasonId.Value);
+        if (status.HasValue)   q = q.Where(t => t.Status == status.Value);
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -56,5 +58,22 @@ public class TeamRepository(AppDbContext db) : Repository<Team>(db), ITeamReposi
             .Select(g => new { SeasonGameId = g.Key, Count = g.Count() })
             .ToListAsync(ct);
         return rows.ToDictionary(r => r.SeasonGameId, r => r.Count);
+    }
+
+    public async Task<IReadOnlyList<Team>> ListActiveByActiveSeasonGameSlugAsync(string sportSlug, CancellationToken ct = default)
+    {
+        // Lower-case match against Game.Slug so the URL slug from the frontend
+        // (always lowercase) matches regardless of how the seeded row was cased.
+        var slug = sportSlug.ToLower();
+        return await Set.AsNoTracking()
+            .Include(t => t.Apartment)
+            .Include(t => t.SeasonGame).ThenInclude(sg => sg!.Game)
+            .Include(t => t.SeasonGame).ThenInclude(sg => sg!.Season)
+            .Where(t => t.Status == TeamStatus.Active
+                     && t.SeasonGame != null
+                     && t.SeasonGame.Season.IsActive
+                     && t.SeasonGame.Game.Slug.ToLower() == slug)
+            .OrderBy(t => t.Name)
+            .ToListAsync(ct);
     }
 }

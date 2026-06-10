@@ -1,3 +1,4 @@
+using Epl.Application.Common.Caching;
 using Epl.Application.Teams.Dtos;
 using Epl.Domain.Abstractions;
 using Epl.Domain.Common;
@@ -6,7 +7,17 @@ using Microsoft.Extensions.Logging;
 
 namespace Epl.Application.Teams.Services;
 
-public class TeamService(IUnitOfWork uow, ILogger<TeamService> log) : ITeamService
+/// <summary>
+/// Team registration + admin status / payment workflow.
+///
+/// Caching:
+///   - Public listing per sport slug is cached (key family <c>teams:</c>) — see
+///     plan/13 §Core contract. Writes (Create / SetStatus) invalidate that family
+///     in the same service method, before the action returns.
+///   - SetPaymentAsync does NOT mutate any field exposed on the public DTOs,
+///     so it does not invalidate the teams cache.
+/// </summary>
+public class TeamService(IUnitOfWork uow, ICacheStore cache, ILogger<TeamService> log) : ITeamService
 {
     public async Task<Result<TeamResponse>> CreateAsync(CreateTeamRequest req, Guid? currentUserId, CancellationToken ct = default)
     {
@@ -73,6 +84,10 @@ public class TeamService(IUnitOfWork uow, ILogger<TeamService> log) : ITeamServi
 
         await uow.SaveChangesAsync(ct);
 
+        // INVALIDATION: a new Active team may show on the public listing for its sport.
+        // Drop the whole teams family — cheap and correct.
+        cache.RemoveByPrefix(CacheKeys.TeamsFamilyPrefix);
+
         log.LogInformation(
             "Team {TeamId} ({Sport}) registered for {Season}/{Game} by user {UserId} apartment {ApartmentId}",
             team.Id, team.Sport, seasonGame.Season.Name, seasonGame.Game.Name,
@@ -86,7 +101,7 @@ public class TeamService(IUnitOfWork uow, ILogger<TeamService> log) : ITeamServi
         var page     = Math.Max(1, q.Page);
         var pageSize = Math.Clamp(q.PageSize, 1, 100);
 
-        var (items, total) = await uow.Teams.ListAsync(q.Sport, q.Search, q.SeasonId, page, pageSize, ct);
+        var (items, total) = await uow.Teams.ListAsync(q.Sport, q.Search, q.SeasonId, q.Status, page, pageSize, ct);
 
         var dtos = items.Select(t => ToResponse(t, t.Apartment, t.SeasonGame?.Season?.Name)).ToList();
         return new PagedResponse<TeamResponse>(dtos, total, page, pageSize);
@@ -118,11 +133,50 @@ public class TeamService(IUnitOfWork uow, ILogger<TeamService> log) : ITeamServi
         return Result<TeamResponse>.Ok(ToResponse(refreshed!, refreshed!.Apartment, refreshed.SeasonGame?.Season?.Name));
     }
 
+    public async Task<Result<TeamResponse>> SetStatusAsync(Guid teamId, TeamStatus status, string? comment, CancellationToken ct = default)
+    {
+        var team = await uow.Teams.GetByIdAsync(teamId, ct);
+        if (team is null) return Result<TeamResponse>.Fail("team_not_found", "Team not found.");
+
+        var trimmed = string.IsNullOrWhiteSpace(comment) ? null : comment.Trim();
+        team.Status        = status;
+        team.StatusComment = trimmed;
+
+        await uow.SaveChangesAsync(ct);
+
+        // INVALIDATION: status change can move the team in or out of the public
+        // Active list. Drop the whole family.
+        cache.RemoveByPrefix(CacheKeys.TeamsFamilyPrefix);
+
+        log.LogInformation(
+            "Team {TeamId} status set to {Status} (comment={Comment})",
+            teamId, status, trimmed ?? "(none)");
+
+        var refreshed = await uow.Teams.GetWithApartmentAsync(teamId, ct);
+        return Result<TeamResponse>.Ok(ToResponse(refreshed!, refreshed!.Apartment, refreshed.SeasonGame?.Season?.Name));
+    }
+
+    public Task<IReadOnlyList<TeamPublicSummaryDto>?> ListPublicByGameSlugCachedAsync(string sportSlug, CancellationToken ct = default)
+        => cache.GetOrCreateAsync<IReadOnlyList<TeamPublicSummaryDto>>(
+            CacheKeys.TeamsPublicByGameSlug(sportSlug),
+            CacheTtl.Default,
+            async token =>
+            {
+                var rows = await uow.Teams.ListActiveByActiveSeasonGameSlugAsync(sportSlug, token);
+                return rows
+                    .Select(t => new TeamPublicSummaryDto(t.Id, t.Sport, t.Name, t.Apartment.Name, t.CaptainName))
+                    .ToList();
+            }, ct);
+
+    public async Task<IReadOnlyList<TeamPublicSummaryDto>> ListPublicByGameSlugAsync(string sportSlug, CancellationToken ct = default)
+        => (await ListPublicByGameSlugCachedAsync(sportSlug, ct)) ?? Array.Empty<TeamPublicSummaryDto>();
+
     private static TeamResponse ToResponse(Team t, Apartment apt, string? seasonName) => new(
         t.Id, t.Sport, t.Name,
         apt.Name, apt.Address, apt.Lat, apt.Lng,
         t.CaptainName, t.CaptainMobile,
         t.SeasonGameId, seasonName,
         t.CreatedAt,
-        t.PaymentCompleted, t.PaidTo, t.PaidAt);
+        t.PaymentCompleted, t.PaidTo, t.PaidAt,
+        t.Status, t.StatusComment);
 }

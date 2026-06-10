@@ -35,4 +35,12 @@ public class Team
     public bool             PaymentCompleted { get; set; }
     public string?          PaidTo           { get; set; }
     public DateTimeOffset?  PaidAt           { get; set; }
+
+    // Admin-managed status. New rows default to Active; admin can move them to
+    // Withdrawn (no longer playing) or Waitlist (held against capacity). Only
+    // Active teams appear on the public listing.
+    public TeamStatus Status { get; set; } = TeamStatus.Active;
+
+    /// <summary>Optional free-text reason / note paired with a status change.</summary>
+    public string? StatusComment { get; set; }
 }

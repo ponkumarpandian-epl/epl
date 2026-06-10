@@ -1,0 +1,134 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Public teams listing — /teams/by-game/[slug]
+   Plain 3-column grid. No accent bars, no icons, no card backgrounds —
+   just the data. Desktop = table. Mobile (≤640px) = stacked rows.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.publicTeamsShell {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: clamp(28px, 5vw, 56px) clamp(16px, 4vw, 32px) 64px;
+}
+
+.publicTeamsHeader { margin-bottom: 16px; }
+.publicTeamsTitle {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4.5vw, 44px);
+  letter-spacing: 0.025em;
+  line-height: 1.05;
+  color: var(--bone);
+  margin: 0;
+}
+.publicTeamsLead {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--bone-dim);
+  margin: 0 0 20px;
+}
+.publicTeamsLead strong { color: var(--bone); font-weight: 700; }
+
+/* ── Sport tabs (sibling-page nav, not in-page tablist) ──────────────── */
+.publicTeamsTabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+.publicTeamsTabs a {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  /* 44px touch target via padding + line-height — passes skill's
+     touch-target-size CRITICAL rule. */
+  padding: 12px 18px;
+  border-radius: var(--radius-pill, 999px);
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--bone-dim);
+  text-decoration: none;
+  transition: color 150ms, border-color 150ms, background 150ms;
+}
+.publicTeamsTabs a:hover {
+  color: var(--bone);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+.publicTeamsTabs a:focus-visible {
+  outline: 2px solid var(--gold-bright, #E8B53D);
+  outline-offset: 2px;
+}
+.publicTeamsTabs a.is-active,
+.publicTeamsTabs a[aria-current="page"] {
+  background: var(--gold-bright, #E8B53D);
+  color: var(--ink, #03081A);
+  border-color: var(--gold-bright, #E8B53D);
+}
+@media (prefers-reduced-motion: reduce) {
+  .publicTeamsTabs a { transition: none; }
+}
+
+/* ── Grid (table semantics via ARIA, CSS Grid for layout) ─────────────── */
+.publicTeamsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  border-top: 1px solid var(--color-border);
+}
+.publicTeamsRow {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1.5fr;
+  gap: 16px;
+  padding: 14px 6px;
+  border-bottom: 1px solid var(--color-border);
+}
+.publicTeamsHead {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bone-fade);
+}
+
+.publicTeamsCellTeam {
+  font-family: var(--font-display);
+  font-size: 17px;
+  letter-spacing: 0.015em;
+  color: var(--bone);
+  overflow-wrap: anywhere;
+}
+.publicTeamsCellApt,
+.publicTeamsCellCap {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--bone-dim);
+  overflow-wrap: anywhere;
+}
+
+/* ── Mobile: stack each row, surface the label via data-label ──────────── */
+@media (max-width: 640px) {
+  .publicTeamsHead { display: none; }
+  .publicTeamsRow {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    padding: 14px 0;
+  }
+  .publicTeamsRow > [data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--bone-fade);
+    margin-bottom: 2px;
+  }
+  /* Team name stays prominent even without the header above */
+  .publicTeamsCellTeam { font-size: 18px; }
+}
+
