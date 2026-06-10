@@ -16,6 +16,16 @@ public class TeamConfig : IEntityTypeConfiguration<Team>
         b.Property(t => t.Sport).HasConversion<int>().IsRequired();
         b.Property(t => t.PaidTo).HasMaxLength(80);
 
+        // Admin-managed status. Existing rows get Active via the migration's
+        // defaultValue + the EF default below — new rows inherit from the
+        // entity initializer (Team.Status = TeamStatus.Active).
+        b.Property(t => t.Status)
+            .HasConversion<int>()
+            .IsRequired()
+            .HasDefaultValue(TeamStatus.Active);
+        b.Property(t => t.StatusComment).HasMaxLength(500);
+        b.HasIndex(t => t.Status);  // public listing filters on Status = Active
+
         b.HasOne(t => t.Apartment)
          .WithMany(a => a.Teams)
          .HasForeignKey(t => t.ApartmentId)

@@ -9,6 +9,7 @@ interface Item { href: string; label: string; admin?: boolean }
 const PUBLIC: Item[] = [
   { href: "/",        label: "Home" },
   { href: "/#sports", label: "Sports" },
+  { href: "/teams",   label: "Teams" },
   { href: "/#gallery", label: "Gallery" },
   { href: "/rules",   label: "Rules" },
   { href: "/contact", label: "Contact" },

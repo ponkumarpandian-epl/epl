@@ -279,9 +279,12 @@
   opacity: 0.4;
 }
 
-/* ── Captain cell — name on top, mobile in mono below ──────────────────── */
+/* ── Captain cell — name on top, mobile + contact icons in mono below ─── */
 .adminTable td.cellCaptain { color: var(--color-text); font-size: 14px; }
 .adminTable td.cellCaptain .cellCaptainMobile {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--font-mono);
   font-size: 12px;
   color: var(--color-text-muted);
@@ -522,4 +525,145 @@
     box-shadow: inset 3px 0 0 rgba(52, 211, 153, 0.55);
   }
   .adminTable tbody tr.row-paid td:first-child { box-shadow: none; }
+}
+
+/* ── Status cell (Active / Withdrawn / Waitlist) ────────────────────────── */
+.adminTable td.cellStatus { min-width: 180px; vertical-align: top; }
+.statusCellView { display: flex; flex-direction: column; gap: 4px; }
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill, 999px);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid var(--color-border);
+  background: rgba(255,255,255,0.04);
+  color: var(--bone-dim);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  align-self: flex-start;
+}
+.statusPill:hover { border-color: rgba(255,255,255,0.22); color: var(--bone); }
+.statusPill:disabled { opacity: 0.6; cursor: progress; }
+.statusPill.status-active    { color: #6EE7B7; border-color: rgba(52, 211, 153, 0.45); background: rgba(52, 211, 153, 0.08); }
+.statusPill.status-withdrawn { color: #FF8C95; border-color: rgba(200, 47, 60, 0.45);  background: rgba(200, 47, 60, 0.08);  }
+.statusPill.status-waitlist  { color: var(--gold-bright, #E8B53D); border-color: rgba(232, 181, 61, 0.45); background: rgba(232, 181, 61, 0.10); }
+
+.statusComment-view {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--bone-fade);
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+  max-width: 220px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.statusError {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: #FF8C95;
+  letter-spacing: 0.06em;
+}
+
+/* Inline editor */
+.statusEditWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 8px);
+  min-width: 180px;
+}
+.statusSelect,
+.statusComment {
+  width: 100%;
+  padding: 6px 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm, 4px);
+  color: var(--bone);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+}
+/* Native browser popup paints <option> with OS defaults (white bg, dark text)
+   — readable in light mode, near-invisible against our dark theme. Forcing the
+   colors makes the popup match the rest of the editor.
+   Caveats: Chrome / Firefox / Edge honour these. Safari (macOS + iOS) largely
+   ignores option styling and falls back to the system picker, which is theme-
+   aware on its own. Browser parity here is best-effort, not pixel-perfect. */
+.statusSelect option {
+  background-color: var(--ink-2, #060F26);
+  color: var(--bone, #F2F0E6);
+}
+.statusSelect option:checked {
+  background: linear-gradient(0deg, rgba(232, 181, 61, 0.18), rgba(232, 181, 61, 0.18)),
+              var(--ink-2, #060F26);
+}
+.statusComment { resize: vertical; min-height: 44px; }
+.statusEditButtons { display: flex; gap: 6px; }
+.statusSaveBtn,
+.statusCancelBtn {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm, 4px);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+}
+.statusSaveBtn   { background: rgba(232, 181, 61, 0.12); color: var(--gold-bright, #E8B53D); border-color: rgba(232, 181, 61, 0.5); }
+.statusCancelBtn { background: rgba(255,255,255,0.04); color: var(--bone-dim); }
+.statusSaveBtn:hover   { background: rgba(232, 181, 61, 0.22); }
+.statusCancelBtn:hover { background: rgba(255,255,255,0.08); color: var(--bone); }
+
+/* ── Captain contact icons (phone + WhatsApp) ───────────────────────────── */
+.captainMobileNumber { white-space: nowrap; }
+.captainContactIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-pill, 999px);
+  color: var(--bone-fade);
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.03);
+  text-decoration: none;
+  /* Touch target padding via flex centering — visible size 26px, hit area
+     bumped via the same selector below for mobile. */
+  transition: color 150ms, border-color 150ms, background 150ms;
+}
+.captainContactIcon:hover {
+  color: var(--bone);
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.06);
+}
+.captainContactIcon:focus-visible {
+  outline: 2px solid var(--gold-bright, #E8B53D);
+  outline-offset: 2px;
+}
+.captainContactIcon.is-whatsapp:hover {
+  color: #25D366;                                  /* WhatsApp brand green */
+  border-color: rgba(37, 211, 102, 0.5);
+  background: rgba(37, 211, 102, 0.12);
+}
+@media (max-width: 720px) {
+  /* Mobile: full 44×44 touch target for the icon links */
+  .captainContactIcon { width: 36px; height: 36px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .captainContactIcon { transition: none; }
 }

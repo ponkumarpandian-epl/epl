@@ -16,7 +16,12 @@ public static class CacheKeys
     // ── Game master ────────────────────────────────────────────────────────
     public const string GamesAll = "games:all";
 
+    // ── Teams (public listing, Active only) ───────────────────────────────
+    /// <summary>Active teams for one game (by sport slug — "cricket" / "badminton" / "volleyball").</summary>
+    public static string TeamsPublicByGameSlug(string slug) => $"teams:public:by-game:{slug}";
+
     // The "family" prefixes used by RemoveByPrefix. Keep aligned with the keys above.
     public const string SeasonFamilyPrefix = "season:";
     public const string GamesFamilyPrefix  = "games:";
+    public const string TeamsFamilyPrefix  = "teams:";
 }
