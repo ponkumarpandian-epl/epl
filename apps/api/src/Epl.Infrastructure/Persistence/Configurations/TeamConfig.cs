@@ -37,6 +37,15 @@ public class TeamConfig : IEntityTypeConfiguration<Team>
          .IsRequired(false)
          .OnDelete(DeleteBehavior.SetNull);
 
+        // Real captain FK. No reverse nav (CaptainedTeams is bound to CreatedBy);
+        // "teams I captain" is a query on this column, which is indexed.
+        b.HasOne(t => t.Captain)
+         .WithMany()
+         .HasForeignKey(t => t.CaptainUserId)
+         .IsRequired(false)
+         .OnDelete(DeleteBehavior.SetNull);
+        b.HasIndex(t => t.CaptainUserId);
+
         // Link to the SeasonGame the team registered for.
         // Nullable so legacy rows survive; new code requires it.
         b.HasOne(t => t.SeasonGame)

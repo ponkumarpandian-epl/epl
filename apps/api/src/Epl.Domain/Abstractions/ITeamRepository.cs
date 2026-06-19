@@ -18,6 +18,18 @@ public interface ITeamRepository : IRepository<Team>
     Task<Team?> GetWithApartmentAsync(Guid id, CancellationToken ct = default);
 
     /// <summary>
+    /// Teams captained by the user (matching <see cref="Team.CaptainUserId"/>).
+    /// Includes Apartment, SeasonGame.Season/Game, and Active Members for counts.
+    /// </summary>
+    Task<IReadOnlyList<Team>> ListByCaptainAsync(Guid captainUserId, CancellationToken ct = default);
+
+    /// <summary>
+    /// A team with its Active Members (+ each member's User), Apartment, Captain,
+    /// and SeasonGame.Season/Game. Tracked when <paramref name="track"/> is true.
+    /// </summary>
+    Task<Team?> GetWithMembersAsync(Guid id, bool track = false, CancellationToken ct = default);
+
+    /// <summary>
     /// Per-SeasonGame team counts for the given season. Single GROUP BY query.
     /// Returns a dictionary keyed by SeasonGame.Id; missing entries imply zero.
     /// </summary>

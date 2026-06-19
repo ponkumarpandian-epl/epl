@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Epl.Application.Auth.Common;
 using Epl.Application.Auth.Dtos;
+using Epl.Domain.Abstractions;
 using Epl.Domain.Common;
 using Epl.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -11,6 +12,7 @@ namespace Epl.Application.Auth.Services;
 public class AuthService(
     UserManager<AppUser> users,
     SignInManager<AppUser> signIn,
+    IUnitOfWork uow,
     ILogger<AuthService> log) : IAuthService
 {
     public async Task<Result<MeResponse>> RegisterAsync(RegisterRequest req, CancellationToken ct = default)
@@ -63,7 +65,8 @@ public class AuthService(
 
     private async Task<MeResponse> ToMeAsync(AppUser u)
     {
-        var roles = await users.GetRolesAsync(u);
-        return new MeResponse(u.Id, u.Email, u.PhoneNumber, u.FullName, u.AvatarUrl, roles.ToArray());
+        var roles     = await users.GetRolesAsync(u);
+        var isCaptain = await uow.Teams.AnyAsync(t => t.CaptainUserId == u.Id);
+        return new MeResponse(u.Id, u.Email, u.PhoneNumber, u.FullName, u.AvatarUrl, roles.ToArray(), isCaptain);
     }
 }

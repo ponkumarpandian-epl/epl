@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Epl.Application.Profile.Dtos;
 using Epl.Application.Profile.Services;
+using Epl.Application.Teams.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,7 +9,7 @@ namespace Epl.Api.Controllers;
 
 [ApiController]
 [Route("api/profile")]
-public class ProfileController(IProfileService profiles) : ControllerBase
+public class ProfileController(IProfileService profiles, ITeamMemberService members) : ControllerBase
 {
     private const long MaxAvatarBytes = 4 * 1024 * 1024;   // 4 MB
 
@@ -20,6 +21,15 @@ public class ProfileController(IProfileService profiles) : ControllerBase
         if (!TryGetCurrentUserId(out var uid)) return Unauthorized();
         var me = await profiles.GetAsync(uid, ct);
         return me is null ? NotFound() : Ok(me);
+    }
+
+    /// <summary>Teams the current user is an Active member of (plan/10 §3.2, §4.3).</summary>
+    [HttpGet("me/teams")]
+    [Authorize]
+    public async Task<IActionResult> MyTeams(CancellationToken ct)
+    {
+        if (!TryGetCurrentUserId(out var uid)) return Unauthorized();
+        return Ok(await members.ListMyTeamsAsync(uid, ct));
     }
 
     /// <summary>Bulk upsert of the current user's skill levels per game.</summary>

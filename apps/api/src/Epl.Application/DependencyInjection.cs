@@ -3,6 +3,7 @@ using Epl.Application.Gallery.Services;
 using Epl.Application.Profile.Services;
 using Epl.Application.Seasons.Services;
 using Epl.Application.Teams.Services;
+using Epl.Application.Users.Services;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,11 +15,15 @@ public static class DependencyInjection
     {
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
 
-        services.AddScoped<IAuthService,    AuthService>();
-        services.AddScoped<ITeamService,    TeamService>();
+        services.AddScoped<IAuthService,       AuthService>();
+        services.AddScoped<ITeamService,       TeamService>();
+        services.AddScoped<ITeamAuthService,   TeamAuthService>();
+        services.AddScoped<ITeamMemberService, TeamMemberService>();
         services.AddScoped<IGalleryService, GalleryService>();
         services.AddScoped<ISeasonService,  SeasonService>();
-        services.AddScoped<IProfileService, ProfileService>();
+        services.AddScoped<IProfileService,    ProfileService>();
+        services.AddScoped<IUserSearchService,  UserSearchService>();
+        services.AddScoped<IUserRoleAdminService, UserRoleAdminService>();
 
         return services;
     }

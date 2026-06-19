@@ -3,6 +3,8 @@ namespace Epl.Domain.Abstractions;
 public interface IUnitOfWork : IAsyncDisposable
 {
     ITeamRepository        Teams       { get; }
+    ITeamMemberRepository  TeamMembers { get; }
+    IUserDirectoryRepository Users     { get; }
     IApartmentRepository   Apartments  { get; }
     IGameRepository        Games       { get; }
     ISeasonRepository      Seasons     { get; }

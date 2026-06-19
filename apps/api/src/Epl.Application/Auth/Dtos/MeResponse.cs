@@ -6,4 +6,6 @@ public record MeResponse(
     string? PhoneNumber,
     string FullName,
     string? AvatarUrl,
-    IReadOnlyList<string> Roles);
+    IReadOnlyList<string> Roles,
+    // True when the user captains at least one team — drives the "Captain" nav link.
+    bool IsCaptain = false);

@@ -172,7 +172,10 @@ export default async function AdminTeamsPage({
                   <td data-label="Sport" className="cellSport">
                     <span className={`sportTag ${t.sport.toLowerCase()}`}>{t.sport}</span>
                   </td>
-                  <td data-label="Team" className="cellTeam">{t.name}</td>
+                  <td data-label="Team" className="cellTeam">
+                    {t.name}
+                    <Link href={`/captain/teams/${t.id}`} className="rosterManageLink">Manage roster →</Link>
+                  </td>
                   <td data-label="Season" className="cellMono">
                     {t.seasonName ?? <span style={{ color: "var(--color-text-subtle)" }}>—</span>}
                   </td>

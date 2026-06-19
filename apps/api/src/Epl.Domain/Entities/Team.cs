@@ -19,8 +19,18 @@ public class Team
     public Guid ApartmentId { get; set; }
     public Apartment Apartment { get; set; } = null!;
 
+    // Denormalised display snapshot from the registration form. Kept for legacy
+    // rows and for showing the captain's name/number even before they sign up.
     public string CaptainName { get; set; } = string.Empty;
     public string CaptainMobile { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Real FK to the captain's <see cref="AppUser"/>. Nullable: legacy rows where
+    /// no matching account exists stay NULL until an admin attaches one. The
+    /// captain perimeter (roster edits) is gated on this matching the caller.
+    /// </summary>
+    public Guid? CaptainUserId { get; set; }
+    public AppUser? Captain { get; set; }
 
     // Anonymous registration is allowed — these are null when the form was
     // submitted without a signed-in user.
@@ -43,4 +53,7 @@ public class Team
 
     /// <summary>Optional free-text reason / note paired with a status change.</summary>
     public string? StatusComment { get; set; }
+
+    /// <summary>Roster rows (Active + Removed history). One Active row is the captain.</summary>
+    public ICollection<TeamMember> Members { get; set; } = new List<TeamMember>();
 }

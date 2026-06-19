@@ -239,3 +239,38 @@
   .profileHero { grid-template-columns: 1fr; text-align: left; }
   .profileRolePill { align-self: flex-start; }
 }
+
+/* ── My teams (plan/10 §4.3) ──────────────────────────────────────────────── */
+.myTeamsPanel {
+  margin-top: 1.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-elevated);
+  padding: 1.1rem 1.25rem;
+}
+.myTeamsTitle { font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 0.75rem; }
+.myTeamsEmpty { color: var(--color-text-subtle); }
+.myTeamsError { color: var(--sport-volleyball-bright); font-size: 0.9rem; margin-bottom: 0.6rem; }
+.myTeamsList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.myTeamRow {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  padding: 0.6rem 0.7rem; border: 1px solid var(--color-border); border-radius: var(--radius-md);
+  flex-wrap: wrap;
+}
+.myTeamMain { display: flex; align-items: center; gap: 0.7rem; min-width: 0; }
+.myTeamInfo { min-width: 0; }
+.myTeamName {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-weight: 700; color: var(--color-text); text-decoration: none;
+}
+.myTeamName:hover { color: var(--color-accent); }
+.myTeamMeta { color: var(--color-text-subtle); font-size: 0.85rem; margin-top: 0.15rem; }
+.myTeamActions { display: flex; align-items: center; gap: 0.5rem; }
+.myTeamManageLink { color: var(--color-accent); font-size: 0.85rem; font-weight: 600; text-decoration: none; }
+.myTeamLeaveBtn, .myTeamLeaveYes, .myTeamLeaveNo {
+  background: transparent; border: 1px solid var(--color-border);
+  color: var(--color-text-subtle); font-size: 0.8rem;
+  padding: 0.3rem 0.7rem; border-radius: var(--radius-pill); cursor: pointer;
+}
+.myTeamLeaveBtn:hover, .myTeamLeaveYes:hover { border-color: var(--sport-volleyball-bright); color: var(--sport-volleyball-bright); }
+.myTeamConfirm { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--color-text-subtle); }

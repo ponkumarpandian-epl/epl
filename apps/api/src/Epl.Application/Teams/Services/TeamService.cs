@@ -80,7 +80,25 @@ public class TeamService(IUnitOfWork uow, ICacheStore cache, ILogger<TeamService
             CaptainName     = req.CaptainName.Trim(),
             CaptainMobile   = req.CaptainMobile.Trim(),
             CreatedByUserId = currentUserId,
+            // A signed-in registrant is the team captain (plan/10 C1). Anonymous
+            // registrations leave this NULL for an admin to attach later.
+            CaptainUserId   = currentUserId,
         });
+
+        // Seed the captain's roster row so the team has a first Active member and
+        // the captain perimeter (CaptainUserId) lines up with a TeamMember.
+        if (currentUserId.HasValue)
+        {
+            uow.TeamMembers.Add(new TeamMember
+            {
+                TeamId        = team.Id,
+                UserId        = currentUserId.Value,
+                IsCaptain     = true,
+                Status        = TeamMemberStatus.Active,
+                AddedByUserId = currentUserId.Value,
+                AddedAt       = DateTimeOffset.UtcNow,
+            });
+        }
 
         await uow.SaveChangesAsync(ct);
 

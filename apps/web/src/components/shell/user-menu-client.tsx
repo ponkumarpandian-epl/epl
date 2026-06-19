@@ -57,6 +57,24 @@ function ProfileIcon() {
     </svg>
   );
 }
+function WhistleIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 12a6 6 0 0 0 6 6h2l4 3v-6.5a6 6 0 0 0 .5-9.5" />
+      <circle cx="9" cy="12" r="2.5" />
+    </svg>
+  );
+}
+function UsersIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
+  );
+}
 
 function Avatar({ src, fallback }: { src: string | null; fallback: string }) {
   if (src) {
@@ -147,6 +165,19 @@ export function UserMenuClient({ me }: { me: MeDto }) {
           <span>My Profile</span>
         </Link>
 
+        {me.isCaptain && (
+          <Link
+            href="/captain"
+            role="menuitem"
+            tabIndex={open ? 0 : -1}
+            className="userDropdownItem"
+            onClick={() => setOpen(false)}
+          >
+            <WhistleIcon />
+            <span>Captain</span>
+          </Link>
+        )}
+
         {isAdmin && (
           <>
             <Link
@@ -168,6 +199,16 @@ export function UserMenuClient({ me }: { me: MeDto }) {
             >
               <ClipboardIcon />
               <span>Team Registrations</span>
+            </Link>
+            <Link
+              href="/admin/users"
+              role="menuitem"
+              tabIndex={open ? 0 : -1}
+              className="userDropdownItem"
+              onClick={() => setOpen(false)}
+            >
+              <UsersIcon />
+              <span>Users &amp; Roles</span>
             </Link>
           </>
         )}

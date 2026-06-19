@@ -1,0 +1,250 @@
+/* Captain dashboard + roster management (plan/10 §4). Reuses global design tokens. */
+
+.captainShell {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+}
+
+.captainHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.75rem;
+}
+.captainEyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+  margin-bottom: 0.35rem;
+}
+.captainTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.captainSubline { color: var(--color-text-subtle); margin-top: 0.35rem; }
+.captainCount {
+  font-family: var(--font-mono);
+  color: var(--color-text-subtle);
+  font-size: 0.9rem;
+}
+.captainCount strong { color: var(--color-accent); font-size: 1.15rem; }
+.captainBackLink { color: var(--color-text-subtle); text-decoration: none; }
+.captainBackLink:hover { color: var(--color-accent); }
+
+/* sport tag (local copy — global one is scoped to the admin CSS import) */
+.sportTag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+.sportTag.cricket    { color: var(--sport-cricket-bright); }
+.sportTag.badminton  { color: var(--sport-badminton-bright); }
+.sportTag.volleyball { color: var(--sport-volleyball-bright); }
+
+/* ── Landing cards ───────────────────────────────────────────────────────── */
+.captainGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+.captainCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-elevated);
+  text-decoration: none;
+  color: var(--color-text);
+  transition: border-color 0.15s, transform 0.15s;
+}
+.captainCard:hover { border-color: var(--color-border-strong); transform: translateY(-2px); }
+.captainCardTop { display: flex; justify-content: space-between; align-items: center; }
+.captainCardName { font-family: var(--font-display); font-size: 1.3rem; margin-top: 0.4rem; }
+.captainCardApt { color: var(--color-text-subtle); font-size: 0.9rem; }
+.captainCardSeason { color: var(--color-text-subtle); font-size: 0.82rem; font-family: var(--font-mono); }
+.captainCardRoster { margin-top: 0.5rem; font-size: 0.95rem; }
+.captainCardRoster strong { color: var(--color-accent); }
+.captainCardCta { margin-top: 0.6rem; color: var(--color-accent); font-size: 0.88rem; font-weight: 600; }
+.rosterFullChip {
+  font-size: 0.68rem; font-family: var(--font-mono); text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--sport-volleyball-bright);
+  border: 1px solid var(--color-border); border-radius: var(--radius-pill); padding: 0.1rem 0.5rem;
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+.captainEmpty {
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+}
+.captainEmpty h2 { font-family: var(--font-display); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.captainEmpty p { color: var(--color-text-subtle); max-width: 46ch; margin: 0 auto 1.2rem; }
+
+.captainPrimaryBtn {
+  display: inline-block;
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+  font-weight: 700;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radius-pill);
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+}
+.captainPrimaryBtn:hover { background: var(--color-accent-hover); }
+.captainPrimaryBtn:disabled { opacity: 0.55; cursor: default; }
+
+/* ── Roster management ───────────────────────────────────────────────────── */
+.rosterWrap { display: flex; flex-direction: column; gap: 1.25rem; }
+.rosterPanel, .addPanel {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-elevated);
+  padding: 1.1rem 1.25rem;
+}
+.rosterPanelHead { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+.rosterPanelTitle { font-family: var(--font-display); font-size: 1.2rem; }
+.rosterCount { font-family: var(--font-mono); font-size: 0.9rem; color: var(--color-text-subtle); display: flex; align-items: center; gap: 0.75rem; }
+.rosterCount strong { color: var(--color-accent); }
+.rosterError { color: var(--sport-volleyball-bright); margin-top: 0.75rem; font-size: 0.9rem; }
+
+.transferBtn {
+  background: transparent;
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text);
+  font-size: 0.78rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+.transferBtn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.transferBtn:disabled { opacity: 0.5; cursor: default; }
+
+.rosterTable { width: 100%; border-collapse: collapse; margin-top: 0.85rem; }
+.rosterTable th {
+  text-align: left; font-family: var(--font-mono); font-size: 0.7rem;
+  text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-subtle);
+  padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--color-border);
+}
+.rosterTable td { padding: 0.55rem 0.6rem; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+.rosterTable tr.is-captain { background: rgba(var(--sport-cricket-rgb), 0.06); }
+.rosterMono { font-family: var(--font-mono); font-size: 0.85rem; color: var(--color-text-subtle); }
+.rosterPlayer { display: flex; align-items: center; gap: 0.6rem; }
+.rosterName { display: inline-flex; align-items: center; gap: 0.4rem; }
+.rosterEmptyRow { color: var(--color-text-subtle); padding: 0.9rem 0.2rem; }
+.rosterRowActions { text-align: right; }
+.rosterRemoveBtn {
+  background: transparent; border: 1px solid var(--color-border);
+  color: var(--color-text-subtle); font-size: 0.78rem;
+  padding: 0.25rem 0.6rem; border-radius: var(--radius-sm); cursor: pointer;
+}
+.rosterRemoveBtn:hover { border-color: var(--sport-volleyball-bright); color: var(--sport-volleyball-bright); }
+.rosterRemoveBtn:disabled { opacity: 0.5; cursor: default; }
+
+.rosterAvatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--color-surface); color: var(--color-text-subtle);
+  font-size: 0.72rem; font-weight: 700; overflow: hidden; flex-shrink: 0;
+}
+.rosterAvatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.captainBadge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--color-accent); color: var(--color-accent-text);
+  font-size: 0.62rem; font-weight: 800; font-family: var(--font-mono);
+}
+
+/* ── Add player ──────────────────────────────────────────────────────────── */
+.addSearchInput, .addFieldInput {
+  width: 100%; background: var(--color-bg); color: var(--color-text);
+  border: 1px solid var(--color-border); border-radius: var(--radius-md);
+  padding: 0.6rem 0.8rem; font-size: 0.95rem; margin-top: 0.75rem;
+}
+.addSearchInput:focus, .addFieldInput:focus { outline: none; border-color: var(--color-accent); }
+.addResults { list-style: none; margin: 0.6rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.35rem; }
+.addResultHint { color: var(--color-text-subtle); font-size: 0.88rem; padding: 0.5rem 0.2rem; }
+.addResultHint code { font-size: 0.82rem; }
+.addResultBtn {
+  width: 100%; display: flex; align-items: center; gap: 0.6rem;
+  background: var(--color-bg); border: 1px solid var(--color-border);
+  border-radius: var(--radius-md); padding: 0.5rem 0.7rem; cursor: pointer; color: var(--color-text);
+}
+.addResultBtn:hover { border-color: var(--color-accent); }
+.addResultName { flex: 1; text-align: left; font-weight: 600; }
+
+.addForm { margin-top: 0.85rem; display: flex; flex-direction: column; gap: 0.75rem; }
+.addFormPicked { display: flex; align-items: center; gap: 0.6rem; }
+.addFormFields { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.addFormFields .addFieldInput { margin-top: 0; flex: 1; min-width: 140px; }
+.addFormButtons { display: flex; gap: 0.6rem; align-items: center; }
+.addCancelBtn {
+  background: transparent; border: 1px solid var(--color-border);
+  color: var(--color-text-subtle); padding: 0.55rem 0.9rem;
+  border-radius: var(--radius-pill); cursor: pointer;
+}
+.addCancelBtn:hover { color: var(--color-text); border-color: var(--color-border-strong); }
+
+/* ── Transfer modal ──────────────────────────────────────────────────────── */
+.modalBackdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  display: flex; align-items: center; justify-content: center; padding: 1rem; z-index: 50;
+}
+.modalCard {
+  background: var(--color-bg-elevated); border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg); padding: 1.4rem; max-width: 440px; width: 100%;
+}
+.modalTitle { font-family: var(--font-display); font-size: 1.3rem; margin-bottom: 0.3rem; }
+.modalLead { color: var(--color-text-subtle); font-size: 0.9rem; margin-bottom: 1rem; }
+.modalList { list-style: none; margin: 0 0 1rem; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; max-height: 50vh; overflow-y: auto; }
+
+/* ── Audit strip ─────────────────────────────────────────────────────────── */
+.rosterAudit { margin-top: 1.5rem; }
+.rosterAuditTitle {
+  font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--color-text-subtle); margin-bottom: 0.6rem;
+}
+.rosterAuditList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.2rem; }
+.rosterAuditItem {
+  display: flex; align-items: center; gap: 0.6rem; padding: 0.4rem 0.6rem;
+  border-left: 2px solid var(--color-border); font-size: 0.88rem;
+}
+.rosterAuditItem.is-added   { border-left-color: var(--sport-badminton-bright); }
+.rosterAuditItem.is-removed { border-left-color: var(--sport-volleyball-bright); }
+.rosterAuditName { display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; }
+.rosterAuditAction {
+  font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--color-text-subtle);
+}
+.rosterAuditTime { margin-left: auto; font-family: var(--font-mono); font-size: 0.78rem; color: var(--color-text-subtle); }
+
+@media (max-width: 560px) {
+  .rosterTable thead { display: none; }
+  .rosterTable, .rosterTable tbody, .rosterTable tr, .rosterTable td { display: block; width: 100%; }
+  .rosterTable tr { border: 1px solid var(--color-border); border-radius: var(--radius-md); margin-bottom: 0.6rem; padding: 0.4rem; }
+  .rosterTable td { border: none; padding: 0.3rem 0.5rem; }
+  .rosterTable td[data-label]::before {
+    content: attr(data-label) ": "; font-family: var(--font-mono); font-size: 0.7rem;
+    text-transform: uppercase; color: var(--color-text-subtle); margin-right: 0.4rem;
+  }
+  .rosterRowActions { text-align: left; }
+}

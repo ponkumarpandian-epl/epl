@@ -50,6 +50,29 @@ public class TeamRepository(AppDbContext db) : Repository<Team>(db), ITeamReposi
               .Include(t => t.SeasonGame).ThenInclude(sg => sg!.Season)
               .FirstOrDefaultAsync(t => t.Id == id, ct);
 
+    public async Task<IReadOnlyList<Team>> ListByCaptainAsync(Guid captainUserId, CancellationToken ct = default)
+        => await Set.AsNoTracking()
+            .Include(t => t.Apartment)
+            .Include(t => t.SeasonGame).ThenInclude(sg => sg!.Season)
+            .Include(t => t.SeasonGame).ThenInclude(sg => sg!.Game)
+            .Include(t => t.Members.Where(m => m.Status == TeamMemberStatus.Active))
+            .Where(t => t.CaptainUserId == captainUserId)
+            .OrderByDescending(t => t.CreatedAt)
+            .ToListAsync(ct);
+
+    public Task<Team?> GetWithMembersAsync(Guid id, bool track = false, CancellationToken ct = default)
+    {
+        var q = track ? Set.AsQueryable() : Set.AsNoTracking();
+        return q
+            .Include(t => t.Apartment)
+            .Include(t => t.Captain)
+            .Include(t => t.SeasonGame).ThenInclude(sg => sg!.Season)
+            .Include(t => t.SeasonGame).ThenInclude(sg => sg!.Game)
+            .Include(t => t.Members.Where(m => m.Status == TeamMemberStatus.Active))
+                .ThenInclude(m => m.User)
+            .FirstOrDefaultAsync(t => t.Id == id, ct);
+    }
+
     public async Task<IReadOnlyDictionary<Guid, int>> CountBySeasonGameAsync(Guid seasonId, CancellationToken ct = default)
     {
         var rows = await Set.AsNoTracking()
