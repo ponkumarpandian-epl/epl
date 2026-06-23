@@ -15,14 +15,16 @@ public record CaptainTeamDto(
 /// <summary>One Active roster row. Mobile is masked; full PII is never returned.</summary>
 public record TeamMemberDto(
     Guid    Id,
-    Guid    UserId,
-    string  FullName,
+    Guid?   UserId,            // null for placeholder rows
+    string  FullName,          // placeholder name when UserId is null
     string? AvatarUrl,
-    string  PhoneMasked,
+    string  PhoneMasked,       // unmasked placeholder mobile when UserId is null
     bool    IsCaptain,
     string? ShirtNumber,
     string? Position,
-    DateTimeOffset AddedAt);
+    DateTimeOffset AddedAt,
+    bool    IsPlaceholder,
+    bool    NeedsAttention);   // placeholder whose mobile now matches a registered user
 
 /// <summary>Team header + Active roster (plan/10 §3.1 GET members, §4.2 manage).</summary>
 public record TeamRosterDto(
@@ -56,7 +58,20 @@ public record RosterChangeDto(
     string  Action,            // "added" | "removed"
     DateTimeOffset At);
 
-public record AddTeamMemberRequest(Guid UserId, string? ShirtNumber, string? Position);
+public record AddTeamMemberRequest(
+    Guid?   UserId,
+    string? PlaceholderName,
+    string? PlaceholderMobile,
+    string? ShirtNumber,
+    string? Position);
+
+public record PendingLinkDto(
+    Guid    MembershipId,
+    Guid    TeamId,
+    Sport   Sport,
+    string  TeamName,
+    string  ApartmentName,
+    string? SeasonName);
 
 public record UpdateTeamMemberRequest(string? ShirtNumber, string? Position);
 

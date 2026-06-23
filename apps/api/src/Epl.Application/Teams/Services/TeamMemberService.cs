@@ -1,3 +1,4 @@
+using Epl.Application.Auth.Common;
 using Epl.Application.Common;
 using Epl.Application.Common.Caching;
 using Epl.Application.Teams.Dtos;
@@ -5,6 +6,7 @@ using Epl.Domain.Abstractions;
 using Epl.Domain.Common;
 using Epl.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Epl.Application.Teams.Services;
@@ -34,15 +36,29 @@ public class TeamMemberService(
         var t = await uow.Teams.GetWithMembersAsync(teamId, track: false, ct);
         if (t is null) return null;
 
-        var members = t.Members
-            .OrderByDescending(m => m.IsCaptain)
-            .ThenBy(m => m.User.FullName)
-            .Select(m => ToMemberDto(m, m.User))
-            .ToList();
+        var active = t.Members.Where(m => m.Status == TeamMemberStatus.Active).ToList();
 
-        return new TeamRosterDto(
-            t.Id, t.Sport, t.Name, t.Apartment.Name, t.SeasonGame?.Season?.Name,
-            t.CaptainUserId, Roster.EffectiveMaxSize(t.Sport, t.SeasonGame?.MaxRosterSize), members);
+        var phMobiles = active.Where(m => m.UserId == null).Select(m => m.PlaceholderMobile!).Distinct().ToList();
+        var registeredMobiles = phMobiles.Count == 0
+            ? new HashSet<string>()
+            : (await users.Users.Where(u => u.PhoneNumber != null && phMobiles.Contains(u.PhoneNumber!))
+                                .Select(u => u.PhoneNumber!).ToListAsync(ct)).ToHashSet();
+
+        var memberDtos = new List<TeamMemberDto>(active.Count);
+        foreach (var m in active.OrderByDescending(m => m.IsCaptain).ThenBy(m => SortName(m)))
+        {
+            if (m.UserId is null)
+                memberDtos.Add(ToPlaceholderDto(m, needsAttention: registeredMobiles.Contains(m.PlaceholderMobile!)));
+            else
+            {
+                var u = await users.FindByIdAsync(m.UserId.Value.ToString());
+                if (u is not null) memberDtos.Add(ToMemberDto(m, u, needsAttention: false));
+            }
+        }
+
+        return new TeamRosterDto(t.Id, t.Sport, t.Name, t.Apartment.Name,
+            t.SeasonGame?.Season?.Name, t.CaptainUserId,
+            Roster.EffectiveMaxSize(t.Sport, t.SeasonGame?.MaxRosterSize), memberDtos);
     }
 
     public async Task<Result<TeamMemberDto>> AddMemberAsync(
@@ -53,25 +69,64 @@ public class TeamMemberService(
         if (!CanManage(team, actorUserId, actorIsAdmin))
             return Result<TeamMemberDto>.Fail("forbidden", "Only the team captain can manage this roster.");
 
-        var user = await users.FindByIdAsync(req.UserId.ToString());
-        if (user is null) return Result<TeamMemberDto>.Fail("user_not_found", "That player doesn't have an account yet.");
+        var max = Roster.EffectiveMaxSize(team.Sport, team.SeasonGame?.MaxRosterSize);
+        if (team.Members.Count(m => m.Status == TeamMemberStatus.Active) >= max)
+            return Result<TeamMemberDto>.Fail("roster_full", $"Roster is full ({max} players).");
 
-        if (team.Members.Any(m => m.UserId == req.UserId))
+        // ── Placeholder branch ──────────────────────────────────────────────
+        if (req.UserId is null)
+        {
+            var mobile = IdentifierParser.ToE164Mobile(req.PlaceholderMobile!);
+
+            // If this mobile already belongs to a registered user, add THEM instead.
+            var existing = await users.Users.FirstOrDefaultAsync(u => u.PhoneNumber == mobile, ct);
+            if (existing is not null)
+                return await AddRegisteredAsync(team, existing.Id, req, actorUserId, ct, max, existing);
+
+            if (team.Members.Any(m => m.Status == TeamMemberStatus.Active
+                                   && m.UserId == null && m.PlaceholderMobile == mobile))
+                return Result<TeamMemberDto>.Fail("already_added", "That number is already on this roster.");
+
+            var ph = uow.TeamMembers.Add(new TeamMember
+            {
+                TeamId            = teamId,
+                UserId            = null,
+                PlaceholderName   = req.PlaceholderName!.Trim(),
+                PlaceholderMobile = mobile,
+                IsCaptain         = false,
+                Status            = TeamMemberStatus.Active,
+                ShirtNumber       = Clean(req.ShirtNumber),
+                Position          = Clean(req.Position),
+                AddedByUserId     = actorUserId,
+                AddedAt           = DateTimeOffset.UtcNow,
+            });
+            await uow.SaveChangesAsync(ct);
+            cache.RemoveByPrefix(CacheKeys.TeamsFamilyPrefix);
+            log.LogInformation("Placeholder '{Name}' added to team {TeamId} by {Actor}", ph.PlaceholderName, teamId, actorUserId);
+            return Result<TeamMemberDto>.Ok(ToPlaceholderDto(ph, needsAttention: false));
+        }
+
+        // ── Registered branch ───────────────────────────────────────────────
+        var user = await users.FindByIdAsync(req.UserId.Value.ToString());
+        if (user is null) return Result<TeamMemberDto>.Fail("user_not_found", "That player doesn't have an account yet.");
+        return await AddRegisteredAsync(team, req.UserId.Value, req, actorUserId, ct, max, user);
+    }
+
+    private async Task<Result<TeamMemberDto>> AddRegisteredAsync(
+        Team team, Guid userId, AddTeamMemberRequest req, Guid actorUserId, CancellationToken ct, int max, AppUser user)
+    {
+        if (team.Members.Any(m => m.Status == TeamMemberStatus.Active && m.UserId == userId))
             return Result<TeamMemberDto>.Fail("already_member", $"{user.FullName} is already on this team.");
 
         if (team.SeasonGameId.HasValue &&
-            await uow.TeamMembers.ExistsActiveInSameSeasonGameAsync(req.UserId, team.SeasonGameId.Value, teamId, ct))
+            await uow.TeamMembers.ExistsActiveInSameSeasonGameAsync(userId, team.SeasonGameId.Value, team.Id, ct))
             return Result<TeamMemberDto>.Fail("already_on_a_team",
                 $"{user.FullName} is already on another team in this competition.");
 
-        var max = Roster.EffectiveMaxSize(team.Sport, team.SeasonGame?.MaxRosterSize);
-        if (team.Members.Count >= max)
-            return Result<TeamMemberDto>.Fail("roster_full", $"Roster is full ({max} players).");
-
         var member = uow.TeamMembers.Add(new TeamMember
         {
-            TeamId        = teamId,
-            UserId        = req.UserId,
+            TeamId        = team.Id,
+            UserId        = userId,
             IsCaptain     = false,
             Status        = TeamMemberStatus.Active,
             ShirtNumber   = Clean(req.ShirtNumber),
@@ -80,9 +135,9 @@ public class TeamMemberService(
             AddedAt       = DateTimeOffset.UtcNow,
         });
         await uow.SaveChangesAsync(ct);
-
-        log.LogInformation("Player {UserId} added to team {TeamId} by {Actor}", req.UserId, teamId, actorUserId);
-        return Result<TeamMemberDto>.Ok(ToMemberDto(member, user));
+        cache.RemoveByPrefix(CacheKeys.TeamsFamilyPrefix);
+        log.LogInformation("Player {UserId} added to team {TeamId} by {Actor}", userId, team.Id, actorUserId);
+        return Result<TeamMemberDto>.Ok(ToMemberDto(member, user, needsAttention: false));
     }
 
     public async Task<Result<TeamMemberDto>> UpdateMemberAsync(
@@ -98,8 +153,11 @@ public class TeamMemberService(
         member.Position    = Clean(req.Position);
         await uow.SaveChangesAsync(ct);
 
-        var user = await users.FindByIdAsync(member.UserId.ToString());
-        return Result<TeamMemberDto>.Ok(ToMemberDto(member, user!));
+        if (member.UserId is null)
+            return Result<TeamMemberDto>.Ok(ToPlaceholderDto(member, needsAttention: false));
+
+        var user = await users.FindByIdAsync(member.UserId.Value.ToString());
+        return Result<TeamMemberDto>.Ok(ToMemberDto(member, user!, needsAttention: false));
     }
 
     public async Task<Result<bool>> RemoveMemberAsync(
@@ -185,7 +243,9 @@ public class TeamMemberService(
     {
         var rows = await uow.TeamMembers.ListRecentByTeamAsync(teamId, limit, ct);
         return rows.Select(m => new RosterChangeDto(
-            m.UserId!.Value, m.User!.FullName, m.IsCaptain,
+            m.UserId ?? Guid.Empty,
+            m.User?.FullName ?? m.PlaceholderName ?? "Unknown",
+            m.IsCaptain,
             m.Status == TeamMemberStatus.Removed ? "removed" : "added",
             m.RemovedAt ?? m.AddedAt)).ToList();
     }
@@ -196,7 +256,15 @@ public class TeamMemberService(
     private static string? Clean(string? s)
         => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 
-    private static TeamMemberDto ToMemberDto(TeamMember m, AppUser user) => new(
-        m.Id, m.UserId!.Value, user.FullName, user.AvatarUrl,
-        Mask.Phone(user.PhoneNumber), m.IsCaptain, m.ShirtNumber, m.Position, m.AddedAt);
+    private static TeamMemberDto ToMemberDto(TeamMember m, AppUser user, bool needsAttention) => new(
+        m.Id, user.Id, user.FullName, user.AvatarUrl,
+        Mask.Phone(user.PhoneNumber), m.IsCaptain, m.ShirtNumber, m.Position, m.AddedAt,
+        IsPlaceholder: false, NeedsAttention: needsAttention);
+
+    private static TeamMemberDto ToPlaceholderDto(TeamMember m, bool needsAttention) => new(
+        m.Id, null, m.PlaceholderName!, null,
+        m.PlaceholderMobile!, m.IsCaptain, m.ShirtNumber, m.Position, m.AddedAt,
+        IsPlaceholder: true, NeedsAttention: needsAttention);
+
+    private static string SortName(TeamMember m) => m.UserId is null ? (m.PlaceholderName ?? "") : "";
 }
