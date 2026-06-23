@@ -79,7 +79,7 @@ public class AuthService(
     {
         if (string.IsNullOrWhiteSpace(user.PhoneNumber)) return;
 
-        var placeholders = await uow.TeamMembers.ListActivePlaceholdersByMobileAsync(user.PhoneNumber!, ct);
+        var placeholders = await uow.TeamMembers.ListActivePlaceholdersByMobileAsync(user.PhoneNumber!, track: true, ct);
         if (placeholders.Count == 0) return;
 
         var claimedSeasonGames = new HashSet<Guid>();

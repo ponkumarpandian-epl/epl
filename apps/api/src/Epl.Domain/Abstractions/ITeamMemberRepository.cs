@@ -31,8 +31,9 @@ public interface ITeamMemberRepository : IRepository<TeamMember>
     /// <summary>
     /// Active placeholder rows with the given mobile number (UserId == null).
     /// Includes Team and Team.SeasonGame for the C8 duplicate-membership check.
+    /// Pass <paramref name="track"/> = true when the caller will mutate and save the rows.
     /// </summary>
-    Task<IReadOnlyList<TeamMember>> ListActivePlaceholdersByMobileAsync(string mobileE164, CancellationToken ct = default);
+    Task<IReadOnlyList<TeamMember>> ListActivePlaceholdersByMobileAsync(string mobileE164, bool track = false, CancellationToken ct = default);
 
     /// <summary>
     /// Active rows that were linked from a placeholder and are awaiting acknowledgement
