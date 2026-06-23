@@ -1,6 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
-import { ALL_ROLES, type AppRole } from "@/lib/admin-users";
+import { ALL_ROLES, type AppRole } from "@/lib/roles";
 import { grantRoleAction, revokeRoleAction } from "../actions";
 
 export function RoleToggles({

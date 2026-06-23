@@ -23,8 +23,7 @@ export interface AdminUserDetail extends AdminUser {
 
 export interface Paged<T> { items: T[]; total: number; page: number; pageSize: number; }
 
-export const ALL_ROLES = ["Admin", "Umpire", "Player"] as const;
-export type AppRole = (typeof ALL_ROLES)[number];
+export { ALL_ROLES, type AppRole } from "./roles";
 
 export async function listUsers(
   q: string, role: string, page: number, pageSize = 20,
