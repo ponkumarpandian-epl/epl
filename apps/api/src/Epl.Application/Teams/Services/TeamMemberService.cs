@@ -60,11 +60,8 @@ public class TeamMemberService(
         {
             if (m.UserId is null)
                 memberDtos.Add(ToPlaceholderDto(m, needsAttention: registeredMobiles.Contains(m.PlaceholderMobile!)));
-            else
-            {
-                var u = await users.FindByIdAsync(m.UserId.Value.ToString());
-                if (u is not null) memberDtos.Add(ToMemberDto(m, u, needsAttention: false));
-            }
+            else if (m.User is not null)
+                memberDtos.Add(ToMemberDto(m, m.User, needsAttention: false));
         }
 
         return new TeamRosterDto(t.Id, t.Sport, t.Name, t.Apartment.Name,
@@ -298,5 +295,6 @@ public class TeamMemberService(
         m.PlaceholderMobile!, m.IsCaptain, m.ShirtNumber, m.Position, m.AddedAt,
         IsPlaceholder: true, NeedsAttention: needsAttention);
 
-    private static string SortName(TeamMember m) => m.UserId is null ? (m.PlaceholderName ?? "") : "";
+    private static string SortName(TeamMember m)
+        => m.UserId is null ? (m.PlaceholderName ?? "") : (m.User?.FullName ?? "");
 }

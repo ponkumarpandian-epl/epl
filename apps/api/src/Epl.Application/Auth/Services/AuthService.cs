@@ -79,40 +79,47 @@ public class AuthService(
     {
         if (string.IsNullOrWhiteSpace(user.PhoneNumber)) return;
 
-        var placeholders = await uow.TeamMembers.ListActivePlaceholdersByMobileAsync(user.PhoneNumber!, track: true, ct);
-        if (placeholders.Count == 0) return;
-
-        var claimedSeasonGames = new HashSet<Guid>();
-        var linked = 0;
-
-        foreach (var ph in placeholders)
+        try
         {
-            var sgId = ph.Team.SeasonGameId;
+            var placeholders = await uow.TeamMembers.ListActivePlaceholdersByMobileAsync(user.PhoneNumber!, track: true, ct);
+            if (placeholders.Count == 0) return;
 
-            // C8: one active membership per SeasonGame. Guard against existing rows AND
-            // against linking two placeholders that share a SeasonGame in this same batch.
-            if (sgId.HasValue)
+            var claimedSeasonGames = new HashSet<Guid>();
+            var linked = 0;
+
+            foreach (var ph in placeholders)
             {
-                if (claimedSeasonGames.Contains(sgId.Value)) continue;
-                if (await uow.TeamMembers.ExistsActiveInSameSeasonGameAsync(user.Id, sgId.Value, ph.TeamId, ct))
-                    continue;
-                claimedSeasonGames.Add(sgId.Value);
+                var sgId = ph.Team.SeasonGameId;
+
+                // C8: one active membership per SeasonGame. Guard against existing rows AND
+                // against linking two placeholders that share a SeasonGame in this same batch.
+                if (sgId.HasValue)
+                {
+                    if (claimedSeasonGames.Contains(sgId.Value)) continue;
+                    if (await uow.TeamMembers.ExistsActiveInSameSeasonGameAsync(user.Id, sgId.Value, ph.TeamId, ct))
+                        continue;
+                    claimedSeasonGames.Add(sgId.Value);
+                }
+
+                ph.UserId                = user.Id;
+                ph.PlaceholderName       = null;
+                ph.PlaceholderMobile     = null;
+                ph.LinkedFromPlaceholder = true;
+                ph.AcknowledgedAt        = null;
+                linked++;
+                log.LogInformation("Linked placeholder {MemberId} on team {TeamId} to new user {UserId}",
+                    ph.Id, ph.TeamId, user.Id);
             }
 
-            ph.UserId                = user.Id;
-            ph.PlaceholderName       = null;
-            ph.PlaceholderMobile     = null;
-            ph.LinkedFromPlaceholder = true;
-            ph.AcknowledgedAt        = null;
-            linked++;
-            log.LogInformation("Linked placeholder {MemberId} on team {TeamId} to new user {UserId}",
-                ph.Id, ph.TeamId, user.Id);
+            if (linked > 0)
+            {
+                await uow.SaveChangesAsync(ct);
+                cache.RemoveByPrefix(CacheKeys.TeamsFamilyPrefix);
+            }
         }
-
-        if (linked > 0)
+        catch (Exception ex)
         {
-            await uow.SaveChangesAsync(ct);
-            cache.RemoveByPrefix(CacheKeys.TeamsFamilyPrefix);
+            log.LogWarning(ex, "Placeholder linking failed for new user {UserId}; continuing", user.Id);
         }
     }
 }
