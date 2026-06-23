@@ -11,3 +11,11 @@ export async function leaveTeamAction(membershipId: string): Promise<ActionResul
   revalidatePath("/profile");
   return { ok: true };
 }
+
+/** Acknowledge an auto-linked team membership (keeps the player on the team). */
+export async function acknowledgeLinkAction(membershipId: string): Promise<ActionResult> {
+  const res = await api.post(`/api/team-members/${membershipId}/acknowledge`, {});
+  if (!res.ok) return { ok: false, message: res.message };
+  revalidatePath("/profile");
+  return { ok: true };
+}

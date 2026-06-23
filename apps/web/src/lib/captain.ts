@@ -88,3 +88,18 @@ export async function getMyTeams(): Promise<MyTeam[]> {
   const res = await api.get<MyTeam[]>("/api/profile/me/teams");
   return res.ok ? res.data : [];
 }
+
+export interface PendingLink {
+  membershipId:  string;
+  teamId:        string;
+  sport:         BackendSport;
+  teamName:      string;
+  apartmentName: string;
+  seasonName:    string | null;
+}
+
+/** Teams the signed-in user was auto-linked to and hasn't yet acknowledged. */
+export async function getPendingLinks(): Promise<PendingLink[]> {
+  const res = await api.get<PendingLink[]>("/api/profile/me/pending-links");
+  return res.ok ? res.data : [];
+}

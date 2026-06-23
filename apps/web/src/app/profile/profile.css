@@ -274,3 +274,13 @@
 }
 .myTeamLeaveBtn:hover, .myTeamLeaveYes:hover { border-color: var(--sport-volleyball-bright); color: var(--sport-volleyball-bright); }
 .myTeamConfirm { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--color-text-subtle); }
+
+/* ── Welcome card (post-registration auto-link acknowledgement) ──────────── */
+.welcomeCard { border: 1px solid #c7d2fe; background: #eef2ff; border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+.welcomeTitle { font-size: 16px; font-weight: 600; margin: 0 0 10px; }
+.welcomeList { list-style: none; margin: 0; padding: 0; }
+.welcomeRow { display: flex; align-items: center; gap: 10px; padding: 6px 0; flex-wrap: wrap; }
+.welcomeTeam { color: var(--color-text, #1e1e2e); font-size: 14px; flex: 1; min-width: 0; }
+.welcomeActions { margin-left: auto; display: inline-flex; gap: 6px; }
+.welcomeKeepAll { margin-top: 8px; background: none; border: none; color: #4338ca; cursor: pointer; font-size: 13px; }
+.welcomeKeepAll:disabled { opacity: 0.55; cursor: default; }
