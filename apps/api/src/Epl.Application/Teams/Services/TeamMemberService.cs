@@ -229,7 +229,7 @@ public class TeamMemberService(
         if (team.CaptainUserId == newCaptainUserId) return Result<bool>.Ok(true);   // no-op
 
         var target = team.Members.FirstOrDefault(m => m.UserId == newCaptainUserId);
-        if (target is null)
+        if (target?.User is null)
             return Result<bool>.Fail("not_a_member", "The new captain must be on the team's roster.");
 
         // Exactly one IsCaptain per team. Flip every Active row, then point the FK.

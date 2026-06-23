@@ -12,7 +12,7 @@ public class TeamMemberRepository(AppDbContext db) : Repository<TeamMember>(db),
             .Include(m => m.User)
             .Where(m => m.TeamId == teamId && m.Status == TeamMemberStatus.Active)
             .OrderByDescending(m => m.IsCaptain)
-            .ThenBy(m => m.User.FullName)
+            .ThenBy(m => m.User != null ? m.User.FullName : m.PlaceholderName)
             .ToListAsync(ct);
 
     public Task<TeamMember?> GetActiveAsync(Guid teamId, Guid userId, bool track = false, CancellationToken ct = default)
