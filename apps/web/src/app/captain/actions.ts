@@ -33,6 +33,29 @@ export async function removeMemberAction(teamId: string, memberId: string): Prom
   return { ok: true };
 }
 
+export async function addPlaceholderAction(
+  teamId: string,
+  name: string,
+  mobile: string,
+  shirtNumber: string | null,
+  position: string | null,
+): Promise<ActionResult<TeamMember>> {
+  const res = await api.post<TeamMember>(`/api/teams/${teamId}/members`,
+    { placeholderName: name, placeholderMobile: mobile, shirtNumber, position });
+  if (!res.ok) return { ok: false, message: res.message };
+  revalidatePath(`/captain/teams/${teamId}`);
+  return { ok: true, data: res.data };
+}
+
+/** Returns the registered user if this mobile already has an account, else null. */
+export async function matchMobileAction(mobile: string): Promise<ActionResult<UserSearchResult | null>> {
+  const term = mobile.trim();
+  if (term.length < 10) return { ok: true, data: null };
+  const res = await api.get<UserSearchResult[]>(`/api/users/search?q=${encodeURIComponent(term)}&limit=1`);
+  if (!res.ok) return { ok: false, message: res.message };
+  return { ok: true, data: res.data[0] ?? null };
+}
+
 export async function transferCaptaincyAction(teamId: string, newCaptainUserId: string): Promise<ActionResult> {
   const res = await api.put(`/api/teams/${teamId}/captain`, { newCaptainUserId });
   if (!res.ok) return { ok: false, message: res.message };

@@ -237,6 +237,33 @@
 }
 .rosterAuditTime { margin-left: auto; font-family: var(--font-mono); font-size: 0.78rem; color: var(--color-text-subtle); }
 
+/* ── Manual add (unregistered player) ───────────────────────────────────── */
+.addModeToggle { display: inline-flex; gap: 4px; margin-bottom: 12px; margin-top: 0.75rem; }
+.addModeBtn {
+  padding: 6px 12px; border-radius: 999px; border: 1px solid var(--color-border, #d4d4d8);
+  background: transparent; cursor: pointer; font-size: 13px; color: var(--color-text);
+}
+.addModeBtn.is-on { background: var(--color-accent, #111827); color: var(--color-accent-text, #fff); border-color: transparent; }
+.manualAddForm { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; }
+.manualField { display: grid; gap: 4px; margin: 8px 0; }
+.manualField > span { font-size: 13px; font-weight: 500; }
+.manualField .addFieldInput { margin-top: 0; }
+.manualHelp { color: var(--color-text-subtle, #6b7280); font-size: 12px; }
+.manualMatchHint {
+  background: #eef2ff; border: 1px solid #c7d2fe;
+  padding: 8px 10px; border-radius: 8px; font-size: 13px;
+}
+.unregChip {
+  margin-left: 6px; padding: 1px 8px; border-radius: 999px;
+  border: 1px dashed var(--color-border, #9ca3af);
+  font-size: 11px; color: var(--color-text-subtle, #6b7280);
+}
+.attentionChip {
+  margin-left: 6px; padding: 1px 8px; border-radius: 999px;
+  background: #fef3c7; color: #92400e; font-size: 11px;
+}
+.attentionNote { margin: 4px 0 0; font-size: 12px; color: #92400e; }
+
 @media (max-width: 560px) {
   .rosterTable thead { display: none; }
   .rosterTable, .rosterTable tbody, .rosterTable tr, .rosterTable td { display: block; width: 100%; }

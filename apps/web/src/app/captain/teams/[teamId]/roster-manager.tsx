@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useTransition } from "react";
 import type { TeamRoster, TeamMember, UserSearchResult } from "@/lib/captain";
-import { addMemberAction, removeMemberAction, searchUsersAction, transferCaptaincyAction } from "../../actions";
+import { addMemberAction, addPlaceholderAction, matchMobileAction, removeMemberAction, searchUsersAction, transferCaptaincyAction } from "../../actions";
 
 interface Props {
   teamId:        string;
@@ -37,6 +37,10 @@ export function RosterManager({ teamId, initialRoster }: Props) {
       if (res.data) setMembers((list) => sortMembers([...list, res.data!]));
       done();
     });
+  }
+
+  function addDirect(m: TeamMember) {
+    setMembers((list) => sortMembers([...list, m]));
   }
 
   function transfer(newCaptainUserId: string) {
@@ -99,7 +103,14 @@ export function RosterManager({ teamId, initialRoster }: Props) {
                     <span className="rosterName">
                       {m.fullName}
                       {m.isCaptain && <span className="captainBadge" title="Captain">C</span>}
+                      {m.isPlaceholder && <span className="unregChip" title="Unregistered">Unregistered</span>}
+                      {m.needsAttention && (
+                        <span className="attentionChip" role="status" title="Needs attention">Needs attention</span>
+                      )}
                     </span>
+                    {m.needsAttention && (
+                      <p className="attentionNote">This player registered but is already on another team in this competition. Remove here or contact an admin.</p>
+                    )}
                   </td>
                   <td data-label="Mobile" className="rosterMono">{m.phoneMasked}</td>
                   <td data-label="Shirt">{m.shirtNumber ?? "—"}</td>
@@ -127,14 +138,15 @@ export function RosterManager({ teamId, initialRoster }: Props) {
       <AddPlayer
         teamId={teamId}
         disabled={full}
-        existingUserIds={members.map((m) => m.userId)}
+        existingUserIds={members.map((m) => m.userId).filter((id): id is string => id !== null)}
         onAdd={addMember}
+        onAddDirect={addDirect}
         pending={pending}
       />
 
       {transferOpen && (
         <TransferModal
-          candidates={members.filter((m) => m.userId !== captainId)}
+          candidates={members.filter((m) => !m.isPlaceholder && m.userId !== captainId)}
           onPick={transfer}
           onClose={() => setTransferOpen(false)}
         />
@@ -145,14 +157,16 @@ export function RosterManager({ teamId, initialRoster }: Props) {
 
 // ── Add-player search + form ──────────────────────────────────────────────
 function AddPlayer({
-  teamId, disabled, existingUserIds, onAdd, pending,
+  teamId, disabled, existingUserIds, onAdd, onAddDirect, pending,
 }: {
   teamId:          string;
   disabled:        boolean;
   existingUserIds: string[];
   onAdd:           (u: UserSearchResult, shirt: string | null, position: string | null, done: () => void) => void;
+  onAddDirect:     (m: TeamMember) => void;
   pending:         boolean;
 }) {
+  const [mode, setMode]       = useState<"registered" | "manual">("registered");
   const [query, setQuery]     = useState("");
   const [results, setResults] = useState<UserSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
@@ -193,7 +207,16 @@ function AddPlayer({
     <section className="addPanel" data-team={teamId}>
       <h2 className="rosterPanelTitle">Add a player</h2>
 
-      {!picked ? (
+      <div className="addModeToggle" role="group" aria-label="How to add a player">
+        <button type="button" className={`addModeBtn ${mode === "registered" ? "is-on" : ""}`}
+          aria-pressed={mode === "registered"} onClick={() => setMode("registered")}>Registered</button>
+        <button type="button" className={`addModeBtn ${mode === "manual" ? "is-on" : ""}`}
+          aria-pressed={mode === "manual"} onClick={() => setMode("manual")}>Unregistered (manual)</button>
+      </div>
+
+      {mode === "manual" ? (
+        <ManualAdd teamId={teamId} pending={pending} onAdded={onAddDirect} />
+      ) : !picked ? (
         <>
           <input
             type="search"
@@ -263,6 +286,70 @@ function AddPlayer({
   );
 }
 
+// ── Manual add (unregistered player) ─────────────────────────────────────
+function ManualAdd({ teamId, pending, onAdded }: {
+  teamId: string; pending: boolean;
+  onAdded: (m: TeamMember) => void;
+}) {
+  const [name, setName]     = useState("");
+  const [mobile, setMobile] = useState("");
+  const [shirt, setShirt]   = useState("");
+  const [position, setPos]  = useState("");
+  const [match, setMatch]   = useState<UserSearchResult | null>(null);
+  const [error, setError]   = useState<string | null>(null);
+  const [busy, startBusy]   = useTransition();
+
+  function checkMobile() {
+    const m = mobile.trim();
+    if (m.length < 10) { setMatch(null); return; }
+    matchMobileAction(m).then((r) => setMatch(r.ok ? (r.data ?? null) : null));
+  }
+
+  function submit() {
+    if (!name.trim()) { setError("Enter the player's name."); return; }
+    if (mobile.trim().length < 10) { setError("Enter a valid 10-digit mobile."); return; }
+    setError(null);
+    startBusy(async () => {
+      const res = await addPlaceholderAction(teamId, name.trim(), mobile.trim(),
+        shirt.trim() || null, position.trim() || null);
+      if (!res.ok) { setError(res.message ?? "Could not add player."); return; }
+      if (res.data) onAdded(res.data);
+      setName(""); setMobile(""); setShirt(""); setPos(""); setMatch(null);
+    });
+  }
+
+  return (
+    <div className="manualAddForm">
+      {match && (
+        <p className="manualMatchHint" role="status">
+          This number belongs to <strong>{match.fullName}</strong> — adding will put them on as a registered player.
+        </p>
+      )}
+      <label className="manualField">
+        <span>Full name</span>
+        <input className="addFieldInput" value={name} maxLength={80}
+          onChange={(e) => setName(e.target.value)} />
+      </label>
+      <label className="manualField">
+        <span>Mobile</span>
+        <input className="addFieldInput" type="tel" inputMode="tel" value={mobile} maxLength={14}
+          placeholder="+91…" onChange={(e) => setMobile(e.target.value)} onBlur={checkMobile} />
+        <small className="manualHelp">Used to link them when they register.</small>
+      </label>
+      <div className="addFormFields">
+        <input className="addFieldInput" placeholder="Shirt # (optional)" maxLength={10}
+          value={shirt} onChange={(e) => setShirt(e.target.value)} aria-label="Shirt number" />
+        <input className="addFieldInput" placeholder="Position (optional)" maxLength={60}
+          value={position} onChange={(e) => setPos(e.target.value)} aria-label="Position" />
+      </div>
+      {error && <p className="rosterError" role="alert">{error}</p>}
+      <button type="button" className="captainPrimaryBtn" disabled={pending || busy} onClick={submit}>
+        Add to roster
+      </button>
+    </div>
+  );
+}
+
 // ── Transfer-captaincy modal ───────────────────────────────────────────────
 function TransferModal({
   candidates, onPick, onClose,
@@ -288,7 +375,7 @@ function TransferModal({
           <ul className="modalList">
             {candidates.map((m) => (
               <li key={m.id}>
-                <button type="button" className="addResultBtn" onClick={() => onPick(m.userId)}>
+                <button type="button" className="addResultBtn" onClick={() => m.userId && onPick(m.userId)}>
                   <span className="rosterAvatar" aria-hidden="true">
                     {m.avatarUrl
                       // eslint-disable-next-line @next/next/no-img-element

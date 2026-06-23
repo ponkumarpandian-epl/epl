@@ -14,15 +14,17 @@ export interface CaptainTeam {
 }
 
 export interface TeamMember {
-  id:          string;
-  userId:      string;
-  fullName:    string;
-  avatarUrl:   string | null;
-  phoneMasked: string;
-  isCaptain:   boolean;
-  shirtNumber: string | null;
-  position:    string | null;
-  addedAt:     string;
+  id:             string;
+  userId:         string | null;
+  fullName:       string;
+  avatarUrl:      string | null;
+  phoneMasked:    string;
+  isCaptain:      boolean;
+  shirtNumber:    string | null;
+  position:       string | null;
+  addedAt:        string;
+  isPlaceholder:  boolean;
+  needsAttention: boolean;
 }
 
 export interface TeamRoster {
