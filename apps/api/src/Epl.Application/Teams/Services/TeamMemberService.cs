@@ -185,7 +185,7 @@ public class TeamMemberService(
     {
         var rows = await uow.TeamMembers.ListRecentByTeamAsync(teamId, limit, ct);
         return rows.Select(m => new RosterChangeDto(
-            m.UserId, m.User.FullName, m.IsCaptain,
+            m.UserId!.Value, m.User!.FullName, m.IsCaptain,
             m.Status == TeamMemberStatus.Removed ? "removed" : "added",
             m.RemovedAt ?? m.AddedAt)).ToList();
     }
@@ -197,6 +197,6 @@ public class TeamMemberService(
         => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 
     private static TeamMemberDto ToMemberDto(TeamMember m, AppUser user) => new(
-        m.Id, m.UserId, user.FullName, user.AvatarUrl,
+        m.Id, m.UserId!.Value, user.FullName, user.AvatarUrl,
         Mask.Phone(user.PhoneNumber), m.IsCaptain, m.ShirtNumber, m.Position, m.AddedAt);
 }

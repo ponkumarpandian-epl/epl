@@ -423,6 +423,9 @@ namespace Epl.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTimeOffset?>("AcknowledgedAt")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<DateTimeOffset>("AddedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -431,6 +434,17 @@ namespace Epl.Infrastructure.Persistence.Migrations
 
                     b.Property<bool>("IsCaptain")
                         .HasColumnType("bit");
+
+                    b.Property<bool>("LinkedFromPlaceholder")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PlaceholderMobile")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("PlaceholderName")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
                     b.Property<string>("Position")
                         .HasMaxLength(60)
@@ -451,10 +465,14 @@ namespace Epl.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("TeamId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid?>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TeamId", "PlaceholderMobile")
+                        .IsUnique()
+                        .HasFilter("[Status] = 1 AND [UserId] IS NULL");
 
                     b.HasIndex("TeamId", "UserId")
                         .IsUnique()
@@ -462,7 +480,10 @@ namespace Epl.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("UserId", "Status");
 
-                    b.ToTable("TeamMembers");
+                    b.ToTable("TeamMembers", t =>
+                        {
+                            t.HasCheckConstraint("CK_TeamMembers_Identity", "([UserId] IS NOT NULL AND [PlaceholderName] IS NULL AND [PlaceholderMobile] IS NULL) OR ([UserId] IS NULL AND [PlaceholderName] IS NOT NULL AND [PlaceholderMobile] IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("Epl.Domain.Entities.UserGameSkill", b =>
@@ -651,8 +672,7 @@ namespace Epl.Infrastructure.Persistence.Migrations
 
                     b.HasOne("Epl.Domain.Entities.AppUser", "Captain")
                         .WithMany()
-                        .HasForeignKey("CaptainUserId")
-                        .OnDelete(DeleteBehavior.ClientSetNull);
+                        .HasForeignKey("CaptainUserId");
 
                     b.HasOne("Epl.Domain.Entities.AppUser", "CreatedBy")
                         .WithMany("CaptainedTeams")
@@ -684,8 +704,7 @@ namespace Epl.Infrastructure.Persistence.Migrations
                     b.HasOne("Epl.Domain.Entities.AppUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Team");
 

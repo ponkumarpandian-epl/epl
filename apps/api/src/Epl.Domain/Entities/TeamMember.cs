@@ -12,8 +12,20 @@ public class TeamMember
     public Guid TeamId { get; set; }
     public Team Team { get; set; } = null!;
 
-    public Guid UserId { get; set; }
-    public AppUser User { get; set; } = null!;
+    public Guid? UserId { get; set; }
+    public AppUser? User { get; set; }
+
+    /// <summary>Set iff <see cref="UserId"/> is null — unregistered player added by the captain.</summary>
+    public string? PlaceholderName { get; set; }
+
+    /// <summary>E.164 mobile of an unregistered player; the key used to auto-link on registration.</summary>
+    public string? PlaceholderMobile { get; set; }
+
+    /// <summary>True when registration converted a placeholder into this real membership (drives the welcome card).</summary>
+    public bool LinkedFromPlaceholder { get; set; }
+
+    /// <summary>Null until the auto-added user keeps/leaves it via the welcome card.</summary>
+    public DateTimeOffset? AcknowledgedAt { get; set; }
 
     /// <summary>Exactly one true per team. The captain's roster row.</summary>
     public bool IsCaptain { get; set; }
