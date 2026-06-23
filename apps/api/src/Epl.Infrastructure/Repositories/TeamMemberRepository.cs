@@ -59,4 +59,26 @@ public class TeamMemberRepository(AppDbContext db) : Repository<TeamMember>(db),
             .OrderByDescending(m => m.RemovedAt ?? m.AddedAt)
             .Take(limit)
             .ToListAsync(ct);
+
+    public async Task<IReadOnlyList<TeamMember>> ListActivePlaceholdersByMobileAsync(
+        string mobileE164, CancellationToken ct = default)
+        => await Set.AsNoTracking()
+            .Include(m => m.Team).ThenInclude(t => t.SeasonGame)
+            .Where(m => m.Status == TeamMemberStatus.Active
+                     && m.UserId == null
+                     && m.PlaceholderMobile == mobileE164)
+            .OrderBy(m => m.AddedAt)
+            .ToListAsync(ct);
+
+    public async Task<IReadOnlyList<TeamMember>> ListPendingLinksByUserAsync(
+        Guid userId, CancellationToken ct = default)
+        => await Set.AsNoTracking()
+            .Include(m => m.Team).ThenInclude(t => t.Apartment)
+            .Include(m => m.Team).ThenInclude(t => t.SeasonGame).ThenInclude(sg => sg!.Season)
+            .Where(m => m.Status == TeamMemberStatus.Active
+                     && m.UserId == userId
+                     && m.LinkedFromPlaceholder
+                     && m.AcknowledgedAt == null)
+            .OrderBy(m => m.AddedAt)
+            .ToListAsync(ct);
 }
