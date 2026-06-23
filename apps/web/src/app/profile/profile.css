@@ -284,3 +284,4 @@
 .welcomeActions { margin-left: auto; display: inline-flex; gap: 6px; }
 .welcomeKeepAll { margin-top: 8px; background: none; border: none; color: #4338ca; cursor: pointer; font-size: 13px; }
 .welcomeKeepAll:disabled { opacity: 0.55; cursor: default; }
+.welcomeError { color: var(--color-danger); font-size: 0.9rem; margin: 0 0 8px; }
