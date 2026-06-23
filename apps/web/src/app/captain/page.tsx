@@ -40,6 +40,11 @@ export default async function CaptainPage() {
                 <div className="captainCardTop">
                   <span className={`sportTag ${t.sport.toLowerCase()}`}>{t.sport}</span>
                   {full && <span className="rosterFullChip">Full</span>}
+                  {t.needsAttentionCount > 0 && (
+                    <span className="attentionChip" title="Placeholders need attention">
+                      {t.needsAttentionCount} needs attention
+                    </span>
+                  )}
                 </div>
                 <h2 className="captainCardName">{t.name}</h2>
                 <div className="captainCardApt">{t.apartmentName}</div>

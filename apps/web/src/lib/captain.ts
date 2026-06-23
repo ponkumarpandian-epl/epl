@@ -9,8 +9,9 @@ export interface CaptainTeam {
   name:              string;
   apartmentName:     string;
   seasonName:        string | null;
-  activeMemberCount: number;
-  maxRosterSize:     number;
+  activeMemberCount:   number;
+  maxRosterSize:       number;
+  needsAttentionCount: number;
 }
 
 export interface TeamMember {

@@ -10,7 +10,8 @@ public record CaptainTeamDto(
     string  ApartmentName,
     string? SeasonName,
     int     ActiveMemberCount,
-    int     MaxRosterSize);
+    int     MaxRosterSize,
+    int     NeedsAttentionCount);
 
 /// <summary>One Active roster row. Mobile is masked; full PII is never returned.</summary>
 public record TeamMemberDto(

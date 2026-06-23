@@ -25,10 +25,21 @@ public class TeamMemberService(
     public async Task<IReadOnlyList<CaptainTeamDto>> ListCaptainTeamsAsync(Guid captainUserId, CancellationToken ct = default)
     {
         var teams = await uow.Teams.ListByCaptainAsync(captainUserId, ct);
+
+        var allPhMobiles = teams.SelectMany(t => t.Members)
+            .Where(m => m.Status == TeamMemberStatus.Active && m.UserId == null)
+            .Select(m => m.PlaceholderMobile!).Distinct().ToList();
+        var registered = allPhMobiles.Count == 0
+            ? new HashSet<string>()
+            : (await users.Users.Where(u => u.PhoneNumber != null && allPhMobiles.Contains(u.PhoneNumber!))
+                                .Select(u => u.PhoneNumber!).ToListAsync(ct)).ToHashSet();
+
         return teams.Select(t => new CaptainTeamDto(
             t.Id, t.Sport, t.Name, t.Apartment.Name, t.SeasonGame?.Season?.Name,
-            t.Members.Count,                          // Active-only via filtered include
-            Roster.EffectiveMaxSize(t.Sport, t.SeasonGame?.MaxRosterSize))).ToList();
+            t.Members.Count(m => m.Status == TeamMemberStatus.Active),
+            Roster.EffectiveMaxSize(t.Sport, t.SeasonGame?.MaxRosterSize),
+            t.Members.Count(m => m.Status == TeamMemberStatus.Active && m.UserId == null
+                              && registered.Contains(m.PlaceholderMobile!)))).ToList();
     }
 
     public async Task<TeamRosterDto?> GetRosterAsync(Guid teamId, CancellationToken ct = default)
