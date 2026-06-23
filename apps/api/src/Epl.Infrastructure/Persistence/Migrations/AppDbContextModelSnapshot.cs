@@ -476,7 +476,7 @@ namespace Epl.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("TeamId", "UserId")
                         .IsUnique()
-                        .HasFilter("[Status] = 1");
+                        .HasFilter("[Status] = 1 AND [UserId] IS NOT NULL");
 
                     b.HasIndex("UserId", "Status");
 

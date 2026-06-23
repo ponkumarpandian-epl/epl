@@ -44,11 +44,15 @@ public class TeamMemberConfig : IEntityTypeConfiguration<TeamMember>
             "([UserId] IS NOT NULL AND [PlaceholderName] IS NULL AND [PlaceholderMobile] IS NULL) " +
             "OR ([UserId] IS NULL AND [PlaceholderName] IS NOT NULL AND [PlaceholderMobile] IS NOT NULL)"));
 
-        // A user can't have two Active rows on the same team. Removed rows are kept
-        // as history, so the uniqueness is filtered to Active only.
+        // A registered user can't have two Active rows on the same team. Removed rows
+        // are kept as history, so uniqueness is filtered to Active only. The
+        // `UserId IS NOT NULL` guard is REQUIRED: SQL Server treats NULL = NULL as a
+        // duplicate in a unique index, so without it every placeholder row (UserId
+        // NULL) on a team would collide. Placeholder uniqueness is handled separately
+        // by the (TeamId, PlaceholderMobile) index above.
         b.HasIndex(m => new { m.TeamId, m.UserId })
             .IsUnique()
-            .HasFilter("[Status] = 1");
+            .HasFilter("[Status] = 1 AND [UserId] IS NOT NULL");
 
         // "Teams I'm on" lookup.
         b.HasIndex(m => new { m.UserId, m.Status });
