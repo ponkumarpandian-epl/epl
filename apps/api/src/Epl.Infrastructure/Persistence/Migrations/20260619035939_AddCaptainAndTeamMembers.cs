@@ -72,13 +72,17 @@ namespace Epl.Infrastructure.Persistence.Migrations
                 table: "TeamMembers",
                 columns: new[] { "UserId", "Status" });
 
+            // NO ACTION, not SET NULL: Teams already has a SET NULL FK to AspNetUsers
+            // (CreatedByUserId), and SQL Server rejects a second set-null/cascade path
+            // to the same table (error 1785 — multiple cascade paths). EF nulls the
+            // captain client-side (DeleteBehavior.ClientSetNull) for tracked graphs.
             migrationBuilder.AddForeignKey(
                 name: "FK_Teams_AspNetUsers_CaptainUserId",
                 table: "Teams",
                 column: "CaptainUserId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.SetNull);
+                onDelete: ReferentialAction.NoAction);
 
             // ── Backfill (plan/10 §2.3) ──────────────────────────────────────
             // 1) Attach a captain account ONLY where CaptainMobile maps to exactly

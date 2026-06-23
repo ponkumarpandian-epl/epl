@@ -652,7 +652,7 @@ namespace Epl.Infrastructure.Persistence.Migrations
                     b.HasOne("Epl.Domain.Entities.AppUser", "Captain")
                         .WithMany()
                         .HasForeignKey("CaptainUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.ClientSetNull);
 
                     b.HasOne("Epl.Domain.Entities.AppUser", "CreatedBy")
                         .WithMany("CaptainedTeams")
