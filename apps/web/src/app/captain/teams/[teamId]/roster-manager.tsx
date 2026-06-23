@@ -100,17 +100,19 @@ export function RosterManager({ teamId, initialRoster }: Props) {
                         // eslint-disable-next-line @next/next/no-img-element
                         ? <img src={m.avatarUrl} alt="" /> : initials(m.fullName)}
                     </span>
-                    <span className="rosterName">
-                      {m.fullName}
-                      {m.isCaptain && <span className="captainBadge" title="Captain">C</span>}
-                      {m.isPlaceholder && <span className="unregChip" title="Unregistered">Unregistered</span>}
+                    <div>
+                      <span className="rosterName">
+                        {m.fullName}
+                        {m.isCaptain && <span className="captainBadge" title="Captain">C</span>}
+                        {m.isPlaceholder && <span className="unregChip" title="Unregistered">Unregistered</span>}
+                        {m.needsAttention && (
+                          <span className="attentionChip" role="status" title="Needs attention">Needs attention</span>
+                        )}
+                      </span>
                       {m.needsAttention && (
-                        <span className="attentionChip" role="status" title="Needs attention">Needs attention</span>
+                        <p className="attentionNote">This player registered but is already on another team in this competition. Remove here or contact an admin.</p>
                       )}
-                    </span>
-                    {m.needsAttention && (
-                      <p className="attentionNote">This player registered but is already on another team in this competition. Remove here or contact an admin.</p>
-                    )}
+                    </div>
                   </td>
                   <td data-label="Mobile" className="rosterMono">{m.phoneMasked}</td>
                   <td data-label="Shirt">{m.shirtNumber ?? "—"}</td>
