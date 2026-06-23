@@ -32,6 +32,15 @@ public class ProfileController(IProfileService profiles, ITeamMemberService memb
         return Ok(await members.ListMyTeamsAsync(uid, ct));
     }
 
+    /// <summary>Placeholder-link rows the current user has not yet acknowledged.</summary>
+    [HttpGet("me/pending-links")]
+    [Authorize]
+    public async Task<IActionResult> PendingLinks(CancellationToken ct)
+    {
+        if (!TryGetCurrentUserId(out var uid)) return Unauthorized();
+        return Ok(await members.ListPendingLinksAsync(uid, ct));
+    }
+
     /// <summary>Bulk upsert of the current user's skill levels per game.</summary>
     [HttpPut("skills")]
     [Authorize]

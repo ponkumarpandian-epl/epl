@@ -21,4 +21,8 @@ public interface ITeamMemberService
 
     // ── Audit strip (C-7) ──────────────────────────────────────────────────
     Task<IReadOnlyList<RosterChangeDto>> ListRecentChangesAsync(Guid teamId, int limit, CancellationToken ct = default);
+
+    // ── Placeholder-link acknowledgement (C-8) ────────────────────────────
+    Task<IReadOnlyList<PendingLinkDto>> ListPendingLinksAsync(Guid userId, CancellationToken ct = default);
+    Task<Result<bool>> AcknowledgeLinkAsync(Guid membershipId, Guid userId, CancellationToken ct = default);
 }

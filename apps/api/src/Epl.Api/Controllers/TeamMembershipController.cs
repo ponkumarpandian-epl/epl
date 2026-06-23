@@ -20,4 +20,12 @@ public class TeamMembershipController(ITeamMemberService members) : ApiControlle
         var result = await members.LeaveTeamAsync(membershipId, uid, ct);
         return result.IsSuccess ? NoContent() : Fail(result.Error!.Value);
     }
+
+    [HttpPost("{id:guid}/acknowledge")]
+    public async Task<IActionResult> Acknowledge(Guid id, CancellationToken ct)
+    {
+        if (!TryGetUserId(out var uid)) return Unauthorized();
+        var result = await members.AcknowledgeLinkAsync(id, uid, ct);
+        return result.IsSuccess ? Ok() : Fail(result.Error!.Value);
+    }
 }

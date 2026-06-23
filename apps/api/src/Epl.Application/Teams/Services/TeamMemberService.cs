@@ -239,6 +239,27 @@ public class TeamMemberService(
         return Result<bool>.Ok(true);
     }
 
+    public async Task<IReadOnlyList<PendingLinkDto>> ListPendingLinksAsync(Guid userId, CancellationToken ct = default)
+    {
+        var rows = await uow.TeamMembers.ListPendingLinksByUserAsync(userId, ct);
+        return rows.Select(m => new PendingLinkDto(
+            m.Id, m.TeamId, m.Team.Sport, m.Team.Name, m.Team.Apartment.Name,
+            m.Team.SeasonGame?.Season?.Name)).ToList();
+    }
+
+    public async Task<Result<bool>> AcknowledgeLinkAsync(Guid membershipId, Guid userId, CancellationToken ct = default)
+    {
+        var member = await uow.TeamMembers.GetWithTeamAsync(membershipId, track: true, ct);
+        if (member is null || member.UserId != userId)
+            return Result<bool>.Fail("member_not_found", "Membership not found.");
+        if (member.AcknowledgedAt is null)
+        {
+            member.AcknowledgedAt = DateTimeOffset.UtcNow;
+            await uow.SaveChangesAsync(ct);
+        }
+        return Result<bool>.Ok(true);
+    }
+
     public async Task<IReadOnlyList<RosterChangeDto>> ListRecentChangesAsync(Guid teamId, int limit, CancellationToken ct = default)
     {
         var rows = await uow.TeamMembers.ListRecentByTeamAsync(teamId, limit, ct);
