@@ -118,21 +118,45 @@ section{position:relative;}
   8%{opacity:.9;}
   100%{transform:translateY(102vh) rotate(680deg);opacity:0;}
 }
-.heroInner{position:relative;z-index:2;display:grid;gap:1.1rem;justify-items:center;}
+.heroInner{
+  position:relative;z-index:2;width:100%;max-width:var(--maxw);
+  display:grid;grid-template-columns:1.02fr 1fr;gap:clamp(1.5rem,4vw,3rem);align-items:center;
+}
+.heroCopy{display:grid;gap:1.05rem;justify-items:start;text-align:left;}
+@media(max-width:960px){
+  .heroInner{grid-template-columns:1fr;gap:2.4rem;}
+  .heroCopy{justify-items:center;text-align:center;order:1;}
+  .heroMedia{order:2;}
+}
 
-.trophyWrap{position:relative;display:grid;place-items:center;}
-.trophyWrap::before{
-  content:"";position:absolute;width:130%;height:120%;z-index:-1;
-  background:radial-gradient(ellipse at center,rgba(255,209,92,.38),rgba(200,32,47,.14) 45%,transparent 68%);
-  filter:blur(24px);
-}
-.trophy{
-  height:clamp(240px,44vh,500px); width:auto; border-radius:16px;
+/* photo collage: team shot large, trophy portrait overlapping */
+.heroMedia{position:relative;width:100%;margin-bottom:1.5rem;}
+.teamShot{
+  margin:0;position:relative;border-radius:18px;overflow:hidden;
   border:1px solid rgba(232,181,61,.4);
-  box-shadow:0 24px 60px rgba(0,0,0,.6), 0 0 46px rgba(255,209,92,.22);
-  animation:floaty 5.5s var(--ease) infinite;
+  box-shadow:var(--shadow-xl),0 0 50px rgba(255,209,92,.16);
 }
-@keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px);}}
+.teamShot::before{
+  content:"";position:absolute;width:130%;height:130%;left:-15%;top:-15%;z-index:-1;
+  background:radial-gradient(ellipse at center,rgba(255,209,92,.30),rgba(200,32,47,.12) 45%,transparent 68%);
+  filter:blur(26px);
+}
+.teamShot img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;}
+.teamShot figcaption{
+  position:absolute;left:0;right:0;bottom:0;padding:1.5rem 1.1rem .9rem;
+  background:linear-gradient(180deg,transparent,rgba(3,8,26,.82));
+  font-family:var(--font-mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--bone-dim);
+}
+.teamShot figcaption b{color:var(--gold-bright);font-weight:700;}
+.trophyCard{
+  position:absolute;left:-22px;bottom:-26px;width:26%;min-width:110px;margin:0;
+  border-radius:14px;overflow:hidden;border:1px solid rgba(232,181,61,.55);
+  box-shadow:0 18px 40px rgba(0,0,0,.6),0 0 30px rgba(255,209,92,.32);
+  animation:floaty 5.5s var(--ease) infinite;background:var(--ink-2);
+}
+.trophyCard img{width:100%;display:block;}
+@media(max-width:520px){.trophyCard{width:30%;left:-10px;bottom:-16px;}}
+@keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
 
 .champBadge{
   display:inline-flex;align-items:center;gap:.55rem;
@@ -148,7 +172,7 @@ section{position:relative;}
 /* the big name */
 .champName{
   font-family:var(--font-display);font-weight:400;text-transform:uppercase;
-  font-size:clamp(3rem,13vw,9.5rem);line-height:.86;letter-spacing:.005em;margin:.1rem 0;
+  font-size:clamp(2.7rem,7vw,6.4rem);line-height:.86;letter-spacing:.005em;margin:.1rem 0;
   background:linear-gradient(180deg,#FFF6DA 0%,var(--gold-bright) 38%,var(--gold) 62%,#8a6410 100%);
   -webkit-background-clip:text;background-clip:text;color:transparent;
   position:relative;
@@ -362,19 +386,28 @@ td.dim{color:var(--bone-fade);}
 <section class="hero" id="champion">
   <div class="confetti" aria-hidden="true" id="confetti"></div>
   <div class="heroInner">
-    <div class="trophyWrap">
-      <img class="trophy" src="trophy-champions-2026.png" alt="EPL Season 2 2026 Champions trophy" />
+    <div class="heroCopy">
+      <span class="champBadge">★ Season 2 · 2026 · Overall Champions ★</span>
+      <div class="champKicker">Overall Champions</div>
+      <h1 class="champName">GM Ecity Town</h1>
+      <p class="champSub">Three sports. Fifteen apartments. One crown. <b>GM Ecity Town</b> tops the combined standings with <b>890 points</b> — Pride of Electronic City.</p>
+      <div class="heroStats">
+        <span class="heroStat"><b>890</b> Total Points</span>
+        <span class="heroStat"><b>1</b> Gold · Volleyball</span>
+        <span class="heroStat"><b>#1</b> of 15 Apartments</span>
+      </div>
+      <div class="scrollcue">↓ Season 2 in full</div>
     </div>
-    <span class="champBadge">★ Season 2 · 2026 · Overall Champions ★</span>
-    <div class="champKicker">Overall Champions</div>
-    <h1 class="champName">GM Ecity Town</h1>
-    <p class="champSub">Three sports. Fifteen apartments. One crown. <b>GM Ecity Town</b> tops the combined standings with <b>890 points</b> — Pride of Electronic City.</p>
-    <div class="heroStats">
-      <span class="heroStat"><b>890</b> Total Points</span>
-      <span class="heroStat"><b>1</b> Gold · Volleyball</span>
-      <span class="heroStat"><b>#1</b> of 15 Apartments</span>
+
+    <div class="heroMedia">
+      <figure class="teamShot">
+        <img src="team-champions-gm.jpg" alt="GM Ecity Town team celebrating with the EPL Season 2 champions trophy" />
+        <figcaption>The champions · <b>GM Ecity Town</b> · Overall Championship 2026</figcaption>
+      </figure>
+      <figure class="trophyCard">
+        <img src="trophy-champions-2026.png" alt="EPL Season 2 2026 Champions trophy" />
+      </figure>
     </div>
-    <div class="scrollcue">↓ Season 2 in full</div>
   </div>
 </section>
 
