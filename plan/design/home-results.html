@@ -120,8 +120,16 @@ section{position:relative;}
 }
 .heroInner{position:relative;z-index:2;display:grid;gap:1.1rem;justify-items:center;}
 
+.trophyWrap{position:relative;display:grid;place-items:center;}
+.trophyWrap::before{
+  content:"";position:absolute;width:130%;height:120%;z-index:-1;
+  background:radial-gradient(ellipse at center,rgba(255,209,92,.38),rgba(200,32,47,.14) 45%,transparent 68%);
+  filter:blur(24px);
+}
 .trophy{
-  width:clamp(84px,12vw,132px); filter:drop-shadow(0 10px 30px rgba(255,209,92,.4));
+  height:clamp(240px,44vh,500px); width:auto; border-radius:16px;
+  border:1px solid rgba(232,181,61,.4);
+  box-shadow:0 24px 60px rgba(0,0,0,.6), 0 0 46px rgba(255,209,92,.22);
   animation:floaty 5.5s var(--ease) infinite;
 }
 @keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px);}}
@@ -244,6 +252,7 @@ section{position:relative;}
 .medal{width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;font-family:var(--font-mono);font-weight:700;font-size:.8rem;color:var(--ink);}
 .medal.g{background:linear-gradient(150deg,#FFF0C0,var(--gold-bright),var(--gold));box-shadow:0 0 16px rgba(var(--gold-rgb),.5);}
 .medal.s{background:linear-gradient(150deg,#F4F7FB,var(--silver),#94a1af);}
+.medal.b{background:linear-gradient(150deg,#F0C89A,var(--bronze),#8a5a2f);}
 .podTeam{flex:1;min-width:0;}
 .podTeam b{display:block;font-family:var(--font-oswald);font-weight:600;font-size:1.05rem;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .podTeam small{color:var(--bone-fade);font-family:var(--font-mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;}
@@ -353,20 +362,9 @@ td.dim{color:var(--bone-fade);}
 <section class="hero" id="champion">
   <div class="confetti" aria-hidden="true" id="confetti"></div>
   <div class="heroInner">
-    <svg class="trophy" viewBox="0 0 64 64" aria-hidden="true">
-      <defs>
-        <linearGradient id="tg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#FFF0C0"/><stop offset="45%" stop-color="#FFD15C"/><stop offset="100%" stop-color="#8a6410"/>
-        </linearGradient>
-      </defs>
-      <path d="M18 8h28v12c0 9-6 16-14 16S18 29 18 20V8z" fill="url(#tg)" stroke="#6b5010" stroke-width="1"/>
-      <path d="M18 12c-4 0-8 2-8 6s4 6 8 6" fill="none" stroke="url(#tg)" stroke-width="3" stroke-linecap="round"/>
-      <path d="M46 12c4 0 8 2 8 6s-4 6-8 6" fill="none" stroke="url(#tg)" stroke-width="3" stroke-linecap="round"/>
-      <rect x="28" y="36" width="8" height="9" fill="url(#tg)"/>
-      <rect x="20" y="45" width="24" height="5" rx="2" fill="url(#tg)"/>
-      <rect x="15" y="50" width="34" height="6" rx="2" fill="url(#tg)" stroke="#6b5010" stroke-width=".8"/>
-      <path d="M32 16l2.2 4.4 4.8.7-3.5 3.4.8 4.8L32 31.4l-4.3 2.3.8-4.8-3.5-3.4 4.8-.7z" fill="#fff" opacity=".75"/>
-    </svg>
+    <div class="trophyWrap">
+      <img class="trophy" src="trophy-champions-2026.png" alt="EPL Season 2 2026 Champions trophy" />
+    </div>
     <span class="champBadge">★ Season 2 · 2026 · Overall Champions ★</span>
     <div class="champKicker">Overall Champions</div>
     <h1 class="champName">GM Ecity Town</h1>
@@ -436,10 +434,12 @@ td.dim{color:var(--bone-fade);}
           <span class="sportIcon" aria-hidden="true">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 19 15 9"/><path d="m14 4 6 6-3 3-6-6z"/><circle cx="6" cy="18" r="2.4" fill="currentColor" stroke="none"/></svg>
           </span>
-          <div class="sportName">Cricket<span>Champion & Runner-up</span></div>
+          <div class="sportName">Cricket<span>Gold · Silver · Bronze</span></div>
         </div>
         <div class="podRow"><span class="medal g">1</span><div class="podTeam"><b>RCC</b><small>Gold</small></div><div class="podPts">320<small> pts</small></div></div>
         <div class="podRow"><span class="medal s">2</span><div class="podTeam"><b>SNN</b><small>Silver</small></div><div class="podPts">240<small> pts</small></div></div>
+        <div class="podRow"><span class="medal b">3</span><div class="podTeam"><b>GM Ecity Town</b><small>Bronze · joint 3rd</small></div><div class="podPts">160<small> pts</small></div></div>
+        <div class="podRow"><span class="medal b">3</span><div class="podTeam"><b>Sriram Summit</b><small>Bronze · joint 3rd</small></div><div class="podPts">160<small> pts</small></div></div>
       </article>
 
       <!-- Badminton -->
@@ -448,10 +448,11 @@ td.dim{color:var(--bone-fade);}
           <span class="sportIcon" aria-hidden="true">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m4 20 7-7"/><path d="M11 13 8 4l9 4-1 6z"/><circle cx="15" cy="10" r="1" fill="currentColor" stroke="none"/></svg>
           </span>
-          <div class="sportName">Badminton<span>Champion & Runner-up</span></div>
+          <div class="sportName">Badminton<span>Gold · Silver · Bronze</span></div>
         </div>
         <div class="podRow"><span class="medal g">1</span><div class="podTeam"><b>SNN</b><small>Gold</small></div><div class="podPts">320<small> pts</small></div></div>
         <div class="podRow"><span class="medal s">2</span><div class="podTeam"><b>Sriram Summit</b><small>Silver</small></div><div class="podPts">240<small> pts</small></div></div>
+        <div class="podRow"><span class="medal b">3</span><div class="podTeam"><b>GM Ecity Town</b><small>Bronze</small></div><div class="podPts">160<small> pts</small></div></div>
       </article>
 
       <!-- Volleyball -->
@@ -460,10 +461,11 @@ td.dim{color:var(--bone-fade);}
           <span class="sportIcon" aria-hidden="true">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 3c4 3 4 15 0 18M3 9c5 2 13 2 18 0M5 17c3-4 11-8 15-6"/></svg>
           </span>
-          <div class="sportName">Volleyball<span>Champion & Runner-up</span></div>
+          <div class="sportName">Volleyball<span>Gold · Silver · Bronze</span></div>
         </div>
         <div class="podRow"><span class="medal g">1</span><div class="podTeam"><b>GM Ecity Town</b><small>Gold</small></div><div class="podPts">320<small> pts</small></div></div>
         <div class="podRow"><span class="medal s">2</span><div class="podTeam"><b>Sriram Summit</b><small>Silver</small></div><div class="podPts">240<small> pts</small></div></div>
+        <div class="podRow"><span class="medal b">3</span><div class="podTeam"><b>Esteem</b><small>Bronze</small></div><div class="podPts">160<small> pts</small></div></div>
       </article>
     </div>
   </div>
