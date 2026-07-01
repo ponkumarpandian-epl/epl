@@ -20,15 +20,15 @@
 
 ## The data (Season 2, 2026 — final)
 
-**Overall champion:** GM Infinite ECity Town — 890 pts (tied with Sriram Summit on 890; wins on gold count 1 vs 0).
+**Overall champion:** GM Infinite — 890 pts (tied with Sriram Summit on 890; wins on gold count 1 vs 0).
 
 **Per-sport podium** (gold = 320, silver = 240, bronze = 160 in that column):
 
 | Sport | 🥇 Gold | 🥈 Silver | 🥉 Bronze |
 |---|---|---|---|
-| Cricket | RCC (320) | SNN (240) | GM Infinite ECity Town & Sriram Summit — joint 3rd (160) |
-| Badminton | SNN (320) | Sriram Summit (240) | GM Infinite ECity Town (160) |
-| Volleyball | GM Infinite ECity Town (320) | Sriram Summit (240) | Esteem (160) |
+| Cricket | RCC (320) | SNN (240) | GM Infinite & Sriram Summit — joint 3rd (160) |
+| Badminton | SNN (320) | Sriram Summit (240) | GM Infinite (160) |
+| Volleyball | GM Infinite (320) | Sriram Summit (240) | Esteem (160) |
 
 Bronze note: two teams tie at 160 in each sport (the semifinal losers). Cricket is shown as **joint 3rd** (both); Badminton and Volleyball bronze were assigned by the organizer (GM, Esteem respectively).
 
@@ -40,7 +40,7 @@ Ordering rule: by `total` desc, ties broken by `gold` desc then `silver` desc (m
 
 ## Section flow
 
-1. **Champion hero** *(signature)* — a two-column editorial + photo **collage**. Left: "GM ECITY TOWN" in massive Anton with a gold shimmer sweep, the Overall Champions kicker, sub-line, and three stat pills (890 pts · 1 gold · #1 of 15). Right: the real **team celebration photo** ([team-champions-gm.jpg](./team-champions-gm.jpg)) as the large gold-glow framed shot with a caption, and the **Champions 2026 trophy** — background removed to white ([trophy-champions-2026-white.png](./trophy-champions-2026-white.png), processed from the original maroon-velvet photo) — as a clean white card beside the headline (gentle float). Behind it all: spotlight-from-above + a quiet confetti layer (disabled under `prefers-reduced-motion`). Stacks to a single centered column on mobile. *(Production note: both photos must be added to the Season 2 storage container / `public/`, optimized (WebP, ~1600px long edge — the sources are 6–8 MB), and the host whitelisted in `next.config.ts` `remotePatterns` if remote.)*
+1. **Champion hero** *(signature)* — a two-column editorial + photo **collage**. Left: "GM ECITY TOWN" in massive Anton with a gold shimmer sweep, the Overall Champions kicker, sub-line, and three stat pills (890 pts · 1 gold · #1 of 15). Right: the real **team celebration photo** ([team-champions-gm.jpg](./team-champions-gm.jpg)) as the large gold-glow framed shot with a caption, and the **Champions 2026 trophy photo** ([trophy-champions-2026.png](./trophy-champions-2026.png)) as a portrait card beside the headline (gentle float, gold glow). Behind it all: spotlight-from-above + a quiet confetti layer (disabled under `prefers-reduced-motion`). Stacks to a single centered column on mobile. *(Production note: both photos must be added to the Season 2 storage container / `public/`, optimized (WebP, ~1600px long edge — the sources are 6–8 MB), and the host whitelisted in `next.config.ts` `remotePatterns` if remote.)*
 2. **Cinematic slideshow** — auto-advancing Season 2 photos, per-photo sport tag + caption, arrows/dots/pause, Ken-Burns drift, pause on hover and when tab hidden.
 3. **Per-sport podium** — three glass cards (cricket=gold, badminton=cyan, volleyball=crimson accents) each showing gold + silver with medal discs and points.
 4. **Standings table** — full breakdown; mono tabular figures; per-sport columns tinted with their accent; top-3 rows get medal-tinted left borders (gold/silver/bronze); champion row carries an animated gold sheen; gold/silver counts as chips; horizontal scroll on mobile.
