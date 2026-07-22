@@ -5,4 +5,5 @@ namespace Epl.Application.Gallery.Services;
 public interface IGalleryService
 {
     Task<GalleryResponse> ListAsync(CancellationToken ct = default);
+    Task<GalleryResponse> ListSeason2GamesAsync(CancellationToken ct = default);
 }

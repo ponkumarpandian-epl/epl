@@ -16,4 +16,13 @@ public class GalleryController(IGalleryService gallery) : ControllerBase
         var data = await gallery.ListAsync(ct);
         return Ok(data);
     }
+
+    [HttpGet("season2-games")]
+    [AllowAnonymous]
+    [ResponseCache(Duration = 300)]
+    public async Task<IActionResult> ListSeason2Games(CancellationToken ct)
+    {
+        var data = await gallery.ListSeason2GamesAsync(ct);
+        return Ok(data);
+    }
 }

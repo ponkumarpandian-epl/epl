@@ -7,9 +7,9 @@ import "./primary-nav.css";
 interface Item { href: string; label: string; admin?: boolean }
 
 const PUBLIC: Item[] = [
-  { href: "/",        label: "Home" },
-  { href: "/#sports", label: "Sports" },
+  { href: "/",        label: "Results" },
   { href: "/teams",   label: "Teams" },
+  { href: "/#standings", label: "Standings" },
   { href: "/#gallery", label: "Gallery" },
   { href: "/rules",   label: "Rules" },
   { href: "/contact", label: "Contact" },

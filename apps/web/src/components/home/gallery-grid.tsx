@@ -52,7 +52,6 @@ export function GalleryGrid({ items }: { items: GalleryImageDto[] }) {
                 fill
                 sizes="(max-width: 540px) 100vw, (max-width: 1080px) 50vw, 33vw"
                 className="galleryImage"
-                priority={i === 0}
               />
               {img.category && (
                 <span className="galleryTag" aria-hidden="true">{img.category}</span>
@@ -72,7 +71,7 @@ export function GalleryGrid({ items }: { items: GalleryImageDto[] }) {
           the lightbox). Opening only happens via a click handler, so the
           portal never runs server-side. */}
       {open && active && createPortal(
-        <Lightbox
+        <GalleryLightbox
           item={active}
           onClose={close}
           onPrev={prev}
@@ -104,21 +103,26 @@ function spanFor(index: number): React.CSSProperties {
   }
 }
 
-function Lightbox({
-  item, onClose, onPrev, onNext, position,
+export function GalleryLightbox({
+  item, onClose, onPrev, onNext, position, hideNavigation = false,
 }: {
   item: GalleryImageDto;
   onClose: () => void;
   onPrev:  () => void;
   onNext:  () => void;
   position: string;
+  hideNavigation?: boolean;
 }) {
   return (
     <div className="lightbox" role="dialog" aria-modal="true" aria-label={item.alt} onClick={onClose}>
       <button type="button" className="lightboxBtn lightboxClose" onClick={onClose} aria-label="Close">×</button>
 
-      <button type="button" className="lightboxBtn lightboxNav lightboxNavPrev" onClick={(e) => { e.stopPropagation(); onPrev(); }} aria-label="Previous image">‹</button>
-      <button type="button" className="lightboxBtn lightboxNav lightboxNavNext" onClick={(e) => { e.stopPropagation(); onNext(); }} aria-label="Next image">›</button>
+      {!hideNavigation && (
+        <>
+          <button type="button" className="lightboxBtn lightboxNav lightboxNavPrev" onClick={(e) => { e.stopPropagation(); onPrev(); }} aria-label="Previous image">‹</button>
+          <button type="button" className="lightboxBtn lightboxNav lightboxNavNext" onClick={(e) => { e.stopPropagation(); onNext(); }} aria-label="Next image">›</button>
+        </>
+      )}
 
       <figure className="lightboxFigure" onClick={(e) => e.stopPropagation()}>
         <div className="lightboxImageWrap">
