@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     template: "%s · EPL",
   },
   description:
-    "EPL Season 2 (2026) — Cricket, Badminton & Volleyball inter-apartment tournament in Electronic City, Bengaluru. Register your team today.",
+    "EPL Season 2 (2026) official results — Cricket, Badminton and Volleyball across Electronic City, Bengaluru.",
   applicationName: "EPL Season 2",
   icons: {
     icon: [
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Electronic-City Premier League · Season 2 (2026)",
     description:
-      "Cricket, Badminton & Volleyball inter-apartment tournament in Electronic City, Bengaluru.",
+      "Official Season 2 results from the Electronic-City Premier League.",
     images: ["/epl_logo.jpg"],
     type: "website",
   },

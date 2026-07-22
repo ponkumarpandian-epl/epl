@@ -23,7 +23,7 @@
   --ink-3:        #0A1838;
   --bone:         #F2F0E6;
   --bone-dim:     rgba(242, 240, 230, 0.7);
-  --bone-fade:    rgba(242, 240, 230, 0.45);
+  --bone-fade:    rgba(242, 240, 230, 0.62);
 
   /* ── Semantic surface ──────────────────────────────────────────────────── */
   --color-bg:            var(--ink);

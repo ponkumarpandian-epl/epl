@@ -20,6 +20,9 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="SharpGrip.FluentValidation.AutoValidation.Mvc"     Version="1.5.0" />
+    <!-- Pin the patched 2.x line instead of accepting Microsoft.AspNetCore.OpenApi's
+         vulnerable 2.0.0 transitive minimum (GHSA-v5pm-xwqc-g5wc). -->
+    <PackageReference Include="Microsoft.OpenApi"                                  Version="2.11.0" />
     <PackageReference Include="Serilog.AspNetCore"                                Version="8.0.3" />
     <PackageReference Include="Serilog.Enrichers.Environment"                     Version="3.0.1" />
     <PackageReference Include="Serilog.Sinks.Console"                             Version="6.0.0" />

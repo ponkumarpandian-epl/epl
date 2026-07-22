@@ -1,4 +1,7 @@
+using Azure.Identity;
+using Azure.Storage.Blobs;
 using Epl.Application.Common.Caching;
+using Epl.Application.Gallery.Services;
 using Epl.Domain.Abstractions;
 using Epl.Domain.Entities;
 using Epl.Infrastructure.Caching;
@@ -8,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Epl.Infrastructure;
 
@@ -39,6 +43,20 @@ public static class DependencyInjection
         });
         services.AddSingleton<ICacheMetrics, InMemoryCacheMetrics>();
         services.AddSingleton<ICacheStore,   MemoryCacheStore>();
+
+        services.Configure<GameGalleryOptions>(config.GetSection(GameGalleryOptions.SectionName));
+        services.AddSingleton(sp =>
+        {
+            var options = sp.GetRequiredService<IOptions<GameGalleryOptions>>().Value;
+            if (!string.IsNullOrWhiteSpace(options.ConnectionString))
+                return new BlobServiceClient(options.ConnectionString);
+
+            if (!Uri.TryCreate(options.AccountUri, UriKind.Absolute, out var accountUri))
+                throw new InvalidOperationException("GameGallery:AccountUri must be an absolute URI.");
+
+            return new BlobServiceClient(accountUri, new DefaultAzureCredential());
+        });
+        services.AddSingleton<IGameGallerySource, AzureGameGallerySource>();
 
         // Identity core + role manager + sign-in manager + EF stores
         services
