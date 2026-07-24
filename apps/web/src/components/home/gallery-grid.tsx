@@ -34,35 +34,48 @@ export function GalleryGrid({ items }: { items: GalleryImageDto[] }) {
   return (
     <>
       <ul className="galleryGrid" role="list">
-        {items.map((img, i) => (
-          <li
-            key={`${img.url}-${i}`}
-            className={`galleryItem ${categoryClass(img.category)}`}
-            style={spanFor(i)}
-          >
-            <button
-              type="button"
-              className="galleryTile"
-              onClick={() => setIndex(i)}
-              aria-label={`Open image: ${img.alt}`}
+        {items.map((img, i) => {
+          const zoomOut = needsZoomOut(img);
+          return (
+            <li
+              key={`${img.url}-${i}`}
+              className={`galleryItem ${categoryClass(img.category)}`}
+              style={spanFor(i)}
             >
-              <Image
-                src={img.url}
-                alt={img.alt}
-                fill
-                sizes="(max-width: 540px) 100vw, (max-width: 1080px) 50vw, 33vw"
-                className="galleryImage"
-              />
-              {img.category && (
-                <span className="galleryTag" aria-hidden="true">{img.category}</span>
-              )}
-              <span className="galleryShine" aria-hidden="true" />
-              <span className="galleryHoverOverlay" aria-hidden="true">
-                <span className="galleryHoverText">{img.alt}</span>
-              </span>
-            </button>
-          </li>
-        ))}
+              <button
+                type="button"
+                className="galleryTile"
+                onClick={() => setIndex(i)}
+                aria-label={`Open image: ${img.alt}`}
+              >
+                {zoomOut && (
+                  <Image
+                    src={img.url}
+                    alt=""
+                    fill
+                    sizes="(max-width: 540px) 100vw, (max-width: 1080px) 50vw, 33vw"
+                    className="galleryImageSpecialBackdrop"
+                    aria-hidden="true"
+                  />
+                )}
+                <Image
+                  src={img.url}
+                  alt={img.alt}
+                  fill
+                  sizes="(max-width: 540px) 100vw, (max-width: 1080px) 50vw, 33vw"
+                  className={`galleryImage${zoomOut ? " galleryImage--zoom-out" : ""}`}
+                />
+                {img.category && (
+                  <span className="galleryTag" aria-hidden="true">{img.category}</span>
+                )}
+                <span className="galleryShine" aria-hidden="true" />
+                <span className="galleryHoverOverlay" aria-hidden="true">
+                  <span className="galleryHoverText">{img.alt}</span>
+                </span>
+              </button>
+            </li>
+          );
+        })}
       </ul>
 
       {/* Portal to body so the lightbox escapes any parent stacking context
@@ -91,6 +104,10 @@ function categoryClass(category?: string): string {
     case "volleyball": return "cat-volleyball";
     default:           return "cat-highlights";
   }
+}
+
+function needsZoomOut(item: GalleryImageDto): boolean {
+  return item.url.toLowerCase().includes("season2-gallery-volleyball-runners-up");
 }
 
 /** Bento layout — explicit per-position spans. 8-item rhythm. */
