@@ -29,7 +29,9 @@ export interface SportPodium {
   sport: "Cricket" | "Badminton" | "Volleyball";
   champion: string;
   runnerUp: string;
-  semiFinalists: string;
+  finalResultBadge: "SF" | "3";
+  finalResultLabel: "Semi-finalists" | "Third place";
+  finalResultTeam: string;
 }
 
 export const overallPlacements: OverallPlacement[] = [
@@ -73,19 +75,25 @@ export const sportPodiums: SportPodium[] = [
     sport: "Cricket",
     champion: "RCC",
     runnerUp: "SNN Raj Serenity",
-    semiFinalists: "GM Infinite & Sriram Summit",
+    finalResultBadge: "SF",
+    finalResultLabel: "Semi-finalists",
+    finalResultTeam: "GM Infinite & Sriram Summit",
   },
   {
     sport: "Badminton",
     champion: "SNN Raj Serenity",
     runnerUp: "Sriram Summit",
-    semiFinalists: "GM Infinite & Ajmera",
+    finalResultBadge: "3",
+    finalResultLabel: "Third place",
+    finalResultTeam: "GM Infinite",
   },
   {
     sport: "Volleyball",
     champion: "GM Infinite E-City Town",
     runnerUp: "Sriram Summit",
-    semiFinalists: "Esteem & PSR Krish",
+    finalResultBadge: "3",
+    finalResultLabel: "Third place",
+    finalResultTeam: "Esteem",
   },
 ];
 

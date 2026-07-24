@@ -8,7 +8,7 @@ const seasonTwoGallery: GalleryImageDto[] = [
   {
     url: "https://steplmediacontent.blob.core.windows.net/season2/result/season2-gallery-cricket-champions.jpg",
     alt: "GM Infinite celebrating their Cricket result",
-    category: "Cricket",
+    category: "Ceremony",
   },
   {
     url: "https://steplmediacontent.blob.core.windows.net/season2/result/season2-gallery-cricket-hercules.jpg",
@@ -22,12 +22,12 @@ const seasonTwoGallery: GalleryImageDto[] = [
   },
   {
     url: "https://steplmediacontent.blob.core.windows.net/season2/result/season2-gallery-badminton-champions.jpg",
-    alt: "EPL Season 2 Badminton champions",
+    alt: "EPL Season 2 Badminton 2nd runners-up",
     category: "Badminton",
   },
   {
     url: "https://steplmediacontent.blob.core.windows.net/season2/result/season2-gallery-badminton-sriram.jpg",
-    alt: "Sriram Summit Badminton team",
+    alt: "Sriram Summit Badminton runners-up",
     category: "Badminton",
   },
   {
@@ -45,10 +45,10 @@ const seasonTwoGallery: GalleryImageDto[] = [
     alt: "Sriram Summit Volleyball team",
     category: "Volleyball",
   },
-  {
-    url: "https://steplmediacontent.blob.core.windows.net/season2/result/season2-gallery-volleyball-runners-up.jpg",
-    alt: "Sriram Summit Volleyball runners-up",
-    category: "Volleyball",
+   {
+    url: "https://steplmediacontent.blob.core.windows.net/season2/result/season2-gallery-cricket-winners.jpg",
+    alt: "RCC EPL Season 2 Cricket winners",
+    category: "Cricket",
   },
   {
     url: "https://steplmediacontent.blob.core.windows.net/season2/result/season2-gallery-volleyball-match-day.jpg",
@@ -57,9 +57,14 @@ const seasonTwoGallery: GalleryImageDto[] = [
   },
   {
     url: "https://steplmediacontent.blob.core.windows.net/season2/result/season2-gallery-prize-ceremony.jpg",
-    alt: "EPL Season 2 overall championship prize ceremony",
+    alt: "EPL Organising Committee with overall champions trophy",
     category: "Ceremony",
   },
+  {
+    url: "https://steplmediacontent.blob.core.windows.net/season2/result/season2-gallery-volleyball-runners-up.jpg",
+    alt: "Sriram Summit Volleyball runners-up",
+    category: "Volleyball",
+  }
 ];
 
 interface GalleryResponse {

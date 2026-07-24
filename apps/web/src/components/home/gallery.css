@@ -90,13 +90,34 @@
 }
 .galleryImage {
   object-fit: cover;
+  object-position: center 34%;
   transition: transform 0.8s var(--ease), filter 0.5s ease;
-  filter: saturate(0.95);
+  filter: saturate(0.98);
 }
 .galleryTile:hover .galleryImage,
 .galleryTile:focus-visible .galleryImage {
-  transform: scale(1.07);
-  filter: saturate(1.15) brightness(1.05);
+  transform: scale(1.045);
+  filter: saturate(1.1) brightness(1.04);
+}
+.galleryImageSpecialBackdrop {
+  z-index: 0;
+  object-fit: cover;
+  object-position: center 30%;
+  transform: scale(1.1);
+  filter: blur(16px) saturate(1.1) brightness(.42);
+  opacity: .78;
+}
+.galleryImage--zoom-out {
+  z-index: 1;
+  object-fit: contain;
+  object-position: center;
+  transform: scale(.96);
+  filter: saturate(1.02);
+}
+.galleryTile:hover .galleryImage--zoom-out,
+.galleryTile:focus-visible .galleryImage--zoom-out {
+  transform: scale(.99);
+  filter: saturate(1.08) brightness(1.03);
 }
 
 /* Category tag */
@@ -345,7 +366,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .lightbox, .lightboxFigure { animation: none; }
-  .galleryImage, .galleryShine, .galleryHoverOverlay { transition: none; }
+  .galleryImage, .galleryImageSpecialBackdrop, .galleryShine, .galleryHoverOverlay { transition: none; }
 }
 
 /* ═════════ Game-day carousels ═══════════════════════════════════════════ */

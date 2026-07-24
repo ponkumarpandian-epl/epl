@@ -176,7 +176,11 @@ export function ResultsHome() {
               <ol>
                 <li><span>1</span><div><small>Champion</small><strong>{podium.champion}</strong></div><b>320</b></li>
                 <li><span>2</span><div><small>Runner-up</small><strong>{podium.runnerUp}</strong></div><b>240</b></li>
-                <li><span>SF</span><div><small>Semi-finalists</small><strong>{podium.semiFinalists}</strong></div><b>160</b></li>
+                <li>
+                  <span>{podium.finalResultBadge}</span>
+                  <div><small>{podium.finalResultLabel}</small><strong>{podium.finalResultTeam}</strong></div>
+                  <b>160</b>
+                </li>
               </ol>
             </article>
           ))}
