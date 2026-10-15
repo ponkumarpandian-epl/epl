@@ -296,6 +296,9 @@ namespace Epl.Infrastructure.Persistence.Migrations
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<int?>("MaxRosterSize")
+                        .HasColumnType("int");
+
                     b.Property<DateTimeOffset?>("RegistrationDeadline")
                         .HasColumnType("datetimeoffset");
 
@@ -357,6 +360,9 @@ namespace Epl.Infrastructure.Persistence.Migrations
                         .HasMaxLength(80)
                         .HasColumnType("nvarchar(80)");
 
+                    b.Property<Guid?>("CaptainUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -397,6 +403,8 @@ namespace Epl.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ApartmentId");
 
+                    b.HasIndex("CaptainUserId");
+
                     b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("SeasonGameId");
@@ -407,6 +415,75 @@ namespace Epl.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Teams");
+                });
+
+            modelBuilder.Entity("Epl.Domain.Entities.TeamMember", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("AcknowledgedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("AddedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("AddedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsCaptain")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("LinkedFromPlaceholder")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PlaceholderMobile")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("PlaceholderName")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("Position")
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<DateTimeOffset?>("RemovedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ShirtNumber")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId", "PlaceholderMobile")
+                        .IsUnique()
+                        .HasFilter("[Status] = 1 AND [UserId] IS NULL");
+
+                    b.HasIndex("TeamId", "UserId")
+                        .IsUnique()
+                        .HasFilter("[Status] = 1 AND [UserId] IS NOT NULL");
+
+                    b.HasIndex("UserId", "Status");
+
+                    b.ToTable("TeamMembers", t =>
+                        {
+                            t.HasCheckConstraint("CK_TeamMembers_Identity", "([UserId] IS NOT NULL AND [PlaceholderName] IS NULL AND [PlaceholderMobile] IS NULL) OR ([UserId] IS NULL AND [PlaceholderName] IS NOT NULL AND [PlaceholderMobile] IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("Epl.Domain.Entities.UserGameSkill", b =>
@@ -593,6 +670,10 @@ namespace Epl.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Epl.Domain.Entities.AppUser", "Captain")
+                        .WithMany()
+                        .HasForeignKey("CaptainUserId");
+
                     b.HasOne("Epl.Domain.Entities.AppUser", "CreatedBy")
                         .WithMany("CaptainedTeams")
                         .HasForeignKey("CreatedByUserId")
@@ -605,9 +686,29 @@ namespace Epl.Infrastructure.Persistence.Migrations
 
                     b.Navigation("Apartment");
 
+                    b.Navigation("Captain");
+
                     b.Navigation("CreatedBy");
 
                     b.Navigation("SeasonGame");
+                });
+
+            modelBuilder.Entity("Epl.Domain.Entities.TeamMember", b =>
+                {
+                    b.HasOne("Epl.Domain.Entities.Team", "Team")
+                        .WithMany("Members")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Epl.Domain.Entities.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Team");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Epl.Domain.Entities.UserGameSkill", b =>
@@ -705,6 +806,11 @@ namespace Epl.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Epl.Domain.Entities.SeasonGame", b =>
                 {
                     b.Navigation("Teams");
+                });
+
+            modelBuilder.Entity("Epl.Domain.Entities.Team", b =>
+                {
+                    b.Navigation("Members");
                 });
 #pragma warning restore 612, 618
         }

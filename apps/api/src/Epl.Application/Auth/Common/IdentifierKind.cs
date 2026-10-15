@@ -18,7 +18,13 @@ public static partial class IdentifierParser
         return IdentifierKind.Invalid;
     }
 
-    public static string ToE164Mobile(string indianMobile) => "+91" + indianMobile.Trim();
+    public static string ToE164Mobile(string indianMobile)
+    {
+        var s = indianMobile.Trim();
+        if (s.StartsWith("+91")) s = s[3..];
+        else if (s.StartsWith('0')) s = s[1..];
+        return "+91" + s;
+    }
 
     [GeneratedRegex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$",         RegexOptions.Compiled)] private static partial Regex MyEmailRegex();
     [GeneratedRegex(@"^[6-9]\d{9}$",                        RegexOptions.Compiled)] private static partial Regex MyMobileRegex();

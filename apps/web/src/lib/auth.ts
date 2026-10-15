@@ -9,6 +9,7 @@ export interface MeDto {
   fullName:    string;
   avatarUrl:   string | null;
   roles:       string[];
+  isCaptain:   boolean;
 }
 
 export async function getCurrentUser(): Promise<MeDto | null> {

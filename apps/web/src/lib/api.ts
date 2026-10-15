@@ -122,6 +122,8 @@ function safeJson(s: string): Record<string, unknown> | null {
 
 export const api = {
   get:   <T>(path: string)                 => call<T>(path, { method: "GET" }),
-  post:  <T>(path: string, body?: unknown) => call<T>(path, { method: "POST",  body: body === undefined ? undefined : JSON.stringify(body) }),
-  patch: <T>(path: string, body?: unknown) => call<T>(path, { method: "PATCH", body: body === undefined ? undefined : JSON.stringify(body) }),
+  post:  <T>(path: string, body?: unknown) => call<T>(path, { method: "POST",   body: body === undefined ? undefined : JSON.stringify(body) }),
+  put:   <T>(path: string, body?: unknown) => call<T>(path, { method: "PUT",    body: body === undefined ? undefined : JSON.stringify(body) }),
+  patch: <T>(path: string, body?: unknown) => call<T>(path, { method: "PATCH",  body: body === undefined ? undefined : JSON.stringify(body) }),
+  del:   <T>(path: string)                 => call<T>(path, { method: "DELETE" }),
 };

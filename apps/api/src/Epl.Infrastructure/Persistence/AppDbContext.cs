@@ -9,6 +9,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 {
     public DbSet<Apartment>     Apartments     => Set<Apartment>();
     public DbSet<Team>          Teams          => Set<Team>();
+    public DbSet<TeamMember>    TeamMembers    => Set<TeamMember>();
     public DbSet<Game>          Games          => Set<Game>();
     public DbSet<Season>        Seasons        => Set<Season>();
     public DbSet<SeasonGame>    SeasonGames    => Set<SeasonGame>();

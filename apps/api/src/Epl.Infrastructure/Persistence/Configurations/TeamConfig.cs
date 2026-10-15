@@ -37,6 +37,19 @@ public class TeamConfig : IEntityTypeConfiguration<Team>
          .IsRequired(false)
          .OnDelete(DeleteBehavior.SetNull);
 
+        // Real captain FK. No reverse nav (CaptainedTeams is bound to CreatedBy);
+        // "teams I captain" is a query on this column, which is indexed.
+        // ClientSetNull (DB-level NO ACTION), not SetNull: Teams already has a
+        // SET NULL path to AspNetUsers via CreatedByUserId, and SQL Server rejects
+        // a second cascade/set-null path to the same table (error 1785). EF still
+        // nulls this client-side for tracked graphs.
+        b.HasOne(t => t.Captain)
+         .WithMany()
+         .HasForeignKey(t => t.CaptainUserId)
+         .IsRequired(false)
+         .OnDelete(DeleteBehavior.ClientSetNull);
+        b.HasIndex(t => t.CaptainUserId);
+
         // Link to the SeasonGame the team registered for.
         // Nullable so legacy rows survive; new code requires it.
         b.HasOne(t => t.SeasonGame)

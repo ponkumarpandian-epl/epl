@@ -23,10 +23,21 @@ function TeamsIcon() {
     </svg>
   );
 }
+function UserCogIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="9" cy="7" r="4"/>
+      <path d="M3 21v-2a4 4 0 0 1 4-4h4"/>
+      <circle cx="18" cy="17" r="3"/>
+      <path d="M18 13.5v1M18 19.5v1M21 17h-1M16 17h-1"/>
+    </svg>
+  );
+}
 
 const ITEMS = [
   { href: "/admin/seasons", label: "Seasons",            icon: <CalendarIcon /> },
   { href: "/teams/admin",   label: "Team Registrations", icon: <TeamsIcon /> },
+  { href: "/admin/users",   label: "Users & Roles",      icon: <UserCogIcon /> },
 ];
 
 export function AdminSidebar() {

@@ -52,6 +52,12 @@ public class SeasonGame
     /// <summary>One-line squad / roster note — "Up to 15 players", "10–13 incl. 3 backups", "12 in squad".</summary>
     public string? SquadNote { get; set; }
 
+    /// <summary>
+    /// Hard cap on Active roster size for teams in this season-game. Null = use the
+    /// per-sport default (Cricket 12 / Badminton 4 / Volleyball 8). Capped at 16.
+    /// </summary>
+    public int? MaxRosterSize { get; set; }
+
     public bool RegistrationOpen { get; set; } = true;
 
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;

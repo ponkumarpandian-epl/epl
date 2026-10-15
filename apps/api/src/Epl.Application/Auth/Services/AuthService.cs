@@ -1,6 +1,8 @@
 using System.Security.Claims;
 using Epl.Application.Auth.Common;
 using Epl.Application.Auth.Dtos;
+using Epl.Application.Common.Caching;
+using Epl.Domain.Abstractions;
 using Epl.Domain.Common;
 using Epl.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -11,6 +13,8 @@ namespace Epl.Application.Auth.Services;
 public class AuthService(
     UserManager<AppUser> users,
     SignInManager<AppUser> signIn,
+    IUnitOfWork uow,
+    ICacheStore cache,
     ILogger<AuthService> log) : IAuthService
 {
     public async Task<Result<MeResponse>> RegisterAsync(RegisterRequest req, CancellationToken ct = default)
@@ -46,6 +50,9 @@ public class AuthService(
 
         await users.AddToRoleAsync(user, Roles.Player);
 
+        if (kind == IdentifierKind.Mobile)
+            await LinkPlaceholdersAsync(user, ct);
+
         // Sign the new user in immediately — they land on the home page logged in.
         await signIn.SignInAsync(user, isPersistent: true);
 
@@ -63,7 +70,56 @@ public class AuthService(
 
     private async Task<MeResponse> ToMeAsync(AppUser u)
     {
-        var roles = await users.GetRolesAsync(u);
-        return new MeResponse(u.Id, u.Email, u.PhoneNumber, u.FullName, u.AvatarUrl, roles.ToArray());
+        var roles     = await users.GetRolesAsync(u);
+        var isCaptain = await uow.Teams.AnyAsync(t => t.CaptainUserId == u.Id);
+        return new MeResponse(u.Id, u.Email, u.PhoneNumber, u.FullName, u.AvatarUrl, roles.ToArray(), isCaptain);
+    }
+
+    private async Task LinkPlaceholdersAsync(AppUser user, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(user.PhoneNumber)) return;
+
+        try
+        {
+            var placeholders = await uow.TeamMembers.ListActivePlaceholdersByMobileAsync(user.PhoneNumber!, track: true, ct);
+            if (placeholders.Count == 0) return;
+
+            var claimedSeasonGames = new HashSet<Guid>();
+            var linked = 0;
+
+            foreach (var ph in placeholders)
+            {
+                var sgId = ph.Team.SeasonGameId;
+
+                // C8: one active membership per SeasonGame. Guard against existing rows AND
+                // against linking two placeholders that share a SeasonGame in this same batch.
+                if (sgId.HasValue)
+                {
+                    if (claimedSeasonGames.Contains(sgId.Value)) continue;
+                    if (await uow.TeamMembers.ExistsActiveInSameSeasonGameAsync(user.Id, sgId.Value, ph.TeamId, ct))
+                        continue;
+                    claimedSeasonGames.Add(sgId.Value);
+                }
+
+                ph.UserId                = user.Id;
+                ph.PlaceholderName       = null;
+                ph.PlaceholderMobile     = null;
+                ph.LinkedFromPlaceholder = true;
+                ph.AcknowledgedAt        = null;
+                linked++;
+                log.LogInformation("Linked placeholder {MemberId} on team {TeamId} to new user {UserId}",
+                    ph.Id, ph.TeamId, user.Id);
+            }
+
+            if (linked > 0)
+            {
+                await uow.SaveChangesAsync(ct);
+                cache.RemoveByPrefix(CacheKeys.TeamsFamilyPrefix);
+            }
+        }
+        catch (Exception ex)
+        {
+            log.LogWarning(ex, "Placeholder linking failed for new user {UserId}; continuing", user.Id);
+        }
     }
 }

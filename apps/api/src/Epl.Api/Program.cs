@@ -88,6 +88,9 @@ builder.Services.AddAuthorization(o =>
     o.AddPolicy(AuthorizationPolicies.AdminOnly,     p => p.RequireRole(Roles.Admin));
     o.AddPolicy(AuthorizationPolicies.PlayerOrAdmin, p => p.RequireRole(Roles.Player, Roles.Admin));
     o.AddPolicy(AuthorizationPolicies.UmpireOrAdmin, p => p.RequireRole(Roles.Umpire, Roles.Admin));
+    // Authenticated gate only — the per-team captain check is resource-scoped and
+    // runs in TeamMemberService (it needs the route's teamId). See plan/10 §3.5.
+    o.AddPolicy(AuthorizationPolicies.TeamCaptainOrAdmin, p => p.RequireAuthenticatedUser());
 });
 
 // ── CORS (browser dev) ──────────────────────────────────────────────────────

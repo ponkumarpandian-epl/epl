@@ -667,3 +667,13 @@
 @media (prefers-reduced-motion: reduce) {
   .captainContactIcon { transition: none; }
 }
+
+/* Roster-management link under a team name (plan/10 §4.4 admin override) */
+.rosterManageLink {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.rosterManageLink:hover { text-decoration: underline; }

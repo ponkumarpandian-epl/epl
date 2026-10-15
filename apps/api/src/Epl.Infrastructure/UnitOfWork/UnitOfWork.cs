@@ -10,14 +10,18 @@ public class UnitOfWork(AppDbContext db) : IUnitOfWork
     private readonly AppDbContext _db = db;
     private IDbContextTransaction? _tx;
 
-    private ITeamRepository?       _teams;
-    private IApartmentRepository?  _apartments;
+    private ITeamRepository?         _teams;
+    private ITeamMemberRepository?   _teamMembers;
+    private IUserDirectoryRepository? _users;
+    private IApartmentRepository?    _apartments;
     private IGameRepository?       _games;
     private ISeasonRepository?     _seasons;
     private ISeasonGameRepository? _seasonGames;
     private IUserSkillRepository?  _userSkills;
 
     public ITeamRepository       Teams       => _teams       ??= new TeamRepository(_db);
+    public ITeamMemberRepository TeamMembers => _teamMembers ??= new TeamMemberRepository(_db);
+    public IUserDirectoryRepository Users    => _users       ??= new UserDirectoryRepository(_db);
     public IApartmentRepository  Apartments  => _apartments  ??= new ApartmentRepository(_db);
     public IGameRepository       Games       => _games       ??= new GameRepository(_db);
     public ISeasonRepository     Seasons     => _seasons     ??= new SeasonRepository(_db);

@@ -1,0 +1,79 @@
+/* Admin users & roles console (plan/10 §8). Reuses admin.css shell classes. */
+
+.userFilterBar { display: flex; gap: 0.6rem; margin-bottom: 0.9rem; flex-wrap: wrap; }
+.userSearchInput {
+  flex: 1; min-width: 220px;
+  background: var(--color-bg); color: var(--color-text);
+  border: 1px solid var(--color-border); border-radius: var(--radius-md);
+  padding: 0.55rem 0.8rem; font-size: 0.95rem;
+}
+.userSearchInput:focus { outline: none; border-color: var(--color-accent); }
+.userSearchBtn {
+  background: var(--color-accent); color: var(--color-accent-text);
+  border: none; border-radius: var(--radius-pill); padding: 0.55rem 1.1rem;
+  font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block;
+}
+.userSearchBtn:hover { background: var(--color-accent-hover); }
+
+.roleChips { display: flex; gap: 0.5rem; margin-bottom: 1.1rem; flex-wrap: wrap; }
+.roleChip {
+  font-family: var(--font-mono); font-size: 0.78rem;
+  padding: 0.3rem 0.8rem; border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border); color: var(--color-text-subtle); text-decoration: none;
+}
+.roleChip:hover { border-color: var(--color-border-strong); color: var(--color-text); }
+.roleChip.is-active { background: var(--color-accent); color: var(--color-accent-text); border-color: var(--color-accent); }
+
+.userNameLink { color: var(--color-text); font-weight: 700; text-decoration: none; }
+.userNameLink:hover { color: var(--color-accent); }
+
+.roleBadges { display: inline-flex; gap: 0.35rem; flex-wrap: wrap; }
+.roleBadge {
+  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  padding: 0.15rem 0.5rem; border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+.roleBadge.role-admin  { color: var(--sport-volleyball-bright); }
+.roleBadge.role-umpire { color: var(--sport-badminton-bright); }
+.roleBadge.role-player { color: var(--color-text-subtle); }
+
+/* ── Detail page ─────────────────────────────────────────────────────────── */
+.userContactLine { color: var(--color-text-subtle); font-family: var(--font-mono); font-size: 0.85rem; margin-top: 0.35rem; }
+.userDetailPanel {
+  border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+  background: var(--color-bg-elevated); padding: 1.1rem 1.25rem; margin-bottom: 1rem;
+}
+.userPanelTitle { font-family: var(--font-display); font-size: 1.15rem; margin-bottom: 0.3rem; }
+.userPanelHint { color: var(--color-text-subtle); font-size: 0.88rem; margin-bottom: 0.9rem; }
+.userRoleError { color: var(--sport-volleyball-bright); font-size: 0.88rem; margin-top: 0.7rem; }
+
+.roleToggleRow { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.roleToggle {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  background: var(--color-bg); border: 1px solid var(--color-border);
+  color: var(--color-text-subtle); font-weight: 600; font-size: 0.9rem;
+  padding: 0.45rem 0.9rem; border-radius: var(--radius-pill); cursor: pointer;
+}
+.roleToggle:hover:not(:disabled) { border-color: var(--color-border-strong); color: var(--color-text); }
+.roleToggle:disabled { opacity: 0.55; cursor: default; }
+.roleToggleDot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--color-border-strong); transition: background 0.15s;
+}
+.roleToggle.is-on { color: var(--color-text); border-color: var(--color-accent); }
+.roleToggle.is-on .roleToggleDot { background: var(--color-accent); }
+
+.captaincyList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.captaincyRow {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  padding: 0.55rem 0.7rem; border: 1px solid var(--color-border); border-radius: var(--radius-md);
+  flex-wrap: wrap;
+}
+.captaincyName { font-weight: 700; margin-left: 0.5rem; }
+.captaincyMeta { color: var(--color-text-subtle); font-size: 0.85rem; }
+.captaincyManageLink { color: var(--color-accent); font-size: 0.85rem; font-weight: 600; text-decoration: none; }
+.captaincyManageLink:hover { text-decoration: underline; }
+
+.captainBackLink { color: var(--color-text-subtle); text-decoration: none; }
+.captainBackLink:hover { color: var(--color-accent); }
