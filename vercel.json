@@ -10,7 +10,7 @@
     "api": {
       "root": ".",
       "runtime": "container",
-      "entrypoint": "apps/api/src/Epl.Api/Dockerfile"
+      "entrypoint": "Dockerfile.api"
     }
   },
   "rewrites": [
